@@ -17,6 +17,7 @@ import {
   IconSearch,
   IconSettings,
   IconUsers,
+  
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -35,46 +36,27 @@ import {
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
+    name: "Carlos Madeira",
+    email: "carlos@diretoria.com",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
-    },
-    {
-      title: "Lifestyle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
+      title: "Sobre Nós",
       url: "#",
       icon: IconUsers,
     },
+    
   ],
   navClouds: [
     {
-      title: "Capture",
+      title: "Capturar",
       icon: IconCamera,
       isActive: true,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "Propostas ativas",
           url: "#",
         },
         {
@@ -84,7 +66,7 @@ const data = {
       ],
     },
     {
-      title: "Proposal",
+      title: "Proposta",
       icon: IconFileDescription,
       url: "#",
       items: [
@@ -116,36 +98,41 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
+      title: "Configurações",
       url: "#",
       icon: IconSettings,
     },
     {
-      title: "Get Help",
+      title: "Ajuda",
       url: "#",
       icon: IconHelp,
     },
     {
-      title: "Search",
+      title: "Nossos temos e condições",
       url: "#",
       icon: IconSearch,
     },
   ],
   documents: [
     {
-      name: "Data Library",
+      name: "Sweet Veneris",
       url: "#",
-      icon: IconDatabase,
+     
     },
     {
-      name: "Reports",
+      name: "Nectar Veneris",
       url: "#",
-      icon: IconReport,
+      
     },
     {
-      name: "Word Assistant",
+      name: "Strong Veneris",
       url: "#",
-      icon: IconFileWord,
+      
+    },
+     {
+      name: "Crock Veneris",
+      url: "#",
+     
     },
   ],
 }
@@ -161,7 +148,7 @@ export function AppSidebar({
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <a href="#">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Maria´s Inc.</span>
+                <span className="text-base font-semibold">Dulci´s Inc.</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

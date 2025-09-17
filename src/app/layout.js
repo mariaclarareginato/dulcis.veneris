@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Teste",
-  description: "Teste.inc",
+  title: "Dulcis Veneris",
+  description: "Dulcis Veneris.inc",
 };
 
 export default function RootLayout({ children }) {
