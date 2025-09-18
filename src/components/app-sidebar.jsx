@@ -115,22 +115,22 @@ const data = {
   ],
   documents: [
     {
-      name: "Sweet Veneris",
+      name: "🍫 Chocolates",
       url: "#",
      
     },
     {
-      name: "Nectar Veneris",
+      name: "🍯 Pães de mel",
       url: "#",
       
     },
     {
-      name: "Strong Veneris",
+      name: "🍬 Trufas",
       url: "#",
       
     },
      {
-      name: "Crock Veneris",
+      name: "🍪 Biscoitaria",
       url: "#",
      
     },
