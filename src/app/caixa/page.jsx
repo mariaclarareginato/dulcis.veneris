@@ -23,8 +23,6 @@ export default function Page() {
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
-          
-          
         </div>
       </SidebarInset>
     </SidebarProvider>

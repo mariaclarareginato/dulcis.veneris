@@ -1,0 +1,180 @@
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Loja {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  endereco  String
+  cidade    String
+  estado    String
+  tipo      LojaTipo
+  ativo     Boolean   @default(true)
+
+  usuarios  Usuario[]
+  estoques  Estoque[]
+  caixas    Caixa[]
+  vendas    Venda[]
+  despesas  Despesa[]
+}
+
+model Usuario {
+  id             Int      @id @default(autoincrement())
+  nome           String
+  cpf            String   @unique
+  email          String   @unique
+  senha_hash     String
+  telefone       String?
+  perfil         String
+  loja_id        Int
+  loja           Loja     @relation(fields: [loja_id], references: [id])
+
+  caixas_abertos Caixa[]  @relation("UsuarioAbertura")
+  vendas         Venda[]
+}
+
+model Fornecedor {
+  id        Int                 @id @default(autoincrement())
+  nome      String
+  contato   String?
+  telefone  String?
+  email     String?
+  documento String?
+
+  pagamentos FornecedorPagamento[]
+}
+
+model Produto {
+  id          Int            @id @default(autoincrement())
+  sku         String         @unique
+  codigo      String         @unique
+  nome        String
+  descricao   String?
+  preco_venda Float
+  custo       Float
+  categoria   String
+
+  estoques    Estoque[]
+  itens_venda VendaItem[]
+  logs        LogAuditoria[]
+}
+
+model Estoque {
+  id             Int     @id @default(autoincrement())
+  loja_id        Int
+  produto_id     Int
+  quantidade     Int
+  estoque_minimo Int
+
+  loja           Loja    @relation(fields: [loja_id], references: [id])
+  produto        Produto @relation(fields: [produto_id], references: [id])
+}
+
+model Caixa {
+  id                Int       @id @default(autoincrement())
+  loja_id           Int
+  usuario_abertura_id Int
+  data_abertura     DateTime
+  saldo_inicial     Float
+  data_fechamento   DateTime?
+  saldo_fechamento  Float?
+  status            String
+
+  loja              Loja      @relation(fields: [loja_id], references: [id])
+  usuario_abertura  Usuario   @relation("UsuarioAbertura", fields: [usuario_abertura_id], references: [id])
+  vendas            Venda[]
+}
+
+model Venda {
+  id         Int       @id @default(autoincrement())
+  caixa_id   Int
+  usuario_id Int
+  loja_id    Int
+  data_hora  DateTime
+  total      Float
+  status     String
+
+  caixa      Caixa     @relation(fields: [caixa_id], references: [id])
+  usuario    Usuario   @relation(fields: [usuario_id], references: [id])
+  loja       Loja      @relation(fields: [loja_id], references: [id])
+
+  itens      VendaItem[]
+  pagamentos Pagamento[]
+}
+
+model VendaItem {
+  id           Int      @id @default(autoincrement())
+  venda_id     Int
+  pedidos      String?
+  produto_id   Int
+  quantidade   Int
+  preco_unitario Float
+  subtotal     Float
+
+  venda        Venda    @relation(fields: [venda_id], references: [id])
+  produto      Produto  @relation(fields: [produto_id], references: [id])
+}
+
+model Pagamento {
+  id        Int       @id @default(autoincrement())
+  venda_id  Int
+  tipo      PagamentoTipo
+  valor     Float
+  detalhe   String?
+
+  venda     Venda     @relation(fields: [venda_id], references: [id])
+}
+
+model Despesa {
+  id             Int      @id @default(autoincrement())
+  loja_id        Int
+  tipo           String
+  descricao      String
+  valor          Float
+  data_vencimento DateTime
+  pago           Boolean  @default(false)
+  data_pagamento DateTime?
+
+  loja           Loja     @relation(fields: [loja_id], references: [id])
+  fornecedorPagamentos FornecedorPagamento[]
+}
+
+model FornecedorPagamento {
+  id           Int        @id @default(autoincrement())
+  fornecedor_id Int
+  despesa_id   Int
+  valor        Float
+  data         DateTime
+
+  fornecedor   Fornecedor @relation(fields: [fornecedor_id], references: [id])
+  despesa      Despesa    @relation(fields: [despesa_id], references: [id])
+}
+
+model LogAuditoria {
+  id            Int      @id @default(autoincrement())
+  produto_id    Int?
+  acao          String
+  tabela_afetada String
+  registro_id   Int
+  timestamp     DateTime @default(now())
+  descricao     String?
+
+  produto       Produto? @relation(fields: [produto_id], references: [id])
+}
+
+enum LojaTipo {
+  MATRIZ
+  FILIAL
+}
+
+enum PagamentoTipo {
+  DINHEIRO
+  CARTAO
+  PIX
+}
