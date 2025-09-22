@@ -40,14 +40,7 @@ const data = {
     email: "carlos@diretoria.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  navMain: [
-    {
-      title: "Sobre Nós",
-      url: "#",
-      icon: IconUsers,
-    },
-    
-  ],
+ 
   navClouds: [
     {
       title: "Capturar",
@@ -155,7 +148,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+   
         <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
