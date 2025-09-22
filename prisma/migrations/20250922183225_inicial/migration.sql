@@ -1,7 +1,3 @@
--- =========================
--- Criação de Tabelas
--- =========================
-
 CREATE TABLE Loja (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(255) NOT NULL,
@@ -134,10 +130,6 @@ CREATE TABLE LogAuditoria (
   descricao TEXT,
   CONSTRAINT fk_log_produto FOREIGN KEY (produto_id) REFERENCES Produto(id)
 );
-
--- =========================
--- Triggers
--- =========================
 
 DELIMITER //
 
