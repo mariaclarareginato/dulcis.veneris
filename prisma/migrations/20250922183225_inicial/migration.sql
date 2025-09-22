@@ -135,13 +135,7 @@ CREATE TABLE LogAuditoria (
   CONSTRAINT fk_log_produto FOREIGN KEY (produto_id) REFERENCES Produto(id)
 );
 
--- =========================
--- Triggers
--- =========================
 
-DELIMITER //
-
--- Atualiza total_vendas quando insere item em venda
 CREATE TRIGGER trg_after_venda_item_insert
 AFTER INSERT ON VendaItem
 FOR EACH ROW
@@ -149,8 +143,7 @@ BEGIN
     UPDATE Produto
     SET total_vendas = total_vendas + NEW.quantidade
     WHERE id = NEW.produto_id;
-END;
-//
+END; -- A instrução termina aqui, com o ponto e vírgula final.
 
 -- Decrementa estoque automaticamente na venda
 CREATE TRIGGER trg_after_venda_item_insert_estoque
@@ -162,7 +155,6 @@ BEGIN
     WHERE produto_id = NEW.produto_id
     LIMIT 1;
 END;
-//
 
 -- Restaura estoque caso item de venda seja removido
 CREATE TRIGGER trg_after_venda_item_delete_estoque
@@ -174,7 +166,6 @@ BEGIN
     WHERE produto_id = OLD.produto_id
     LIMIT 1;
 END;
-//
 
 -- Log de alterações em Produto
 CREATE TRIGGER trg_after_update_produto
@@ -184,7 +175,6 @@ BEGIN
     INSERT INTO LogAuditoria (produto_id, acao, tabela_afetada, registro_id, descricao)
     VALUES (NEW.id, 'UPDATE', 'Produto', NEW.id, CONCAT('Produto atualizado: ', NEW.nome));
 END;
-//
 
 -- Log de exclusão de Venda
 CREATE TRIGGER trg_after_delete_venda
@@ -194,6 +184,3 @@ BEGIN
     INSERT INTO LogAuditoria (acao, tabela_afetada, registro_id, descricao)
     VALUES (NULL, 'Venda', OLD.id, 'Venda removida');
 END;
-//
-
-DELIMITER ;
