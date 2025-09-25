@@ -1,42 +1,42 @@
-// prisma/seed.js
-import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
+import 'dotenv/config'; // <--- garante que .env seja carregado
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-  // Exemplo: adicionar alguns produtos
   await prisma.produto.createMany({
     data: [
       {
-        sku: "SKU001",
-        codigo: "COD001",
-        nome: "Produto A",
-        descricao: "Primeiro produto de teste",
-        preco_venda: 100.0,
-        custo: 70.0,
-        categoria: "Categoria 1",
+        sku: "PROD001",
+        codigo: "001",
+        nome: "Refrigerante Cola 2L",
+        descricao: "Refrigerante sabor cola, 2 litros",
+        img: "https://meusite.com/images/refrigerante_cola_2l.png",
+        preco_venda: 9.99,
+        custo: 5.5,
+        categoria: "Bebidas",
       },
       {
-        sku: "SKU002",
-        codigo: "COD002",
-        nome: "Produto B",
-        descricao: "Segundo produto",
-        preco_venda: 150.0,
-        custo: 90.0,
-        categoria: "Categoria 2",
+        sku: "PROD002",
+        codigo: "002",
+        nome: "Suco Laranja 1L",
+        descricao: "Suco natural de laranja",
+        img: "https://meusite.com/images/suco_laranja_1l.png",
+        preco_venda: 7.5,
+        custo: 4.0,
+        categoria: "Bebidas",
       },
     ],
-  })
+  });
+
+  console.log("Seed concluída!");
 }
 
 main()
-  .then(async () => {
-    console.log("✅ Seed concluído com sucesso!")
-    await prisma.$disconnect()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
   })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
