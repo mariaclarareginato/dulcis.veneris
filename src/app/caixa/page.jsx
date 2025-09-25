@@ -1,21 +1,19 @@
-// src/app/caixa/page.jsx
-import { AppSidebar } from "@/components/app-sidebar"
-import { SiteHeader } from "@/components/site-header"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { prisma } from "@/lib/prisma"
+import { AppSidebar } from "@/components/app-sidebar";
+import { SiteHeader } from "@/components/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 export default async function Page() {
-  // Busca os produtos no banco
-  const produtos = await prisma.produto.findMany({
-    orderBy: { nome: "asc" },
+  const res = await fetch(`http://localhost:3000/api/produtos`, {
+    cache: "no-store", // força sempre buscar do servidor
   });
+  const produtos = await res.json();
 
   return (
     <SidebarProvider
@@ -43,6 +41,9 @@ export default async function Page() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <img>
+                    {produto.img}
+                  </img>
                   <p className="mb-2 text-sm text-muted-foreground">
                     {produto.descricao || "Sem descrição"}
                   </p>
@@ -61,5 +62,5 @@ export default async function Page() {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }
