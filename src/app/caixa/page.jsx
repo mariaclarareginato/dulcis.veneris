@@ -1,11 +1,5 @@
 import Image from "next/image"
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default async function Page() {
   const res = await fetch("http://localhost:3000/api/produtos", {
@@ -19,33 +13,37 @@ export default async function Page() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {produtos.map((produto) => (
-          <Card key={produto.id} className="rounded-2xl shadow-md hover:shadow-lg transition overflow-hidden">
-            {produto.img && (
-              <div className="relative w-full h-48">
-                <Image src={produto.img} alt={produto.nome} fill className="object-cover" />
-              </div>
-            )}
+      <Card key={produto.id} className="rounded-2xl shadow-md hover:shadow-lg transition">
+  {/* Imagem */}
+  {produto.img && (
+    <div className="relative w-full h-72 overflow-hidden rounded-t-2xl">
+      <Image
+        src={produto.img}
+        alt={produto.nome}
+        fill
+        className="object-cover"
+      />
+    </div>
+  )}
 
-            <CardHeader>
-              <CardTitle>{produto.nome}</CardTitle>
-              <CardDescription>
-                {produto.sku} | {produto.categoria}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-2 text-sm text-muted-foreground">
-                {produto.descricao || "Sem descrição"}
-              </p>
-              <div className="flex justify-between items-center font-semibold">
-                <span>Preço:</span>
-                <span>R$ {produto.preco_venda.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm text-muted-foreground">
-                <span>Custo:</span>
-                <span>R$ {produto.custo.toFixed(2)}</span>
-              </div>
-            </CardContent>
-          </Card>
+  {/* Conteúdo do card */}
+  <CardContent className="h-auto overflow-visible">
+    <h3 className="text-lg font-bold mb-1">{produto.nome}</h3>
+    <p className="text-sm text-muted-foreground mb-2">
+      {produto.sku} | {produto.categoria}
+    </p>
+    <p className="text-sm mb-4">{produto.descricao || "Sem descrição"}</p>
+    <div className="flex justify-between items-center font-semibold mb-1">
+      <span>Preço:</span>
+      <span>R$ {produto.preco_venda.toFixed(2)}</span>
+    </div>
+    <div className="flex justify-between items-center text-sm text-muted-foreground">
+      <span>Custo:</span>
+      <span>R$ {produto.custo.toFixed(2)}</span>
+    </div>
+  </CardContent>
+</Card>
+
         ))}
       </div>
     </>

@@ -40,7 +40,7 @@ export default async function CategoriaPage({ params }) {
             </CardHeader>
             <CardContent>
               {produto.img && (
-                <div className="relative w-full h-48 mb-4">
+                <div className="relative w-full h-70 mb-4">
                   <Image
                     src={produto.img}
                     alt={produto.nome}

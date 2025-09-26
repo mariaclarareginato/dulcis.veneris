@@ -75,22 +75,8 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
               <DropdownMenuItem>
-                <IconUserCircle />
-                Minha conta
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Pagamento
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notificações
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            
               <IconLogout />
               Sair
             </DropdownMenuItem>

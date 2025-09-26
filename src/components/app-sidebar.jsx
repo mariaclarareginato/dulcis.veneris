@@ -89,23 +89,7 @@ const data = {
       ],
     },
   ],
-  navSecondary: [
-    {
-      title: "Configurações",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Ajuda",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Nossos temos e condições",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
+
   documents: [
     {
       name: "📦 Catálogo de produtos",
@@ -150,7 +134,6 @@ export function AppSidebar({
       <SidebarContent>
    
         <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
