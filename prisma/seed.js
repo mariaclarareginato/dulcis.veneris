@@ -165,7 +165,7 @@ async function main() {
         img: "/catalogo/paomel1.png",
         preco_venda: 35.0,
         custo: 20.0,
-        categoria:"Pães de mel",
+        categoria:"paes-de-mel",
       },
       {
         sku: "SKU017",
@@ -175,7 +175,7 @@ async function main() {
         img: "/catalogo/paomel2.png",
         preco_venda: 35.0,
         custo: 20.0,
-        categoria:"Pães de mel",
+        categoria:"paes-de-mel",
       },
       {
         sku: "SKU018",
@@ -185,7 +185,7 @@ async function main() {
         img: "/catalogo/paomel3.png",
         preco_venda: 35.0,
         custo: 20.0,
-        categoria:"Pães de mel",
+        categoria:"paes-de-mel",
       },
       {
         sku: "SKU019",
@@ -195,7 +195,7 @@ async function main() {
         img: "/catalogo/paomel4.png",
         preco_venda: 35.0,
         custo: 20.0,
-        categoria:"Pães de mel",
+        categoria:"paes-de-mel",
       },
        {
         sku: "SKU020",
@@ -205,7 +205,7 @@ async function main() {
         img: "/catalogo/paomel5.png",
         preco_venda: 35.0,
         custo: 20.0,
-        categoria:"Pães de mel",
+        categoria:"paes-de-mel",
       },
        {
         sku: "SKU021",
@@ -215,7 +215,7 @@ async function main() {
         img: "/catalogo/menud.png",
         preco_venda: 65.0,
         custo: 38.0,
-        categoria:"Pães de mel",
+        categoria:"paes-de-mel",
       },
        {
         sku: "SKU022",
@@ -225,7 +225,7 @@ async function main() {
         img: "/catalogo/paesmelembalagem.png",
         preco_venda: 200.0,
         custo: 100.0,
-        categoria:"Pães de mel",
+        categoria:"paes-de-mel",
       },
       {
         sku: "SKU023",

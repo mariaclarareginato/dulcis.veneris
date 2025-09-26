@@ -108,24 +108,24 @@ const data = {
   ],
   documents: [
     {
+      name: "📦 Catálogo de produtos",
+      url: "/caixa",  // todos
+    },
+    {
       name: "🍫 Chocolates",
-      url: "#",
-     
+      url: "/caixa/chocolates",
     },
     {
       name: "🍯 Pães de mel",
-      url: "#",
-      
+      url: "/caixa/paes-de-mel",
     },
     {
       name: "🍬 Trufas",
-      url: "#",
-      
+      url: "/caixa/trufas",
     },
-     {
+    {
       name: "🍪 Bolachas",
-      url: "#",
-     
+      url: "/caixa/bolachas",
     },
   ],
 }
