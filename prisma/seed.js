@@ -12,7 +12,7 @@ async function main() {
         codigo: "COD001",
         nome: "Clássicos",
         descricao: "A linha Clássicos Dulce Venere representa a essência e a tradição da marca, sendo os verdadeiros carros-chefe e os mais vendidos do nosso portfólio. Reúne os sabores que encantam diferentes paladares e atravessam gerações. Composta pelo Chocolate ao Leite, cremoso e equilibrado; o Chocolate Meio-Amargo 70% Cacau, intenso e sofisticado; e o Chocolate Branco, delicado e aveludado, essa seleção foi criada para oferecer experiências únicas em cada mordida. Uma verdadeira celebração do cacau em suas formas mais apreciadas, unindo tradição, qualidade e prazer em cada detalhe.", 
-        img: "./catalogo/chocolates.png",
+        img: "/catalogo/chocolates.png",
         preco_venda: 40.0,
         custo: 70.0,
         categoria: "Chocolates",

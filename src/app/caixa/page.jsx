@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -11,7 +12,7 @@ import {
 
 export default async function Page() {
   const res = await fetch(`http://localhost:3000/api/produtos`, {
-    cache: "no-store", // força sempre buscar do servidor
+    cache: "no-store",
   });
   const produtos = await res.json();
 
@@ -32,8 +33,20 @@ export default async function Page() {
             {produtos.map((produto) => (
               <Card
                 key={produto.id}
-                className="rounded-2xl shadow-md hover:shadow-lg transition"
+                className="rounded-2xl shadow-md hover:shadow-lg transition overflow-hidden"
               >
+                {/* Imagem do produto */}
+                {produto.img && (
+                  <div className="relative w-full h-48">
+                    <Image
+                      src={produto.img}
+                      alt={produto.nome}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+
                 <CardHeader>
                   <CardTitle>{produto.nome}</CardTitle>
                   <CardDescription>
@@ -41,9 +54,6 @@ export default async function Page() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <img>
-                    {produto.img}
-                  </img>
                   <p className="mb-2 text-sm text-muted-foreground">
                     {produto.descricao || "Sem descrição"}
                   </p>
