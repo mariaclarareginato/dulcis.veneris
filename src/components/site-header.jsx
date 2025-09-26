@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { CartDropdown } from "./ui/CartDropdown";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +53,11 @@ export function SiteHeader() {
               <DropdownMenuItem onClick={() => setTheme("system")}>System</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <div className="ml-2">
+  <CartDropdown />
+</div>
+
         </div>
       </div>
     </header>

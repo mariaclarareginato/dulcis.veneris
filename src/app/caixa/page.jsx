@@ -32,7 +32,10 @@ export default async function Page() {
     <p className="text-sm text-muted-foreground mb-2">
       {produto.sku} | {produto.categoria}
     </p>
-    <p className="text-sm mb-4">{produto.descricao || "Sem descrição"}</p>
+
+  <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
+  {produto.descricao || "Sem descrição"}
+</p>
     <div className="flex justify-between items-center font-semibold mb-1">
       <span>Preço:</span>
       <span>R$ {produto.preco_venda.toFixed(2)}</span>

@@ -40,7 +40,7 @@ export default async function CategoriaPage({ params }) {
             </CardHeader>
             <CardContent>
               {produto.img && (
-                <div className="relative w-full h-70 mb-4">
+                <div className="relative w-full h-72 mb-4">
                   <Image
                     src={produto.img}
                     alt={produto.nome}
@@ -49,9 +49,10 @@ export default async function CategoriaPage({ params }) {
                   />
                 </div>
               )}
-              <p className="mb-2 text-sm text-muted-foreground">
-                {produto.descricao || "Sem descrição"}
-              </p>
+  <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
+  {produto.descricao || "Sem descrição"}
+</p>
+
               <div className="flex justify-between font-semibold">
                 <span>Preço:</span>
                 <span>R$ {produto.preco_venda.toFixed(2)}</span>
