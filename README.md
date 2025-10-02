@@ -1,8 +1,8 @@
 # Dulcis Veneris
 
-<img width="540" height="534" alt="image" src="https://github.com/user-attachments/assets/5f2bc56b-6fa9-44a8-9e2d-968785d0869c" />
+<img width="540" height="534" alt="image1" src="https://github.com/user-attachments/assets/5f2bc56b-6fa9-44a8-9e2d-968785d0869c" />
 
-<img width="400" height="267" alt="image" src="https://github.com/user-attachments/assets/712fc9ea-2711-4c01-87fb-f31df3828c8f" />
+<img width="400" height="267" alt="image2" src="https://github.com/user-attachments/assets/712fc9ea-2711-4c01-87fb-f31df3828c8f" />
 
 
 ## 
