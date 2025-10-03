@@ -31,7 +31,7 @@ model Usuario {
   email          String   @unique
   senha_hash     String
   telefone       String?
-  perfil         String
+  perfil         PerfilUsuario 
   loja_id        Int
   loja           Loja     @relation(fields: [loja_id], references: [id])
 
@@ -178,4 +178,10 @@ enum PagamentoTipo {
   DINHEIRO
   CARTAO
   PIX
+}
+
+enum PerfilUsuario {
+  CAIXA
+  GERENTE
+  ADMIN
 }

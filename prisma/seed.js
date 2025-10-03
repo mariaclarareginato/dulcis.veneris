@@ -4,6 +4,33 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
+
+  const loja = 
+  await prisma.loja.deleteMany()
+  await prisma.loja.createMany({
+    data: [
+      {
+        nome: "Dulcis Veneris",
+        endereco: "Av. Paulista, 1000",
+        cidade: "São Paulo",
+        estado: "SP",
+        tipo: "FILIAL",
+        ativo: true,
+      },
+    ],
+  });
+
+  const Usuario = 
+  await prisma.usuario.deleteMany()
+  await prisma.usuario.createMany({
+    data: [
+      {
+        
+      },
+    ],
+  })
+
+
   await prisma.produto.deleteMany()
   await prisma.produto.createMany({
     data: [
@@ -342,6 +369,7 @@ async function main() {
     
 
     ],
+    
   });
 
   console.log("Seed concluída!");
