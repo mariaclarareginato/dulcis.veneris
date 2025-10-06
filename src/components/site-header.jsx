@@ -32,7 +32,7 @@ export function SiteHeader() {
         <SidebarTrigger className="-ml-1" />
 
         <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
-      <h1 className="text-[40px] text-red-800 font-bold text-center w-full">
+      <h1 className="text-[20px] sm:text-[40px] text-red-800 font-bold text-center w-full ">
   ✧ Dulcis Veneris ✧
 </h1>
 

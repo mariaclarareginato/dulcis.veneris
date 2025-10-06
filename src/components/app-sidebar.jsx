@@ -2,27 +2,16 @@
 
 import * as React from "react"
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
+  IconCamera,  
   IconFileAi,
   IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
   IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
+ 
   
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -90,25 +79,35 @@ const data = {
     },
   ],
 
-  documents: [
+
+
+
+  catalogo: [
     {
-      name: "📦 Catálogo de produtos",
+      name: "Catálogo",
       url: "/caixa",  // todos
     },
+  ],
+
+
+
+
+  linhas: [
+ 
     {
-      name: "🍫 Chocolates",
+      name: "Chocolates",
       url: "/caixa/chocolates",
     },
     {
-      name: "🍯 Pães de mel",
+      name: "Pães de mel",
       url: "/caixa/paes-de-mel",
     },
     {
-      name: "🍬 Trufas",
+      name: "Trufas",
       url: "/caixa/trufas",
     },
     {
-      name: "🍪 Bolachas",
+      name: "Bolachas",
       url: "/caixa/bolachas",
     },
   ],
@@ -132,8 +131,9 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        <NavMain items={data.catalogo}/>
    
-        <NavDocuments items={data.documents} />
+        <NavDocuments items={data.linhas} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

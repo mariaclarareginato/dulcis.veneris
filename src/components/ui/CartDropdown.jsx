@@ -44,8 +44,13 @@ export function CartDropdown() {
               <span>Total:</span>
               <span>${totalPrice.toFixed(2)}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem  onClick={() => router.push("/carrinho")} className="text-center text-gray-900 justify-center bg-red-400 cursor-pointer border-red border-red-2px">
-              Vizualizar carrinho
+            <DropdownMenuItem>
+             <Button 
+    onClick={() => router.push("/carrinho")} 
+    className="text-center w-full h-full text-gray-100 justify-center bg-red-800 cursor-pointer border-0 outline-none focus:ring-0 focus:outline-none"
+  >
+    Visualizar carrinho
+  </Button>
             </DropdownMenuItem>
           </>
         )}

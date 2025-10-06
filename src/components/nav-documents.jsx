@@ -26,7 +26,7 @@ export function NavDocuments({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Nossas linhas: </SidebarGroupLabel>
+      <SidebarGroupLabel className="font-bold text-base">Nossas linhas: </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>

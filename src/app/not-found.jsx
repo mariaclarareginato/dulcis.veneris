@@ -9,7 +9,7 @@ export default function NotFound() {
     />
       <h1 className="text-9xl font-extrabold text-red-500 drop-shadow-lg z-10 animate-bounce">404</h1>
       <h2 className="text-2xl font-semibold mt-4">Página não encontrada</h2>
-      <p className="mt-2 text-gray-600">
+      <p className="mt-2 text-red-400 font-bold">
         Poxa! Parece que você se perdeu.
       </p>
 

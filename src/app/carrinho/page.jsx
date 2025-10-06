@@ -9,9 +9,11 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function Carrinho({ usuarioId = 1, lojaId = 1, produtos = [] }) {
   const [carrinho, setCarrinho] = useState([]);
+  const router = useRouter();
 
   // Busca carrinho (venda aberta)
   const fetchCarrinho = async () => {
@@ -55,10 +57,10 @@ export default function Carrinho({ usuarioId = 1, lojaId = 1, produtos = [] }) {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Carrinho</h2>
+      <h2 className="text-3xl sm:text-5xl font-bold mb-6">Carrinho</h2>
 
       {carrinho.length === 0 ? (
-        <p className="text-muted-foreground">Seu carrinho está vazio.</p>
+        <p className="text-muted-foreground text-red-500 font-bold">Seu carrinho está vazio.</p>
       ) : (
         <div className="space-y-4">
           {carrinho.map((item) => (
@@ -107,7 +109,7 @@ export default function Carrinho({ usuarioId = 1, lojaId = 1, produtos = [] }) {
       )}
 
       <div className="mt-6">
-        <h3 className="text-xl font-semibold mb-2">Adicionar produtos</h3>
+        <Button onClick={() => router.push("/caixa")} className="text-xl font-semibold mb-2">Adicionar produtos +</Button>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {produtos.map((produto) => (
             <Card key={produto.id} className="p-4 rounded-xl shadow-sm hover:shadow-md transition">
