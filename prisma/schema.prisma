@@ -33,7 +33,7 @@ model Usuario {
   telefone       String?
   perfil         PerfilUsuario 
   loja_id        Int
-  loja           Loja     @relation(fields: [loja_id], references: [id])
+  loja           Loja     @relation(fields: [loja_id], references: [id], onDelete: Cascade)
 
   caixas_abertos Caixa[]  @relation("UsuarioAbertura")
   vendas         Venda[]
@@ -88,7 +88,7 @@ model Caixa {
   status            String
 
   loja              Loja      @relation(fields: [loja_id], references: [id])
-  usuario_abertura  Usuario   @relation("UsuarioAbertura", fields: [usuario_abertura_id], references: [id])
+  usuario_abertura  Usuario   @relation("UsuarioAbertura", fields: [usuario_abertura_id], references: [id], onDelete: Cascade)
   vendas            Venda[]
 }
 
