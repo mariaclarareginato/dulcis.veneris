@@ -1,7 +1,8 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-
+import { SiteFooter } from "@/components/site-footer"
+ 
 export default function CaixaLayout({ children }) {
   return (
     <SidebarProvider
@@ -16,7 +17,9 @@ export default function CaixaLayout({ children }) {
         <div className="flex flex-1 flex-col p-6">
           {children}
         </div>
+           <SiteFooter />
       </SidebarInset>
     </SidebarProvider>
+ 
   )
 }

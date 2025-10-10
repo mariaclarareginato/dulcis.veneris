@@ -3,9 +3,15 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('🧹 Limpando tabelas...');
-  await prisma.estoque.deleteMany();
-  await prisma.produto.deleteMany();
-  await prisma.loja.deleteMany();
+ 
+  await prisma.$transaction([
+  prisma.estoque.deleteMany(),
+  prisma.produto.deleteMany(),
+  prisma.usuario.deleteMany(),
+  prisma.loja.deleteMany(),
+]);
+
+
 
   console.log('🏪 Criando lojas...');
 
@@ -462,7 +468,10 @@ console.log('🍫 Criando produtos...');
       },
     ];
 
+
+
     // Criar produtos para cada loja
+
   const produtos = await prisma.$transaction(
     produtosData.map((p) =>
       prisma.produto.create({
@@ -471,30 +480,63 @@ console.log('🍫 Criando produtos...');
     )
   );
 
-  console.log('📦 Criando estoques por loja...');
-  const lojas = [lojaSP, lojaRJ];
+  // ----------------------------
+  // 5. Criar estoques
+  // ----------------------------
+
+  console.log("📦 Criando estoques aleatórios por loja...");
+
+  // busca todas as lojas e produtos
+  const lojas = await prisma.loja.findMany();
+  const todosProdutos = await prisma.produto.findMany();
+
+  // função utilitária: pega N produtos aleatórios sem repetir
+  function pegarProdutosAleatorios(lista, quantidade) {
+    const copia = [...lista];
+    const selecionados = [];
+    for (let i = 0; i < quantidade && copia.length > 0; i++) {
+      const index = Math.floor(Math.random() * copia.length);
+      selecionados.push(copia.splice(index, 1)[0]);
+    }
+    return selecionados;
+  }
+
 
   for (const loja of lojas) {
-    for (const produto of produtos) {
+    console.log(`➡️ Criando estoque para ${loja.nome}...`);
+
+    // define número de produtos por loja
+    const qtdProdutos = loja.tipo === "MATRIZ" ? 30 : 20;
+
+    // escolhe produtos aleatórios
+    const produtosAleatorios = pegarProdutosAleatorios(todosProdutos, qtdProdutos);
+
+    // cria os registros de estoque
+    for (const produto of produtosAleatorios) {
+      const quantidade = Math.floor(Math.random() * 200) + 50; // 50–250 unidades
+      const estoqueMinimo = Math.floor(Math.random() * 20) + 5; // 5–25 unidades
+
       await prisma.estoque.create({
         data: {
           loja_id: loja.id,
           produto_id: produto.id,
-          quantidade: 100,
-          estoque_minimo: 10,
+          quantidade,
+          estoque_minimo: estoqueMinimo,
         },
       });
     }
   }
 
- console.log('✅ Seed concluído com sucesso!');
+  console.log("✅ Estoques criados com sucesso!");
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
+  .then(async () => {
     await prisma.$disconnect();
+    console.log("🌱 Seed finalizado com sucesso!");
+  })
+  .catch(async (e) => {
+    console.error("❌ Erro ao executar seed:", e);
+    await prisma.$disconnect();
+    process.exit(1);
   });
