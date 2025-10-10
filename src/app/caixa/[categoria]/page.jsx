@@ -1,4 +1,8 @@
+"use client"
+
+import React, { use, useState, useEffect } from "react"
 import Image from "next/image"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardHeader,
@@ -7,25 +11,42 @@ import {
   CardContent,
 } from "@/components/ui/card"
 
-export default async function CategoriaPage({ params }) {
-  const { categoria } = params
+export default function CategoriaPage({ params }) {
+  const { categoria } = use(params) 
+  const [produtos, setProdutos] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const res = await fetch("http://localhost:3000/api/produtos", {
-    cache: "no-store",
-  })
-  const produtos = await res.json()
+  useEffect(() => {
+    fetch("/api/produtos")
+      .then(res => res.json())
+      .then(data => {
+        setProdutos(data)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [])
 
   const categoriaNormalizada = decodeURIComponent(categoria).toLowerCase()
   const produtosFiltrados = produtos.filter(
     (p) => p.categoria.toLowerCase() === categoriaNormalizada
   )
 
-  if (produtosFiltrados.length === 0) {
+  if (loading) { 
     return (
-      <h2 className="text-2xl font-bold mb-6">
-        Nenhum produto encontrado em "{categoria}"
-      </h2>
-    )
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-16 h-16 border-4 border-red-500 border-dashed rouded-full animate-spin"></div>
+      </div>
+    ) 
+  };
+
+
+  if (produtosFiltrados.length === 0) {
+    return <h2 className="text-2xl font-bold mb-6">
+      Nenhum produto encontrado em "{categoria}"
+    </h2>
   }
 
   return (
@@ -49,9 +70,9 @@ export default async function CategoriaPage({ params }) {
                   />
                 </div>
               )}
-  <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
-  {produto.descricao || "Sem descrição"}
-</p>
+              <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
+                {produto.descricao || "Sem descrição"}
+              </p>
 
               <div className="flex justify-between font-semibold">
                 <span>Preço:</span>
@@ -61,6 +82,10 @@ export default async function CategoriaPage({ params }) {
                 <span>Custo:</span>
                 <span>R$ {produto.custo.toFixed(2)}</span>
               </div>
+              <br></br>
+              <Button className="w-full" onClick={() => adicionarAoCarrinho(produto)}>
+                Adicionar ao Carrinho
+              </Button>
             </CardContent>
           </Card>
         ))}

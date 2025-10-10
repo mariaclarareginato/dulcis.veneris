@@ -86,6 +86,7 @@ export default function Page({ usuarioId = 1, lojaId = 1 }) {
                 <span>Custo:</span>
                 <span>R$ {produto.custo.toFixed(2)}</span>
               </div>
+              <br></br>
               <Button className="w-full" onClick={() => adicionarAoCarrinho(produto)}>
                 Adicionar ao Carrinho
               </Button>
