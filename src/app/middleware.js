@@ -1,7 +1,7 @@
 // middleware.js
 import { NextResponse } from "next/server";
 
-export function middleware(request) {
+export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Rotas públicas que não precisam de login
@@ -18,7 +18,8 @@ export function middleware(request) {
   return NextResponse.next();
 }
 
-// Define em quais rotas o middleware roda
+// Define onde o middleware deve rodar
 export const config = {
+  matcher: ["/", "/registro/:path*"],
   matcher: ["/", "/((?!_next/static|_next/image|favicon.ico).*)"], // roda em todas as rotas, exceto assets
 };

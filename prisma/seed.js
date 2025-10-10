@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 async function main() {
@@ -13,40 +14,41 @@ async function main() {
 
 
 
-  console.log('🏪 Criando lojas...');
+  console.log("🏪 Criando lojas...");
 
-  const lojaMatriz= await prisma.loja.create({
+  const lojaMatriz = await prisma.loja.create({
     data: {
-      nome: 'Dulce Venere - Matriz',
-      endereco: 'Doutor Januário Miraglia, 120',
-      cidade: 'Campos do Jordão',
-      estado: 'SP',
-      tipo: 'MATRIZ',
+      nome: "Dulce Venere - Matriz",
+      endereco: "Doutor Januário Miraglia, 120",
+      cidade: "Campos do Jordão",
+      estado: "SP",
+      tipo: "MATRIZ",
     },
   });
 
-
   const lojaSP = await prisma.loja.create({
     data: {
-      nome: 'Dulce Venere - São Paulo',
-      endereco: 'Rua das Amêndoas, 120',
-      cidade: 'São Paulo',
-      estado: 'SP',
-      tipo: 'FILIAL',
+      nome: "Dulce Venere - São Paulo",
+      endereco: "Rua das Amêndoas, 120",
+      cidade: "São Paulo",
+      estado: "SP",
+      tipo: "FILIAL",
     },
   });
 
   const lojaRJ = await prisma.loja.create({
     data: {
-      nome: 'Dulce Venere - Rio de Janeiro',
-      endereco: 'Avenida Cacau, 87',
-      cidade: 'Rio de Janeiro',
-      estado: 'RJ',
-      tipo: 'FILIAL',
+      nome: "Dulce Venere - Rio de Janeiro",
+      endereco: "Avenida Cacau, 87",
+      cidade: "Rio de Janeiro",
+      estado: "RJ",
+      tipo: "FILIAL",
     },
   });
 
   console.log("Criando usuários...");
+
+  const senhaHash = await bcrypt.hash("senha123", 10);
 
   // Admin
   const admin = await prisma.usuario.create({
@@ -54,7 +56,7 @@ async function main() {
       nome: "Gabriel",
       cpf: "111.111.111-11",
       email: "gabriel@email.com",
-      senha_hash: "senha123",
+      senha_hash: senhaHash,
       telefone: "(11)11111-1111",
       perfil: "ADMIN",
       loja_id: lojaMatriz.id,
@@ -67,7 +69,7 @@ async function main() {
       nome: "Gustavo",
       cpf: "222.222.222-22",
       email: "gustavo@email.com",
-      senha_hash: "senha123",
+      senha_hash: senhaHash,
       telefone: "(22)22222-2222",
       perfil: "GERENTE",
       loja_id: lojaSP.id,
@@ -79,29 +81,77 @@ async function main() {
       nome: "Henry",
       cpf: "333.333.333-33",
       email: "henry@email.com",
-      senha_hash: "senha123",
+      senha_hash: senhaHash,
       telefone: "(33)33333-3333",
       perfil: "GERENTE",
       loja_id: lojaRJ.id,
     },
   });
 
-// Caixas
+  // Caixas
   await prisma.usuario.createMany({
     data: [
-      { nome: "Caixa SP 1", cpf: "444.444.444-44", email: "caixa1@sp.com", senha_hash: "senha123", telefone: "(44)44444-4444", perfil: "CAIXA", loja_id: lojaSP.id },
-      { nome: "Caixa SP 2", cpf: "555.555.555-55", email: "caixa2@sp.com", senha_hash: "senha123", telefone: "(55)55555-5555", perfil: "CAIXA", loja_id: lojaSP.id },
-      { nome: "Caixa SP 3", cpf: "666.666.666-66", email: "caixa3@sp.com", senha_hash: "senha123", telefone: "(66)66666-6666", perfil: "CAIXA", loja_id: lojaSP.id },
-      { nome: "Caixa RJ 1", cpf: "777.777.777-77", email: "caixa1@rj.com", senha_hash: "senha123", telefone: "(77)77777-7777", perfil: "CAIXA", loja_id: lojaRJ.id },
-      { nome: "Caixa RJ 2", cpf: "888.888.888-88", email: "caixa2@rj.com", senha_hash: "senha123", telefone: "(88)88888-8888", perfil: "CAIXA", loja_id: lojaRJ.id },
-      { nome: "Caixa RJ 3", cpf: "999.999.999-99", email: "caixa3@rj.com", senha_hash: "senha123", telefone: "(99)99999-9999", perfil: "CAIXA", loja_id: lojaRJ.id },
+      {
+        nome: "Caixa SP 1",
+        cpf: "444.444.444-44",
+        email: "caixa1@sp.com",
+        senha_hash: senhaHash,
+        telefone: "(44)44444-4444",
+        perfil: "CAIXA",
+        loja_id: lojaSP.id,
+      },
+      {
+        nome: "Caixa SP 2",
+        cpf: "555.555.555-55",
+        email: "caixa2@sp.com",
+        senha_hash: senhaHash,
+        telefone: "(55)55555-5555",
+        perfil: "CAIXA",
+        loja_id: lojaSP.id,
+      },
+      {
+        nome: "Caixa SP 3",
+        cpf: "666.666.666-66",
+        email: "caixa3@sp.com",
+        senha_hash: senhaHash,
+        telefone: "(66)66666-6666",
+        perfil: "CAIXA",
+        loja_id: lojaSP.id,
+      },
+      {
+        nome: "Caixa RJ 1",
+        cpf: "777.777.777-77",
+        email: "caixa1@rj.com",
+        senha_hash: senhaHash,
+        telefone: "(77)77777-7777",
+        perfil: "CAIXA",
+        loja_id: lojaRJ.id,
+      },
+      {
+        nome: "Caixa RJ 2",
+        cpf: "888.888.888-88",
+        email: "caixa2@rj.com",
+        senha_hash: senhaHash,
+        telefone: "(88)88888-8888",
+        perfil: "CAIXA",
+        loja_id: lojaRJ.id,
+      },
+      {
+        nome: "Caixa RJ 3",
+        cpf: "999.999.999-99",
+        email: "caixa3@rj.com",
+        senha_hash: senhaHash,
+        telefone: "(99)99999-9999",
+        perfil: "CAIXA",
+        loja_id: lojaRJ.id,
+      },
     ],
   });
 
   // ----------------------------
   // 4. Criar produtos
   // ----------------------------
-console.log('🍫 Criando produtos...');
+  console.log("🍫 Criando produtos...");
   const produtosData = [
       {
         sku: "SKU001",
@@ -540,3 +590,4 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+
