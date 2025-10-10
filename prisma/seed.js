@@ -1,46 +1,45 @@
-import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // ----------------------------
-  // 1. Limpar tabelas
-  // ----------------------------
-  console.log("Limpando tabelas...");
- await prisma.produto.deleteMany();
- await prisma.usuario.deleteMany();
+  console.log('🧹 Limpando tabelas...');
+  await prisma.estoque.deleteMany();
+  await prisma.produto.deleteMany();
   await prisma.loja.deleteMany();
 
-  // ----------------------------
-  // 2. Criar lojas
-  // ----------------------------
-  console.log("Criando lojas...");
+  console.log('🏪 Criando lojas...');
+
+  const lojaMatriz= await prisma.loja.create({
+    data: {
+      nome: 'Dulce Venere - Matriz',
+      endereco: 'Doutor Januário Miraglia, 120',
+      cidade: 'Campos do Jordão',
+      estado: 'SP',
+      tipo: 'MATRIZ',
+    },
+  });
+
+
   const lojaSP = await prisma.loja.create({
     data: {
-      nome: "Dulcis Veneris Matriz",
-      endereco: "Av. Paulista, 1000",
-      cidade: "São Paulo",
-      estado: "SP",
-      tipo: "MATRIZ",
-      ativo: true,
+      nome: 'Dulce Venere - São Paulo',
+      endereco: 'Rua das Amêndoas, 120',
+      cidade: 'São Paulo',
+      estado: 'SP',
+      tipo: 'FILIAL',
     },
   });
 
   const lojaRJ = await prisma.loja.create({
     data: {
-      nome: "Dulcis Veneris Filial RJ",
-      endereco: "Rua das Laranjeiras, 200",
-      cidade: "Rio de Janeiro",
-      estado: "RJ",
-      tipo: "FILIAL",
-      ativo: true,
+      nome: 'Dulce Venere - Rio de Janeiro',
+      endereco: 'Avenida Cacau, 87',
+      cidade: 'Rio de Janeiro',
+      estado: 'RJ',
+      tipo: 'FILIAL',
     },
   });
 
-  // ----------------------------
-  // 3. Criar usuários
-  // ----------------------------
   console.log("Criando usuários...");
 
   // Admin
@@ -52,7 +51,7 @@ async function main() {
       senha_hash: "senha123",
       telefone: "(11)11111-1111",
       perfil: "ADMIN",
-      loja_id: lojaSP.id,
+      loja_id: lojaMatriz.id,
     },
   });
 
@@ -81,7 +80,7 @@ async function main() {
     },
   });
 
-  // Caixas
+// Caixas
   await prisma.usuario.createMany({
     data: [
       { nome: "Caixa SP 1", cpf: "444.444.444-44", email: "caixa1@sp.com", senha_hash: "senha123", telefone: "(44)44444-4444", perfil: "CAIXA", loja_id: lojaSP.id },
@@ -96,10 +95,7 @@ async function main() {
   // ----------------------------
   // 4. Criar produtos
   // ----------------------------
-  console.log("Criando produtos...");
- 
-await prisma.produto.deleteMany();
-
+console.log('🍫 Criando produtos...');
   const produtosData = [
       {
         sku: "SKU001",
@@ -467,18 +463,33 @@ await prisma.produto.deleteMany();
     ];
 
     // Criar produtos para cada loja
-  for (const loja of [lojaSP, lojaRJ]) {
-    for (const p of produtosData) {
-      await prisma.produto.create({
-        data: { ...p },
+  const produtos = await prisma.$transaction(
+    produtosData.map((p) =>
+      prisma.produto.create({
+        data: p,
+      })
+    )
+  );
+
+  console.log('📦 Criando estoques por loja...');
+  const lojas = [lojaSP, lojaRJ];
+
+  for (const loja of lojas) {
+    for (const produto of produtos) {
+      await prisma.estoque.create({
+        data: {
+          loja_id: loja.id,
+          produto_id: produto.id,
+          quantidade: 100,
+          estoque_minimo: 10,
+        },
       });
     }
   }
 
-  console.log("Seed concluída!");
-
-
+ console.log('✅ Seed concluído com sucesso!');
 }
+
 main()
   .catch((e) => {
     console.error(e);
