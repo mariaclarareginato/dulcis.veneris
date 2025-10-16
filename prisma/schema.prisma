@@ -1,4 +1,3 @@
-// schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,179 +7,190 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Loja {
-  id        Int       @id @default(autoincrement())
-  nome      String
-  endereco  String
-  cidade    String
-  estado    String
-  tipo      LojaTipo
-  ativo     Boolean   @default(true)
+model caixa {
+  id                  Int       @id @default(autoincrement())
+  loja_id             Int
+  usuario_abertura_id Int
+  data_abertura       DateTime
+  saldo_inicial       Float
+  data_fechamento     DateTime?
+  saldo_fechamento    Float?
+  status              String
+  loja                loja      @relation(fields: [loja_id], references: [id], map: "Caixa_loja_id_fkey")
+  usuario             usuario   @relation(fields: [usuario_abertura_id], references: [id], onDelete: Cascade, map: "Caixa_usuario_abertura_id_fkey")
+  venda               venda[]
 
-  usuarios  Usuario[]
-  estoques  Estoque[]
-  caixas    Caixa[]
-  vendas    Venda[]
-  despesas  Despesa[]
+  @@index([loja_id], map: "Caixa_loja_id_fkey")
+  @@index([usuario_abertura_id], map: "Caixa_usuario_abertura_id_fkey")
 }
 
-model Usuario {
-  id             Int      @id @default(autoincrement())
-  nome           String
-  cpf            String   @unique
-  email          String   @unique
-  senha_hash     String
-  telefone       String?
-  perfil         PerfilUsuario 
-  loja_id        Int
-  loja           Loja     @relation(fields: [loja_id], references: [id], onDelete: Cascade)
+model despesa {
+  id                  Int                   @id @default(autoincrement())
+  loja_id             Int
+  tipo                String
+  descricao           String
+  valor               Float
+  data_vencimento     DateTime
+  pago                Boolean               @default(false)
+  data_pagamento      DateTime?
+  loja                loja                  @relation(fields: [loja_id], references: [id], map: "Despesa_loja_id_fkey")
+  fornecedorpagamento fornecedorpagamento[]
 
-  caixas_abertos Caixa[]  @relation("UsuarioAbertura")
-  vendas         Venda[]
+  @@index([loja_id], map: "Despesa_loja_id_fkey")
 }
 
-model Fornecedor {
-  id        Int                 @id @default(autoincrement())
-  nome      String
-  contato   String?
-  telefone  String?
-  email     String?
-  documento String?
-
-  pagamentos FornecedorPagamento[]
-}
-
-model Produto {
-  id          Int            @id @default(autoincrement())
-  sku         String         @unique
-  codigo      String         @unique
-  nome        String
-  descricao   String?
-  img         String?        // link da imagem
-  preco_venda Float
-  custo       Float
-  categoria   String
-
-  estoques    Estoque[]
-  itens_venda VendaItem[]
-  logs        LogAuditoria[]
-}
-
-model Estoque {
+model estoque {
   id             Int     @id @default(autoincrement())
   loja_id        Int
   produto_id     Int
   quantidade     Int
   estoque_minimo Int
+  loja           loja    @relation(fields: [loja_id], references: [id], map: "Estoque_loja_id_fkey")
+  produto        produto @relation(fields: [produto_id], references: [id], map: "Estoque_produto_id_fkey")
 
-  loja           Loja    @relation(fields: [loja_id], references: [id])
-  produto        Produto @relation(fields: [produto_id], references: [id])
+  @@index([loja_id], map: "Estoque_loja_id_fkey")
+  @@index([produto_id], map: "Estoque_produto_id_fkey")
 }
 
-model Caixa {
-  id                Int       @id @default(autoincrement())
-  loja_id           Int
-  usuario_abertura_id Int
-  data_abertura     DateTime
-  saldo_inicial     Float
-  data_fechamento   DateTime?
-  saldo_fechamento  Float?
-  status            String
-
-  loja              Loja      @relation(fields: [loja_id], references: [id])
-  usuario_abertura  Usuario   @relation("UsuarioAbertura", fields: [usuario_abertura_id], references: [id], onDelete: Cascade)
-  vendas            Venda[]
+model fornecedor {
+  id                  Int                   @id @default(autoincrement())
+  nome                String
+  contato             String?
+  telefone            String?
+  email               String?
+  documento           String?
+  fornecedorpagamento fornecedorpagamento[]
 }
 
-model Venda {
-  id         Int       @id @default(autoincrement())
+model fornecedorpagamento {
+  id            Int        @id @default(autoincrement())
+  fornecedor_id Int
+  despesa_id    Int
+  valor         Float
+  data          DateTime
+  despesa       despesa    @relation(fields: [despesa_id], references: [id], map: "FornecedorPagamento_despesa_id_fkey")
+  fornecedor    fornecedor @relation(fields: [fornecedor_id], references: [id], map: "FornecedorPagamento_fornecedor_id_fkey")
+
+  @@index([despesa_id], map: "FornecedorPagamento_despesa_id_fkey")
+  @@index([fornecedor_id], map: "FornecedorPagamento_fornecedor_id_fkey")
+}
+
+model logauditoria {
+  id             Int      @id @default(autoincrement())
+  produto_id     Int?
+  acao           String
+  tabela_afetada String
+  registro_id    Int
+  timestamp      DateTime @default(now())
+  descricao      String?
+  produto        produto? @relation(fields: [produto_id], references: [id], map: "LogAuditoria_produto_id_fkey")
+
+  @@index([produto_id], map: "LogAuditoria_produto_id_fkey")
+}
+
+model loja {
+  id       Int       @id @default(autoincrement())
+  nome     String
+  endereco String
+  cidade   String
+  estado   String
+  tipo     loja_tipo
+  ativo    Boolean   @default(true)
+  caixa    caixa[]
+  despesa  despesa[]
+  estoque  estoque[]
+  usuario  usuario[]
+  venda    venda[]
+}
+
+model pagamento {
+  id       Int            @id @default(autoincrement())
+  venda_id Int
+  tipo     pagamento_tipo
+  valor    Float
+  detalhe  String?
+  venda    venda          @relation(fields: [venda_id], references: [id], map: "Pagamento_venda_id_fkey")
+
+  @@index([venda_id], map: "Pagamento_venda_id_fkey")
+}
+
+model produto {
+  id           Int            @id @default(autoincrement())
+  sku          String         @unique(map: "Produto_sku_key")
+  codigo       String         @unique(map: "Produto_codigo_key")
+  nome         String
+  descricao    String?
+  img          String?
+  preco_venda  Float
+  custo        Float
+  categoria    String
+  estoque      estoque[]
+  logauditoria logauditoria[]
+  vendaitem    vendaitem[]
+}
+
+model usuario {
+  id         Int            @id @default(autoincrement())
+  nome       String
+  cpf        String         @unique(map: "Usuario_cpf_key")
+  email      String         @unique(map: "Usuario_email_key")
+  senha_hash String
+  telefone   String?
+  perfil     usuario_perfil
+  loja_id    Int
+  caixa      caixa[]
+  loja       loja           @relation(fields: [loja_id], references: [id], onDelete: Cascade, map: "Usuario_loja_id_fkey")
+  venda      venda[]
+
+  @@index([loja_id], map: "Usuario_loja_id_fkey")
+}
+
+model venda {
+  id         Int         @id @default(autoincrement())
   caixa_id   Int
   usuario_id Int
   loja_id    Int
   data_hora  DateTime
   total      Float
   status     String
+  pagamento  pagamento[]
+  caixa      caixa       @relation(fields: [caixa_id], references: [id], map: "Venda_caixa_id_fkey")
+  loja       loja        @relation(fields: [loja_id], references: [id], map: "Venda_loja_id_fkey")
+  usuario    usuario     @relation(fields: [usuario_id], references: [id], map: "Venda_usuario_id_fkey")
+  vendaitem  vendaitem[]
 
-  caixa      Caixa     @relation(fields: [caixa_id], references: [id])
-  usuario    Usuario   @relation(fields: [usuario_id], references: [id])
-  loja       Loja      @relation(fields: [loja_id], references: [id])
-
-  itens      VendaItem[]
-  pagamentos Pagamento[]
+  @@index([caixa_id], map: "Venda_caixa_id_fkey")
+  @@index([loja_id], map: "Venda_loja_id_fkey")
+  @@index([usuario_id], map: "Venda_usuario_id_fkey")
 }
 
-model VendaItem {
-  id           Int      @id @default(autoincrement())
-  venda_id     Int
-  pedidos      String?
-  produto_id   Int
-  quantidade   Int
+model vendaitem {
+  id             Int     @id @default(autoincrement())
+  venda_id       Int
+  pedidos        String?
+  produto_id     Int
+  quantidade     Int
   preco_unitario Float
-  subtotal     Float
+  subtotal       Float
+  produto        produto @relation(fields: [produto_id], references: [id], map: "VendaItem_produto_id_fkey")
+  venda          venda   @relation(fields: [venda_id], references: [id], map: "VendaItem_venda_id_fkey")
 
-  venda        Venda    @relation(fields: [venda_id], references: [id])
-  produto      Produto  @relation(fields: [produto_id], references: [id])
+  @@index([produto_id], map: "VendaItem_produto_id_fkey")
+  @@index([venda_id], map: "VendaItem_venda_id_fkey")
 }
 
-model Pagamento {
-  id        Int       @id @default(autoincrement())
-  venda_id  Int
-  tipo      PagamentoTipo
-  valor     Float
-  detalhe   String?
-
-  venda     Venda     @relation(fields: [venda_id], references: [id])
-}
-
-model Despesa {
-  id             Int      @id @default(autoincrement())
-  loja_id        Int
-  tipo           String
-  descricao      String
-  valor          Float
-  data_vencimento DateTime
-  pago           Boolean  @default(false)
-  data_pagamento DateTime?
-
-  loja           Loja     @relation(fields: [loja_id], references: [id])
-  fornecedorPagamentos FornecedorPagamento[]
-}
-
-model FornecedorPagamento {
-  id           Int        @id @default(autoincrement())
-  fornecedor_id Int
-  despesa_id   Int
-  valor        Float
-  data         DateTime
-
-  fornecedor   Fornecedor @relation(fields: [fornecedor_id], references: [id])
-  despesa      Despesa    @relation(fields: [despesa_id], references: [id])
-}
-
-model LogAuditoria {
-  id            Int      @id @default(autoincrement())
-  produto_id    Int?
-  acao          String
-  tabela_afetada String
-  registro_id   Int
-  timestamp     DateTime @default(now())
-  descricao     String?
-
-  produto       Produto? @relation(fields: [produto_id], references: [id])
-}
-
-enum LojaTipo {
-  MATRIZ
-  FILIAL
-}
-
-enum PagamentoTipo {
+enum pagamento_tipo {
   DINHEIRO
   CARTAO
   PIX
 }
 
-enum PerfilUsuario {
+enum loja_tipo {
+  MATRIZ
+  FILIAL
+}
+
+enum usuario_perfil {
   CAIXA
   GERENTE
   ADMIN

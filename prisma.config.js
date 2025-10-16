@@ -1,3 +1,4 @@
+import "dotenv/config"; // <-- Adicione esta linha no topo
 import { defineConfig } from "@prisma/config";
 
 export default defineConfig({
@@ -9,6 +10,6 @@ export default defineConfig({
     },
   },
   seed: {
-    command: "node prisma/seed.js", // aponta para o seed correto
+    command: "node prisma/seed.js",
   },
 });
