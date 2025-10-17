@@ -1,4 +1,3 @@
-// src/app/api/produtos/route.js
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -18,7 +17,7 @@ export async function GET(req) {
     const produtos = await prisma.produto.findMany({
       orderBy: { nome: "asc" },
       include: {
-        estoque: {
+        estoque: { // ✅ nome correto do relacionamento
           where: { loja_id: lojaId },
           select: {
             quantidade: true,
@@ -33,7 +32,7 @@ export async function GET(req) {
       ...produto,
       quantidade: produto.estoque[0]?.quantidade ?? 0,
       estoque_minimo: produto.estoque[0]?.estoque_minimo ?? 0,
-      estoque: undefined, // Remove array do response
+      estoque: undefined, // remove array do response
     }));
 
     return NextResponse.json(produtosComEstoque);
