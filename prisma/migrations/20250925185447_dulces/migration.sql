@@ -33,7 +33,7 @@ CREATE TABLE `Fornecedor` (
     `nome` VARCHAR(191) NOT NULL,
     `contato` VARCHAR(191) NULL,
     `telefone` VARCHAR(191) NULL,
-    `email` VARCHAR(191) NULL,
+    `email` VARCHAR(191) NULL,  
     `documento` VARCHAR(191) NULL,
 
     PRIMARY KEY (`id`)

@@ -1,83 +1,98 @@
-// app/api/carrinho/route.js
 import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const usuarioId = Number(searchParams.get("usuarioId"));
-    const lojaId = Number(searchParams.get("lojaId"));
+    const usuarioId = parseInt(searchParams.get("usuarioId"));
+    const lojaId = parseInt(searchParams.get("lojaId"));
 
+    if (!usuarioId || !lojaId) {
+      return NextResponse.json(
+        { error: "Usuário e Loja são obrigatórios" },
+        { status: 400 }
+      );
+    }
+
+    // Busca venda aberta
     let venda = await prisma.venda.findFirst({
-      where: { usuario_id: usuarioId, loja_id: lojaId, status: "ABERTA" },
-      include: { itens: { include: { produto: true } } },
+      where: {
+        usuario_id: usuarioId,
+        loja_id: lojaId,
+        status: "ABERTA",
+      },
+      include: {
+        vendaitem: {
+          include: {
+            produto: {
+              include: {
+                estoque: {
+                  where: { loja_id: lojaId },
+                  select: { quantidade: true, estoque_minimo: true },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
+    // Cria venda aberta se não existir (necessário caixa aberto)
     if (!venda) {
+      const caixaAberto = await prisma.caixa.findFirst({
+        where: { loja_id: lojaId, status: "ABERTO" },
+      });
+
+      if (!caixaAberto) {
+        return NextResponse.json(
+          { error: "Não há caixa aberto nesta loja" },
+          { status: 400 }
+        );
+      }
+
       venda = await prisma.venda.create({
         data: {
           usuario_id: usuarioId,
           loja_id: lojaId,
-          caixa_id: 1, // exemplo, pode ser dinâmico
+          caixa_id: caixaAberto.id,
           data_hora: new Date(),
           total: 0,
           status: "ABERTA",
         },
-        include: { itens: { include: { produto: true } } },
-      });
-    }
-
-    return new Response(JSON.stringify({ itens: venda.itens, vendaId: venda.id }), { status: 200 });
-  } catch (err) {
-    console.error(err);
-    return new Response("Erro ao buscar carrinho", { status: 500 });
-  }
-}
-
-export async function POST(req) {
-  try {
-    const { usuarioId, lojaId, produtoId, quantidade } = await req.json();
-
-    let venda = await prisma.venda.findFirst({
-      where: { usuario_id: usuarioId, loja_id: lojaId, status: "ABERTA" },
-    });
-
-    if (!venda) throw new Error("Venda não encontrada");
-
-    let item = await prisma.vendaItem.findFirst({
-      where: { venda_id: venda.id, produto_id: produtoId },
-    });
-
-    const produto = await prisma.produto.findUnique({ where: { id: produtoId } });
-    if (!produto) throw new Error("Produto não encontrado");
-
-    if (item) {
-      item = await prisma.vendaItem.update({
-        where: { id: item.id },
-        data: {
-          quantidade: item.quantidade + quantidade,
-          subtotal: (item.quantidade + quantidade) * produto.preco_venda,
-        },
-      });
-    } else {
-      item = await prisma.vendaItem.create({
-        data: {
-          venda_id: venda.id,
-          produto_id: produtoId,
-          quantidade,
-          preco_unitario: produto.preco_venda,
-          subtotal: quantidade * produto.preco_venda,
+        include: {
+          vendaitem: {
+            include: {
+              produto: {
+                include: {
+                  estoque: {
+                    where: { loja_id: lojaId },
+                    select: { quantidade: true, estoque_minimo: true },
+                  },
+                },
+              },
+            },
+          },
         },
       });
     }
 
-    const itens = await prisma.vendaItem.findMany({ where: { venda_id: venda.id } });
-    const total = itens.reduce((acc, i) => acc + i.subtotal, 0);
+    // Formata itens com quantidade e estoque_minimo
+    const itens = venda.vendaitem.map((item) => ({
+      ...item,
+      estoque_disponivel: item.produto.estoque[0]?.quantidade ?? 0,
+      estoque_minimo: item.produto.estoque[0]?.estoque_minimo ?? 0,
+    }));
 
-    await prisma.venda.update({ where: { id: venda.id }, data: { total } });
-
-    return new Response(JSON.stringify(item), { status: 200 });
+    return NextResponse.json({
+      itens,
+      vendaId: venda.id,
+      total: venda.total,
+    });
   } catch (err) {
-    console.error(err);
-    return new Response("Erro ao adicionar ao carrinho", { status: 500 });
+    console.error("Erro ao buscar carrinho:", err);
+    return NextResponse.json(
+      { error: "Erro ao buscar carrinho" },
+      { status: 500 }
+    );
   }
 }

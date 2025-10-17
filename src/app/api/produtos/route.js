@@ -1,14 +1,46 @@
-// app/api/produtos/route.ts
 import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url);
+    const lojaId = parseInt(searchParams.get("lojaId"));
+
+    if (!lojaId || isNaN(lojaId)) {
+      return NextResponse.json(
+        { error: "Loja não informada ou inválida" },
+        { status: 400 }
+      );
+    }
+
+    // Busca produtos com estoque apenas da loja específica
     const produtos = await prisma.produto.findMany({
       orderBy: { nome: "asc" },
+      include: {
+        estoque: { // ✅ nome correto do relacionamento
+          where: { loja_id: lojaId },
+          select: {
+            quantidade: true,
+            estoque_minimo: true,
+          },
+        },
+      },
     });
-    return new Response(JSON.stringify(produtos), { status: 200 });
+
+    // Mapeia para incluir quantidade diretamente no produto
+    const produtosComEstoque = produtos.map((produto) => ({
+      ...produto,
+      quantidade: produto.estoque[0]?.quantidade ?? 0,
+      estoque_minimo: produto.estoque[0]?.estoque_minimo ?? 0,
+      estoque: undefined, // remove array do response
+    }));
+
+    return NextResponse.json(produtosComEstoque);
   } catch (err) {
-    console.error(err);
-    return new Response("Erro ao buscar produtos", { status: 500 });
+    console.error("Erro ao buscar produtos:", err);
+    return NextResponse.json(
+      { error: "Erro ao buscar produtos" },
+      { status: 500 }
+    );
   }
 }
