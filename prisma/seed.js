@@ -139,7 +139,7 @@ async function main() {
       {
         nome: "Caixa RJ 3",
         cpf: "999.999.999-99",
-        email: "caixa3@rj.com",
+        email: "  ",
         senha_hash: senhaHash,
         telefone: "(99)99999-9999",
         perfil: "CAIXA",
