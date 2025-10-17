@@ -1,17 +1,14 @@
 "use client"
 
-import * as React from "react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
 import {
-  IconCamera,  
+  IconCamera,
   IconFileAi,
   IconFileDescription,
   IconInnerShadowTop,
- 
-  
 } from "@tabler/icons-react"
 
-import { NavDocuments } from "@/components/nav-documents"
-import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -23,121 +20,95 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
-  user: {
-    name: "Carlos Madeira",
-    email: "carlos@diretoria.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
- 
-  navClouds: [
-    {
-      title: "Capturar",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Propostas ativas",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposta",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
+export function AppSidebar({ ...props }) {
+  const [user, setUser] = useState({ name: "", email: "" })
 
+  useEffect(() => {
+    const userData = localStorage.getItem("user")
+    if (userData) {
+      setUser(JSON.parse(userData))
+    }
+  }, [])
 
+  const data = {
+    menus: [
+      {
+        title: "Catálogo",
+        items: [
+          { title: "Chocolates", url: "/caixa/chocolates" },
+          { title: "Pães de mel", url: "/caixa/paes-de-mel" },
+          { title: "Trufas", url: "/caixa/trufas" },
+          { title: "Bolachas", url: "/caixa/bolachas" },
+        ],
+      },
+      {
+        title: "Capturar",
+        icon: IconCamera,
+        items: [
+          { title: "Propostas ativas", url: "#" },
+          { title: "Archived", url: "#" },
+        ],
+      },
+      {
+        title: "Proposta",
+        icon: IconFileDescription,
+        items: [
+          { title: "Active Proposals", url: "#" },
+          { title: "Archived", url: "#" },
+        ],
+      },
+      {
+        title: "Prompts",
+        icon: IconFileAi,
+        items: [
+          { title: "Active Proposals", url: "#" },
+          { title: "Archived", url: "#" },
+        ],
+      },
+    ],
+  }
 
-
-  catalogo: [
-    {
-      name: "Catálogo",
-      url: "/caixa",  // todos
-    },
-  ],
-
-
-
-
-  linhas: [
- 
-    {
-      name: "Chocolates",
-      url: "/caixa/chocolates",
-    },
-    {
-      name: "Pães de mel",
-      url: "/caixa/paes-de-mel",
-    },
-    {
-      name: "Trufas",
-      url: "/caixa/trufas",
-    },
-    {
-      name: "Bolachas",
-      url: "/caixa/bolachas",
-    },
-  ],
-}
-
-export function AppSidebar({
-  ...props
-}) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
+            <SidebarMenuButton asChild>
+              <Link href="/">
                 <IconInnerShadowTop className="!size-5" />
                 <span className="text-base font-semibold">Dulci´s Veneris Inc.</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
-        <NavMain items={data.catalogo}/>
-   
-        <NavDocuments items={data.linhas} />
+        {/* Exibe email do usuário logado */}
+        <div className="px-4 py-2 text-sm text-gray-700">
+          {user.email ? `Logado como: ${user.email}` : "Usuário não logado"}
+        </div>
+
+        {data.menus.map((menu) => (
+          <SidebarMenu key={menu.title}>
+            <SidebarMenuButton asChild>
+              <button className="flex items-center gap-2">
+                {menu.icon && <menu.icon className="!size-5" />}
+                <span>{menu.title}</span>
+              </button>
+            </SidebarMenuButton>
+            {menu.items?.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <Link href={item.url}>{item.title}</Link>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        ))}
       </SidebarContent>
+
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }
