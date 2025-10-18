@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
+import 'dotenv/config';
 
 async function main() {
   console.log('🧹 Limpando tabelas...');

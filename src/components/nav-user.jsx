@@ -1,4 +1,4 @@
-// components/nav-user.js
+
 "use client"
 
 import { IconDotsVertical, IconLogout } from "@tabler/icons-react"
@@ -36,7 +36,7 @@ export function NavUser({ user }) {
             >
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="text-muted-foreground truncate text-xs text-red-600 font-bold">
+                <span className="text-lg font-bold text-center">
                   {user.email}
                 </span>
               </div>
@@ -53,7 +53,7 @@ export function NavUser({ user }) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex flex-1 flex-col gap-1 px-1 py-1.5 text-left text-sm">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="text-muted-foreground truncate text-xs text-yellow-600 font-bold">
+                <span className="text-m font-bold text-center">
                  Olá,  {user.nome}
                 </span>
               </div>

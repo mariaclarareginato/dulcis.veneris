@@ -1,19 +1,9 @@
 "use client"
 
-import { IconDots, IconFolder, IconShare3, IconTrash } from "@tabler/icons-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
@@ -26,7 +16,8 @@ export function NavDocuments({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel className="font-bold text-base">Nossas linhas: </SidebarGroupLabel>
+      <SidebarGroupLabel className="font-semibold text-base pt-5 pb-10">Nossas linhas: </SidebarGroupLabel>
+     
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
