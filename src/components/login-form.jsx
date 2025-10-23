@@ -1,89 +1,109 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import Link from "next/link"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { saveUserData } from "@/lib/auth-client";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState("")
-  const [senha, setSenha] = useState("")
-  const [feedback, setFeedback] = useState("")
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    email: "",
+    senha: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setFeedback("")
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, senha }),
-      })
+        body: JSON.stringify(formData),
+      });
 
-      const data = await res.json()
+      const data = await res.json();
+
       if (!res.ok) {
-        setFeedback(data.message || "Erro ao fazer login")
-      } else {
-        // salva usuário logado no localStorage
-        localStorage.setItem("user", JSON.stringify(data.user))
-        setFeedback("Login bem-sucedido!")
+        throw new Error(data.message || "Erro ao fazer login");
+      }
 
-        // redireciona por perfil
-        if (data.user.perfil === "CAIXA") window.location.href = "/caixa"
-        else if (data.user.perfil === "GERENTE") window.location.href = "/loja"
-        else if (data.user.perfil === "ADMIN") window.location.href = "/matriz"
+      // ✅ Salva token e dados do usuário no localStorage
+      saveUserData(data.token, data.user);
+
+      // Redireciona baseado no perfil
+      if (data.user.perfil === "ADMIN") {
+        router.push("/admin");
+      } else if (data.user.perfil === "GERENTE") {
+        router.push("/gerente");
+      } else {
+        router.push("/caixa");
       }
     } catch (err) {
-      setFeedback("Erro de conexão com servidor")
+      setError(err.message || "Erro ao fazer login");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="px-4">
-      <Card className="w-full max-w-[400px] mx-auto mt-10 sm:p-8">
-        <div className="justify-center flex">
-          <img className="w-40 h-auto" src="logos/logo2.png" alt="Logo" />
-        </div>
-
-        <CardHeader>
-          <CardTitle className="text-center text-red-500 font-bold text-[30px]">Bem vindo!</CardTitle>
-          <CardDescription>
-            Digite suas informações para acessar nosso site de caixa e gerenciamento de lojas:
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Input
-              type="password"
-              placeholder="Senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-            />
-
-            <Button type="submit" className="w-full">Entrar</Button>
-          </form>
-
-          <p className="text-center mt-2 text-sm">
-            Não tem uma conta?{" "}
-            <Link href="/registro" className="text-red-500 font-bold hover:underline">
-              Registre-se
-            </Link>
-          </p>
-
-          {feedback && (
-            <p className="text-center mt-2 text-sm text-red-500">{feedback}</p>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Login</CardTitle>
+        <CardDescription>Entre com suas credenciais</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
+              {error}
+            </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
-  )
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="senha">Senha</Label>
+            <Input
+              id="senha"
+              type="password"
+              required
+              value={formData.senha}
+              onChange={(e) =>
+                setFormData({ ...formData, senha: e.target.value })
+              }
+            />
+          </div>
+
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
 }

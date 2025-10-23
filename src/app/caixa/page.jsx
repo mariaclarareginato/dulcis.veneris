@@ -1,22 +1,49 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Package, ShoppingCart, AlertCircle } from "lucide-react";
+import { getLoggedUser } from "@/lib/auth-client";
 
-export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
+export default function CaixaPage() {
+  const router = useRouter();
   const [produtos, setProdutos] = useState([]);
   const [carrinho, setCarrinho] = useState([]);
   const [loading, setLoading] = useState(true);
   const [adicionandoId, setAdicionandoId] = useState(null);
+  const [userData, setUserData] = useState(null);
+
+  // ✅ Busca dados do usuário logado
+  useEffect(() => {
+    const user = getLoggedUser();
+
+    if (!user) {
+      // Se não estiver logado, redireciona para login
+      router.push("/login");
+      return;
+    }
+
+    setUserData(user);
+  }, [router]);
+
+  // ✅ Salva os dados do usuário em cookies para usar em Server Components
+  useEffect(() => {
+    if (userData) {
+      document.cookie = `userId=${userData.id}; path=/`;
+      document.cookie = `lojaId=${userData.loja_id}; path=/`;
+    }
+  }, [userData]);
 
   // Busca produtos com estoque da loja
   useEffect(() => {
+    if (!userData) return;
+
     setLoading(true);
-    fetch(`/api/produtos?lojaId=${lojaId}`)
+    fetch(`/api/produtos?lojaId=${userData.loja_id}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -28,13 +55,15 @@ export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
         console.error(err);
         setLoading(false);
       });
-  }, [lojaId]);
+  }, [userData]);
 
   // Busca carrinho (venda aberta)
   const fetchCarrinho = async () => {
+    if (!userData) return;
+
     try {
       const res = await fetch(
-        `/api/carrinho?usuarioId=${usuarioId}&lojaId=${lojaId}`
+        `/api/carrinho?usuarioId=${userData.id}&lojaId=${userData.loja_id}`
       );
       const data = await res.json();
       setCarrinho(data.itens || []);
@@ -44,11 +73,15 @@ export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
   };
 
   useEffect(() => {
-    fetchCarrinho();
-  }, [usuarioId, lojaId]);
+    if (userData) {
+      fetchCarrinho();
+    }
+  }, [userData]);
 
   // Adiciona produto ao carrinho com validação
   const adicionarAoCarrinho = async (produto) => {
+    if (!userData) return;
+
     if (produto.quantidade <= 0) {
       alert("Produto sem estoque disponível!");
       return;
@@ -61,8 +94,8 @@ export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          usuarioId,
-          lojaId,
+          usuarioId: userData.id,
+          lojaId: userData.loja_id,
           produtoId: produto.id,
           quantidade: 1,
         }),
@@ -121,6 +154,15 @@ export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
 
   const total = carrinho.reduce((acc, item) => acc + item.subtotal, 0);
 
+  // ✅ Loading enquanto verifica autenticação
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-16 h-16 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -131,11 +173,14 @@ export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold">Produtos Disponíveis</h2>
-        <p className="text-muted-foreground">
-          Selecione os produtos para adicionar ao carrinho
-        </p>
+      {/* ✅ Header com informações do usuário */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold">Produtos Disponíveis</h2>
+          <p className="text-muted-foreground">
+            Bem-vindo(a), {userData.nome} | Loja: {userData.loja_id}
+          </p>
+        </div>
       </div>
 
       {/* Grid de Produtos */}
@@ -163,7 +208,6 @@ export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
                     fill
                     className="object-cover"
                   />
-                  {/* Badge de Estoque na Imagem */}
                   <div className="absolute top-2 right-2">
                     <Badge
                       variant={
@@ -193,7 +237,6 @@ export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
               )}
 
               <CardContent className="p-4 space-y-3">
-                {/* Nome e SKU */}
                 <div>
                   <h3 className="text-base font-bold line-clamp-1">
                     {produto.nome}
@@ -203,7 +246,6 @@ export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
                   </p>
                 </div>
 
-                {/* DESTAQUE: Estoque Grande */}
                 <div
                   className={`flex items-center justify-between p-3 rounded-lg ${
                     semEstoque
@@ -245,7 +287,6 @@ export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
                   )}
                 </div>
 
-                {/* Preço */}
                 <div className="flex justify-between items-center pt-2 border-t">
                   <span className="text-sm text-muted-foreground">Preço:</span>
                   <span className="text-lg font-bold text-green-600">
@@ -253,7 +294,6 @@ export default function CaixaPage({ usuarioId = 1, lojaId = 1 }) {
                   </span>
                 </div>
 
-                {/* Botão */}
                 <Button
                   className="w-full"
                   onClick={() => adicionarAoCarrinho(produto)}
