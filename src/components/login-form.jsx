@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-// 1. Importe o useRouter
 import { useRouter } from "next/navigation" 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,7 +11,6 @@ export default function LoginForm() {
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
   const [feedback, setFeedback] = useState("")
-  // 2. Inicialize o router
   const router = useRouter() 
 
   const handleSubmit = async (e) => {
@@ -23,26 +21,28 @@ export default function LoginForm() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        // IMPORTANTE: Adicionar 'credentials: "include"' é uma boa prática
+        // quando você está enviando/recebendo cookies.
+        // credentials: "include", 
         body: JSON.stringify({ email, senha }),
       })
 
-      const data = await res.json() // data agora contém { token: "...", user: {...} }
+      // data ainda contém { user: {...} } e a mensagem
+      const data = await res.json() 
 
       if (!res.ok) {
+        // A API de login corrigida deve enviar status 401 ou 404 em caso de falha.
         setFeedback(data.message || "Erro ao fazer login")
       } else {
-        // 3. CORREÇÃO DE SESSÃO: Salve o TOKEN no localStorage
-        // O token é a "chave" que autentica o usuário em futuras requisições.
-        localStorage.setItem("token", data.token)
-
-        // O objeto data.user ainda está disponível aqui para o redirecionamento.
-        // Não é mais necessário salvar a mensagem de sucesso, pois vamos navegar.
-
-        // 4. CORREÇÃO DE NAVEGAÇÃO: Use router.push()
-        // Isso navega sem recarregar a página.
+        // 3. CORREÇÃO DE SESSÃO: REMOVIDO localStorage.setItem("token", data.token)
+        // O token é salvo automaticamente pelo navegador via Set-Cookie do backend.
+        
+        // 4. NAVEGAÇÃO: O redirecionamento é seguro, pois o Cookie já está no navegador.
         if (data.user.perfil === "CAIXA") router.push("/caixa")
         else if (data.user.perfil === "GERENTE") router.push("/loja")
         else if (data.user.perfil === "ADMIN") router.push("/matriz")
+        // Se o perfil não for reconhecido, redirecione para uma rota padrão ou login.
+        else router.push("/caixa") 
       }
     } catch (err) {
       setFeedback("Erro de conexão com servidor")
@@ -70,12 +70,14 @@ export default function LoginForm() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
             <Input
               type="password"
               placeholder="Senha"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
+              required
             />
 
             <Button type="submit" className="w-full">Entrar</Button>
@@ -88,7 +90,6 @@ export default function LoginForm() {
             </Link>
           </p>
 
-          {/* O feedback de *erro* continuará funcionando perfeitamente */}
           {feedback && (
             <p className="text-center mt-2 text-sm text-red-500">{feedback}</p>
           )}
