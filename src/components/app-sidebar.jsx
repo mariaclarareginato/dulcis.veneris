@@ -16,7 +16,7 @@ export function AppSidebar({ ...props }) {
   const [user, setUser] = useState({ name: "", email: "" })
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
+    const userData = sessionStorage.getItem("user")
     if (userData) {
       setUser(JSON.parse(userData))
     }

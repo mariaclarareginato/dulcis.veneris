@@ -1,16 +1,18 @@
 // middleware.js
 import { NextResponse } from "next/server";
-import * as jose from 'jose'; // 💡 Importar jose para validação
+import * as jose from 'jose'; 
 
+// 🚨 Garanta que esta chave é a MESMA usada para assinar o JWT no seu backend
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta';
 
-export async function middleware(request) { // 💡 Mude para async
+export async function middleware(request) {
     const { pathname } = request.nextUrl;
     
+    // Rotas estritamente públicas (não exigem login)
+    // Se a raiz "/" é para ser a landing page, ela deve estar aqui.
     const rotasPublicas = ["/login", "/registro", "/"]; 
     const isPublicRoute = rotasPublicas.includes(pathname);
     
-    // Obtém o token do cookie (NextResponse.next().cookies.get("token") é mais seguro)
     const token = request.cookies.get("token")?.value; 
 
     let isAuthenticated = false;
@@ -23,38 +25,49 @@ export async function middleware(request) { // 💡 Mude para async
             isAuthenticated = true;
             userPayload = payload;
         } catch (error) {
-            // Token inválido ou expirado
-            console.warn("Middleware: Token inválido/expirado. Tratando como não autenticado.");
-            isAuthenticated = false; 
-            // ⚠️ Opcional, mas boa prática: limpar o cookie inválido
-            const response = NextResponse.next();
-            response.cookies.delete('token');
-            return response;
+            // 🛑 CORREÇÃO CRÍTICA: Se o token for inválido/expirado,
+            // não podemos permitir o acesso à página atual.
+            console.warn("Middleware: Token inválido/expirado. Redirecionando para / e limpando cookie.");
+            isAuthenticated = false;
+
+            const url = request.nextUrl.clone();
+            url.pathname = '/'; // 💡 Destino de segurança é a raiz
+            
+            // Cria a resposta de redirecionamento
+            const response = NextResponse.redirect(url);
+            
+            // Limpa o cookie inválido para evitar o mesmo erro no próximo acesso
+            response.cookies.delete('token'); 
+            
+            return response; // ⬅️ RETORNA O REDIRECIONAMENTO IMEDIATO
         }
     }
 
     // ----------------------------------------------------------------------
-    // 1. Proteção de Rota: Usuário NÃO AUTENTICADO (Sem token ou Token inválido)
+    // 1. Proteção de Rota (para Tokens Ausentes)
     // ----------------------------------------------------------------------
     
+    // Se não estiver autenticado E estiver em uma rota PROTEGIDA (como /caixa)
     if (!isAuthenticated && !isPublicRoute) {
-        console.log(`Middleware: Não autenticado. Redirecionando ${pathname} para /login`);
+        console.log(`Middleware: Token ausente. Redirecionando ${pathname} para /`);
+        
+        // 🛑 MUDANÇA DE DESTINO: Redireciona para a raiz "/"
         const url = request.nextUrl.clone();
-        url.pathname = '/login';
-        url.searchParams.set('callbackUrl', pathname); 
+        url.pathname = '/';
         
         return NextResponse.redirect(url);
     }
     
     // ----------------------------------------------------------------------
-    // 2. Prevenção de Loop: Usuário AUTENTICADO (Com token VÁLIDO)
+    // 2. Prevenção de Loop: Usuário AUTENTICADO
     // ----------------------------------------------------------------------
     
+    // Se estiver logado e tentar acessar /login, /registro, ou a raiz (se ela não for o destino)
     if (isAuthenticated && (pathname === "/login" || pathname === "/registro")) {
-        // 💡 Melhore o redirecionamento baseado no perfil (Autorização)
-        let redirectPath = '/caixa'; // Default
-        if (userPayload.perfil === "GERENTE") redirectPath = "/loja";
-        else if (userPayload.perfil === "ADMIN") redirectPath = "/matriz";
+        // 💡 Redireciona para a página principal do perfil
+        let redirectPath = '/caixa'; 
+        if (userPayload?.perfil === "GERENTE") redirectPath = "/loja";
+        else if (userPayload?.perfil === "ADMIN") redirectPath = "/matriz";
         
         console.log(`Middleware: Logado. Redirecionando ${pathname} para ${redirectPath}`);
         return NextResponse.redirect(new URL(redirectPath, request.url));
@@ -64,24 +77,20 @@ export async function middleware(request) { // 💡 Mude para async
     // 3. Autorização (Verificar se o perfil pode acessar a rota)
     // ----------------------------------------------------------------------
     
+    // O código de autorização aqui está correto e não foi alterado.
     if (isAuthenticated && userPayload) {
         const userPerfil = userPayload.perfil;
         
         if (pathname.startsWith('/loja') && (userPerfil !== 'GERENTE' && userPerfil !== 'ADMIN')) {
-            console.log(`Middleware: Acesso negado. Redirecionando GERENTE/CAIXA para /caixa`);
+            console.log(`Middleware: Acesso negado. Redirecionando para /caixa`);
             return NextResponse.redirect(new URL('/caixa', request.url));
         }
         if (pathname.startsWith('/matriz') && userPerfil !== 'ADMIN') {
-            console.log(`Middleware: Acesso negado. Redirecionando para /loja ou /caixa`);
+            console.log(`Middleware: Acesso negado. Redirecionando para fallback`);
             const fallbackPath = (userPerfil === 'GERENTE') ? '/loja' : '/caixa';
             return NextResponse.redirect(new URL(fallbackPath, request.url));
         }
-        // Para /caixa, todos (CAIXA, GERENTE, ADMIN) geralmente têm acesso.
     }
-    
-    // ----------------------------------------------------------------------
-    // 4. Permissão
-    // ----------------------------------------------------------------------
     
     return NextResponse.next();
 }
