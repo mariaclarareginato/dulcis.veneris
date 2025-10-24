@@ -1,46 +1,54 @@
-// src/lib/auth-client.js
+// src/lib/auth-client.js CORRIGIDO
+import Cookies from 'js-cookie';
 
 /**
- * Obtém os dados do usuário logado armazenados no localStorage
+ * Obtém os dados do usuário logado armazenados no sessionStorage
  * @returns {Object|null} Dados do usuário ou null se não estiver logado
  */
 export function getLoggedUser() {
-  if (typeof window === "undefined") return null;
+	if (typeof window === "undefined") return null;
 
-  try {
-    const token = localStorage.getItem("token");
-    const userString = localStorage.getItem("user");
+	try {
+		// O token principal de autenticação agora está no Cookie (HttpOnly)
+		const token = Cookies.get("token"); 
+		// Os dados não sensíveis do usuário são salvos no sessionStorage pelo LoginForm
+		const userString = sessionStorage.getItem("user"); 
 
-    if (!token || !userString) return null;
+		if (!token || !userString) return null;
 
-    const user = JSON.parse(userString);
-    return user;
-  } catch (error) {
-    console.error("Erro ao obter usuário logado:", error);
-    return null;
-  }
+		const user = JSON.parse(userString);
+		return user;
+	} catch (error) {
+		console.error("Erro ao obter usuário logado:", error);
+		return null;
+	}
 }
 
 /**
- * Salva os dados do usuário no localStorage após login
- * @param {string} token - Token JWT
+ * Salva os dados do usuário no sessionStorage após login.
+ * NOTA: O TOKEN JWT PRINCIPAL É SALVO PELO BACKEND COMO COOKIE HTTP.
  * @param {Object} user - Dados do usuário
  */
-export function saveUserData(token, user) {
-  if (typeof window === "undefined") return;
+export function saveUserData(user) {
+	if (typeof window === "undefined") return;
 
-  localStorage.setItem("token", token);
-  localStorage.setItem("user", JSON.stringify(user));
+	// O token não é mais salvo aqui, apenas os dados do usuário.
+	sessionStorage.setItem("user", JSON.stringify(user));
 }
 
 /**
- * Remove os dados do usuário (logout)
+ * Remove os dados do usuário (logout) e o token (via Cookie).
  */
 export function clearUserData() {
-  if (typeof window === "undefined") return;
+	if (typeof window === "undefined") return;
 
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
+	// Remove os dados do sessionStorage
+	sessionStorage.removeItem("user");
+    
+    // Remove o token do Cookie.
+    // NOTE: Se o backend tiver um endpoint de logout, é melhor chamá-lo
+    // para limpar o cookie de forma mais segura.
+	Cookies.remove("token"); 
 }
 
 /**
@@ -48,10 +56,11 @@ export function clearUserData() {
  * @returns {boolean}
  */
 export function isAuthenticated() {
-  if (typeof window === "undefined") return false;
+	if (typeof window === "undefined") return false;
 
-  const token = localStorage.getItem("token");
-  return !!token;
+	// A autenticação é baseada na presença do token no Cookie
+	const token = Cookies.get("token");
+	return !!token;
 }
 
 /**
@@ -59,7 +68,8 @@ export function isAuthenticated() {
  * @returns {string|null}
  */
 export function getToken() {
-  if (typeof window === "undefined") return null;
+	if (typeof window === "undefined") return null;
 
-  return localStorage.getItem("token");
+	// Obtém o token do Cookie
+	return Cookies.get("token");
 }

@@ -8,6 +8,8 @@ export function middleware(request) {
   // O token é o que o backend salva via Set-Cookie
   const token = request.cookies.get("token"); 
 
+  console.log(`Middleware: Acessando ${pathname} | Token: ${token ? "Presente" : "Ausente"}`);
+
   // Rotas que não precisam de login
   // Incluímos a raiz ("/") para forçar a checagem se o usuário está logado ou não.
   const rotasPublicas = ["/login", "/registro", "/"]; 
