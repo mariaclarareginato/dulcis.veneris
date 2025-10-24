@@ -51,7 +51,7 @@ export default function CategoriaPage({ params }) {
         setLoading(true);
         setError(null);
 
-        // 🎯 Usa o loja_id do usuário logado
+        //  Usa o loja_id do usuário logado
         const res = await fetch(`/api/produtos?lojaId=${userData.loja_id}`, {
           signal: controller.signal,
         });
@@ -181,7 +181,7 @@ export default function CategoriaPage({ params }) {
         <h2 className="text-2xl font-bold capitalize">
           {decodeURIComponent(categoria)}
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-4 mb-4">
           {produtosFiltrados.length}{" "}
           {produtosFiltrados.length === 1
             ? "produto encontrado"
