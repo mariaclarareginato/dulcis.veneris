@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { use } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,19 +14,36 @@ import {
 } from "@/components/ui/card";
 import { AlertCircle, ShoppingCart, Package } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { getLoggedUser } from "@/lib/auth-client";
 
-export default function CategoriaPage({ params, searchParams }) {
+export default function CategoriaPage({ params }) {
+  const router = useRouter();
   const categoria = use(params).categoria;
-  const search = use(searchParams);
-  const lojaId = parseInt(search.lojaId);
-  const usuarioId = parseInt(search.usuarioId);
 
+  // ✅ Estados
+  const [userData, setUserData] = useState(null);
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [adicionandoId, setAdicionandoId] = useState(null);
 
+  // ✅ 1. BUSCA DADOS DO USUÁRIO LOGADO
   useEffect(() => {
+    const user = getLoggedUser();
+
+    if (!user) {
+      // Se não estiver logado, redireciona para login
+      router.push("/login");
+      return;
+    }
+
+    setUserData(user);
+  }, [router]);
+
+  // ✅ 2. BUSCA PRODUTOS (só roda quando tiver userData)
+  useEffect(() => {
+    if (!userData) return; // Aguarda usuário carregar
+
     const controller = new AbortController();
 
     async function fetchProdutos() {
@@ -33,7 +51,8 @@ export default function CategoriaPage({ params, searchParams }) {
         setLoading(true);
         setError(null);
 
-        const res = await fetch(`/api/produtos?lojaId=${lojaId}`, {
+        // 🎯 Usa o loja_id do usuário logado
+        const res = await fetch(`/api/produtos?lojaId=${userData.loja_id}`, {
           signal: controller.signal,
         });
 
@@ -56,9 +75,9 @@ export default function CategoriaPage({ params, searchParams }) {
 
     fetchProdutos();
     return () => controller.abort();
-  }, [lojaId]);
+  }, [userData]); // ← Depende de userData
 
-  // Filtra produtos por categoria
+  // ✅ 3. FILTRA PRODUTOS POR CATEGORIA
   const produtosFiltrados = useMemo(() => {
     const categoriaNormalizada = decodeURIComponent(categoria).toLowerCase();
     return produtos.filter(
@@ -66,8 +85,10 @@ export default function CategoriaPage({ params, searchParams }) {
     );
   }, [produtos, categoria]);
 
-  // Adiciona produto ao carrinho com validação de estoque
+  // ✅ 4. ADICIONA PRODUTO AO CARRINHO
   const handleAdicionarCarrinho = async (produto) => {
+    if (!userData) return; // Proteção extra
+
     if (produto.quantidade <= 0) {
       alert("Produto sem estoque disponível");
       return;
@@ -80,8 +101,8 @@ export default function CategoriaPage({ params, searchParams }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          usuarioId,
-          lojaId,
+          usuarioId: userData.id, // ← Usa dados do usuário logado
+          lojaId: userData.loja_id, // ← Usa dados do usuário logado
           produtoId: produto.id,
           quantidade: 1,
         }),
@@ -105,7 +126,16 @@ export default function CategoriaPage({ params, searchParams }) {
     }
   };
 
-  // Estado de carregamento
+  // ✅ LOADING ENQUANTO VERIFICA AUTENTICAÇÃO
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-16 h-16 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // ✅ ESTADO DE CARREGAMENTO
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -114,7 +144,7 @@ export default function CategoriaPage({ params, searchParams }) {
     );
   }
 
-  // Estado de erro
+  // ✅ ESTADO DE ERRO
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
@@ -127,7 +157,7 @@ export default function CategoriaPage({ params, searchParams }) {
     );
   }
 
-  // Nenhum produto encontrado
+  // ✅ NENHUM PRODUTO ENCONTRADO
   if (produtosFiltrados.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
@@ -143,6 +173,7 @@ export default function CategoriaPage({ params, searchParams }) {
     );
   }
 
+  // ✅ RENDERIZAÇÃO PRINCIPAL
   return (
     <div className="space-y-6">
       {/* Header */}
