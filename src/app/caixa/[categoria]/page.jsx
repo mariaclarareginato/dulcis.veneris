@@ -20,14 +20,14 @@ export default function CategoriaPage({ params }) {
   const router = useRouter();
   const categoria = use(params).categoria;
 
-  // ✅ Estados
+  //  Estados
   const [userData, setUserData] = useState(null);
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [adicionandoId, setAdicionandoId] = useState(null);
 
-  // ✅ 1. BUSCA DADOS DO USUÁRIO LOGADO
+  //  1. BUSCA DADOS DO USUÁRIO LOGADO
   useEffect(() => {
     const user = getLoggedUser();
 
@@ -40,7 +40,7 @@ export default function CategoriaPage({ params }) {
     setUserData(user);
   }, [router]);
 
-  // ✅ 2. BUSCA PRODUTOS (só roda quando tiver userData)
+  //  2. BUSCA PRODUTOS (só roda quando tiver userData)
   useEffect(() => {
     if (!userData) return; // Aguarda usuário carregar
 
@@ -77,7 +77,7 @@ export default function CategoriaPage({ params }) {
     return () => controller.abort();
   }, [userData]); // ← Depende de userData
 
-  // ✅ 3. FILTRA PRODUTOS POR CATEGORIA
+  //  3. FILTRA PRODUTOS POR CATEGORIA
   const produtosFiltrados = useMemo(() => {
     const categoriaNormalizada = decodeURIComponent(categoria).toLowerCase();
     return produtos.filter(
@@ -85,7 +85,7 @@ export default function CategoriaPage({ params }) {
     );
   }, [produtos, categoria]);
 
-  // ✅ 4. ADICIONA PRODUTO AO CARRINHO
+  //  4. ADICIONA PRODUTO AO CARRINHO
   const handleAdicionarCarrinho = async (produto) => {
     if (!userData) return; // Proteção extra
 
@@ -126,7 +126,7 @@ export default function CategoriaPage({ params }) {
     }
   };
 
-  // ✅ LOADING ENQUANTO VERIFICA AUTENTICAÇÃO
+  //  LOADING ENQUANTO VERIFICA AUTENTICAÇÃO
   if (!userData) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -135,7 +135,7 @@ export default function CategoriaPage({ params }) {
     );
   }
 
-  // ✅ ESTADO DE CARREGAMENTO
+  //  ESTADO DE CARREGAMENTO
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -144,7 +144,7 @@ export default function CategoriaPage({ params }) {
     );
   }
 
-  // ✅ ESTADO DE ERRO
+  //  ESTADO DE ERRO
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
@@ -157,7 +157,7 @@ export default function CategoriaPage({ params }) {
     );
   }
 
-  // ✅ NENHUM PRODUTO ENCONTRADO
+  //  NENHUM PRODUTO ENCONTRADO
   if (produtosFiltrados.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
@@ -173,7 +173,7 @@ export default function CategoriaPage({ params }) {
     );
   }
 
-  // ✅ RENDERIZAÇÃO PRINCIPAL
+  //  RENDERIZAÇÃO PRINCIPAL
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -238,11 +238,10 @@ export default function CategoriaPage({ params }) {
                 </p>
 
                 {/* DESTAQUE: Badge de Estoque */}
-                <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
-                  <Package className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-gradient-to-r">
                   <div className="text-center">
-                    <p className="text-xs text-blue-600 font-medium">
-                      ESTOQUE DISPONÍVEL
+                    <p className="text-xs font-medium">
+                      ESTOQUE DISPONÍVEL: 
                     </p>
                     <p
                       className={`text-2xl font-bold ${
@@ -250,12 +249,12 @@ export default function CategoriaPage({ params }) {
                           ? "text-red-600"
                           : estoqueMinimo
                           ? "text-yellow-600"
-                          : "text-blue-600"
+                          : "text-green-800"
                       }`}
                     >
                       {produto.quantidade}
                     </p>
-                    <p className="text-xs text-blue-500">
+                    <p className="text-xs">
                       {produto.quantidade === 1 ? "unidade" : "unidades"}
                     </p>
                   </div>
@@ -264,7 +263,6 @@ export default function CategoriaPage({ params }) {
                 {/* Alerta de Estoque Baixo */}
                 {estoqueMinimo && (
                   <Alert className="py-2 border-yellow-500 bg-yellow-50">
-                    <AlertCircle className="h-4 w-4 text-yellow-600" />
                     <AlertDescription className="text-xs text-yellow-700">
                       ⚠️ Estoque baixo! Restam apenas {produto.quantidade}{" "}
                       unidades
@@ -274,7 +272,6 @@ export default function CategoriaPage({ params }) {
 
                 {semEstoque && (
                   <Alert className="py-2 border-red-500 bg-red-50">
-                    <AlertCircle className="h-4 w-4 text-red-600" />
                     <AlertDescription className="text-xs text-red-700 font-bold">
                       🚫 PRODUTO ESGOTADO
                     </AlertDescription>
@@ -299,9 +296,11 @@ export default function CategoriaPage({ params }) {
                     </span>
                   </div>
 
-                  {/* Margem de lucro */}
+                   </div>
+
+                   {/* 
                   <div className="flex justify-between items-center text-xs pt-1 border-t">
-                    <span className="text-muted-foreground">Margem:</span>
+                    <span className="text-muted-foreground">Margem de lucro:</span>
                     <span className="font-semibold text-blue-600">
                       {(
                         ((produto.preco_venda - produto.custo) /
@@ -311,7 +310,9 @@ export default function CategoriaPage({ params }) {
                       %
                     </span>
                   </div>
-                </div>
+                </div> 
+                */}
+                
 
                 {/* Botão Adicionar ao Carrinho */}
                 <Button
@@ -338,6 +339,7 @@ export default function CategoriaPage({ params }) {
             </Card>
           );
         })}
+        
       </div>
     </div>
   );

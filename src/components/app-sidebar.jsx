@@ -43,9 +43,17 @@ const data = {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader className="hover:bg-transparent transition-none">
-        <div>
-             <h1 className="text-base font-bold text-center p-5">Dulci´s Veneris Inc.</h1>
-        </div>
+    <SidebarHeader>
+  <div className="flex items-center gap-4 p-5">
+    <img
+      className="h-10 w-10"
+      src="/logos/logo.png"
+      alt="Logo"
+    />
+    <h1 className="text-base font-bold">Dulci´s Veneris Inc.</h1>
+  </div>
+</SidebarHeader>
+
       </SidebarHeader>
 
       <SidebarContent>
