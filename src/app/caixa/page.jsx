@@ -162,7 +162,7 @@ export default function CaixaPage() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold">Produtos Disponíveis</h2>
-          <p className="text-muted-foreground mt-5 mb-5">
+          <p className="text-muted-foreground mt-5 font-semibold">
             Bem-vindo(a), {userData.nome} | Loja: {userData.loja_id}
           </p>
         </div>

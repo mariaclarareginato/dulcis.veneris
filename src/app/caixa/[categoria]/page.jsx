@@ -181,7 +181,7 @@ export default function CategoriaPage({ params }) {
         <h2 className="text-2xl font-bold capitalize">
           {decodeURIComponent(categoria)}
         </h2>
-        <p className="text-sm text-muted-foreground mt-4 mb-4">
+        <p className="text-sm text-muted-foreground mt-4 mb-4 font-semibold">
           {produtosFiltrados.length}{" "}
           {produtosFiltrados.length === 1
             ? "produto encontrado"
