@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { withAuth } from "../middleware/authApiGuard";
+import { withAuth } from "../middleware/authMiddleware";
 
 const prisma = new PrismaClient();
 
