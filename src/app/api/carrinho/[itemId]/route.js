@@ -3,12 +3,12 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-// 🔄 Alterar quantidade do item
+// 🔄 PUT: Alterar quantidade do item
 export async function PUT(req, { params }) {
   const itemId = parseInt(params.itemId);
   const { quantidade } = await req.json();
 
-  if (!itemId || !quantidade || quantidade < 1) {
+  if (isNaN(itemId) || !quantidade || quantidade < 1) {
     return NextResponse.json(
       { error: "ID do item ou quantidade inválidos" },
       { status: 400 }
@@ -20,14 +20,8 @@ export async function PUT(req, { params }) {
     const item = await prisma.vendaItem.findUnique({
       where: { id: itemId },
       include: {
-        venda: true,
-        produto: {
-          include: {
-            estoque: {
-              where: { loja_id: prisma.venda.loja_id }, // Assume que loja_id está disponível
-              select: { quantidade: true },
-            },
-          },
+        venda: {
+          select: { loja_id: true }
         },
       },
     });
@@ -36,7 +30,7 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ error: "Item não encontrado" }, { status: 404 });
     }
     
-    // É necessário ter o loja_id para verificar o estoque
+    // 2. Verifica Estoque
     const lojaId = item.venda.loja_id; 
 
     const estoqueProduto = await prisma.produto.findUnique({
@@ -53,12 +47,12 @@ export async function PUT(req, { params }) {
     
     if (estoqueDisponivel < quantidade) {
         return NextResponse.json(
-            { error: `Estoque insuficiente para ${quantidade} unidades. Disponível: ${estoqueDisponivel}` },
+            { error: `Estoque insuficiente. Disponível: ${estoqueDisponivel}` },
             { status: 400 }
         );
     }
     
-    // 2. Atualiza o Item
+    // 3. Atualiza o Item
     const subtotal = quantidade * item.preco_unitario;
     const itemAtualizado = await prisma.vendaItem.update({
       where: { id: itemId },
@@ -68,7 +62,7 @@ export async function PUT(req, { params }) {
       },
     });
 
-    // 3. Atualiza o Total da Venda
+    // 4. Atualiza o Total da Venda
     const novoTotal = await prisma.vendaItem.aggregate({
       _sum: {
         subtotal: true,
@@ -86,22 +80,24 @@ export async function PUT(req, { params }) {
     });
 
     return NextResponse.json({ success: true, item: itemAtualizado });
+
   } catch (err) {
     console.error("Erro ao atualizar quantidade:", err);
+    // ⚠️ Proteção: Garante que SEMPRE retorna um JSON válido em caso de erro.
     return NextResponse.json(
-      { error: "Erro interno ao atualizar quantidade" },
+      { error: "Erro interno ao atualizar quantidade", details: err.message },
       { status: 500 }
     );
   }
 }
 
-// ❌ Remover item do carrinho
+// ❌ DELETE: Remover item do carrinho
 export async function DELETE(req, { params }) {
   const itemId = parseInt(params.itemId);
 
-  if (!itemId) {
+  if (isNaN(itemId)) {
     return NextResponse.json(
-      { error: "ID do item é obrigatório" },
+      { error: "ID do item é obrigatório e deve ser um número válido" },
       { status: 400 }
     );
   }
@@ -142,17 +138,18 @@ export async function DELETE(req, { params }) {
       },
     });
 
-    // Opcional: Se a venda ficar vazia, você pode deletá-la ou mantê-la aberta
+    // 4. Se a venda ficar vazia, deleta a venda (limpeza)
     if (vendaAtualizada.vendaitem.length === 0) {
-        // Exemplo: Se não tiver mais itens, deleta a venda "vazia"
         await prisma.venda.delete({ where: { id: vendaAtualizada.id } });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, vendaTotal: novoTotal._sum.subtotal ?? 0 });
+
   } catch (err) {
     console.error("Erro ao remover item:", err);
+    // ⚠️ Proteção: Garante que SEMPRE retorna um JSON válido em caso de erro.
     return NextResponse.json(
-      { error: "Erro interno ao remover item" },
+      { error: "Erro interno ao remover item", details: err.message },
       { status: 500 }
     );
   }
