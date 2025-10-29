@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Dulcis Veneris",
-  description: "Dulcis Veneris.inc",
+  description: "Sistema - Dulcis Veneris.inc",
 };
 
 export default function RootLayout({ children }) {

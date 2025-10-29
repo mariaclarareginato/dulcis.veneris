@@ -6,23 +6,23 @@ import Cookies from 'js-cookie';
  * @returns {Object|null} Dados do usuário ou null se não estiver logado
  */
 export function getLoggedUser() {
-  if (typeof window === "undefined") return null;
+ if (typeof window === "undefined") return null;
 
-  try {
-    // Removemos a dependência do token aqui. 
-    // O Middleware Global garante que, se o token for inválido, o usuário 
-    // nem chega no componente.
-    const userString = sessionStorage.getItem("user"); 
+ try {
+ // Removemos a dependência do token aqui. 
+ // O Middleware Global garante que, se o token for inválido, o usuário 
+ // nem chega no componente.
+ const userString = sessionStorage.getItem("user"); 
 
-    if (!userString) return null; // Retorna null se não houver dados no sessionStorage
+ if (!userString) return null; // Retorna null se não houver dados no sessionStorage
 
-    const user = JSON.parse(userString);
-    return user;
-  } catch (error) {
-    console.error("Erro ao obter usuário logado (JSON inválido). Limpando sessionStorage:", error);
+ const user = JSON.parse(userString);
+return user;
+ } catch (error) {
+ console.error("Erro ao obter usuário logado (JSON inválido). Limpando sessionStorage:", error);
     sessionStorage.removeItem("user"); // Boa prática
-    return null;
-  }
+ return null;
+ }
 }
 
 /**
@@ -73,4 +73,4 @@ export function getToken() {
 
 	// Obtém o token do Cookie
 	return Cookies.get("token");
-}
+};

@@ -85,46 +85,49 @@ export default function CategoriaPage({ params }) {
     );
   }, [produtos, categoria]);
 
+
+
   //  4. ADICIONA PRODUTO AO CARRINHO
-  const handleAdicionarCarrinho = async (produto) => {
-    if (!userData) return; // Proteção extra
 
-    if (produto.quantidade <= 0) {
-      alert("Produto sem estoque disponível");
-      return;
+ const handleAdicionarCarrinho = async (produto) => {
+  if (!userData) return; // Proteção extra
+
+  if (produto.quantidade <= 0) {
+    alert("Produto sem estoque disponível");
+    return;
+  }
+
+  try {
+
+    const res = await fetch(`/api/carrinho`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        usuarioId: userData.id,    // Usuário logado
+        lojaId: userData.loja_id,  // Loja do usuário
+        produtoId: produto.id,     
+        quantidade: 1,             // Sempre envia 1
+      }),
+    });
+
+    // Proteção: evita erro caso o backend retorne corpo vazio
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : {};
+
+    if (!res.ok) {
+      throw new Error(data.error || "Erro ao adicionar ao carrinho");
     }
 
-    try {
-      setAdicionandoId(produto.id);
+    // Feedback de sucesso
+    alert(`✅ ${produto.nome} adicionado ao carrinho!`);
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Erro ao adicionar produto ao carrinho");
+  } finally {
+    setAdicionandoId(null);
+  }
+};
 
-      const res = await fetch(`/api/carrinho`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usuarioId: userData.id, // ← Usa dados do usuário logado
-          lojaId: userData.loja_id, // ← Usa dados do usuário logado
-          produtoId: produto.id,
-          quantidade: 1,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(
-          data.message || data.error || "Erro ao adicionar ao carrinho"
-        );
-      }
-
-      // Feedback de sucesso
-      alert(`${produto.nome} adicionado ao carrinho!`);
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Erro ao adicionar produto ao carrinho");
-    } finally {
-      setAdicionandoId(null);
-    }
-  };
 
   //  LOADING ENQUANTO VERIFICA AUTENTICAÇÃO
   if (!userData) {

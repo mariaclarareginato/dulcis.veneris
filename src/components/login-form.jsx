@@ -80,12 +80,7 @@ placeholder="Senha"
  <Button type="submit" className="w-full">Entrar</Button>
  </form>
 
- <p className="text-center mt-2 text-sm">
- Não tem uma conta?{" "}
- <Link href="/registro" className="text-red-500 font-bold hover:underline">
- Registre-se
- </Link>
- </p>
+
 
 {feedback && (
  <p className="text-center mt-2 text-sm text-red-500">{feedback}</p>
