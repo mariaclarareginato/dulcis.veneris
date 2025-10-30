@@ -207,10 +207,10 @@ export default function CategoriaPage({ params }) {
               className="rounded-2xl shadow-md hover:shadow-lg transition-shadow"
             >
               <CardHeader>
-                <CardTitle className="line-clamp-1">{produto.nome}</CardTitle>
+                <CardTitle>{produto.nome}</CardTitle>
                 <CardDescription className="flex items-center justify-between">
-                  <span>{produto.sku}</span>
-                  <span className="text-xs capitalize">
+                  <span className="mt-5">{produto.sku}</span>
+                  <span className="text-xs capitalize mt-5">
                     {produto.categoria}
                   </span>
                 </CardDescription>
@@ -236,7 +236,7 @@ export default function CategoriaPage({ params }) {
                 )}
 
                 {/* Descrição */}
-                <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
+                <p className="text-sm text-muted-foreground line-clamp-3 min-h-[2.5rem]">
                   {produto.descricao || "Sem descrição"}
                 </p>
 

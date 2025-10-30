@@ -57,38 +57,47 @@ export function CartDropdown() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-auto max-w-sm sm:max-w-sm">
-        {carrinho.length === 0 ? (
-          <DropdownMenuItem disabled>Seu carrinho está vazio</DropdownMenuItem>
-        ) : (
-          <>
-            {carrinho.map((item) => (
-              <DropdownMenuItem
-                key={item.id}
-                className="flex justify-between text-md"
-              >
-                <span className="w-full">{item.produto?.nome} x {item.quantidade}</span>
-                <span> R$ {((item.produto?.preco_venda || 0) * item.quantidade).toFixed(2)}
-                </span>
-              </DropdownMenuItem>
-            ))}
+<DropdownMenuContent
+  align="end"
+  className="w-64 sm:w-80 md:w-96 p-2 overflow-auto max-h-96"
+>
+  {carrinho.length === 0 ? (
+    <DropdownMenuItem disabled className="px-4 py-2">
+      Seu carrinho está vazio
+    </DropdownMenuItem>
+  ) : (
+    <>
+      {carrinho.map((item) => (
+        <DropdownMenuItem
+          key={item.id}
+          className="flex justify-between text-md px-4 py-2"
+        >
+          <span className="truncate w-3/4">
+            {item.produto?.nome} x {item.quantidade}
+          </span>
+          <span className="ml-2">
+            R$ {((item.produto?.preco_venda || 0) * item.quantidade).toFixed(2)}
+          </span>
+        </DropdownMenuItem>
+      ))}
 
-            <DropdownMenuItem className="font-bold flex justify-between border-t mt-2 pt-5">
-              <span>Total:</span>
-              <span>R$ {total.toFixed(2)}</span>
-            </DropdownMenuItem>
+      <DropdownMenuItem className="font-bold flex justify-between border-t mt-2 pt-2 px-4">
+        <span>Total:</span>
+        <span>R$ {total.toFixed(2)}</span>
+      </DropdownMenuItem>
 
-            <DropdownMenuItem>
-              <Button
-                onClick={() => router.push("/carrinho")}
-                className="w-full bg-red-800 text-white hover:bg-red-700"
-              >
-                Visualizar carrinho
-              </Button>
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
+      <DropdownMenuItem className="px-4 py-2">
+        <Button
+          onClick={() => router.push("/carrinho")}
+          className="w-full bg-red-800 text-white hover:bg-red-700"
+        >
+          Visualizar carrinho
+        </Button>
+      </DropdownMenuItem>
+    </>
+  )}
+</DropdownMenuContent>
+
     </DropdownMenu>
   );
 }

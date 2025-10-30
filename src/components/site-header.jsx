@@ -31,7 +31,7 @@ export function SiteHeader() {
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger />
 
-<h1 className="text-xl sm:text-5xl text-red-800 m-3 font-bold italic tracking-wide text-center w-full">
+<h1 className="text-lg sm:text-5xl text-red-800 m-3 font-bold italic tracking-wide text-center w-full">
   ✧ Dulcis Veneris ✧
 </h1>
 

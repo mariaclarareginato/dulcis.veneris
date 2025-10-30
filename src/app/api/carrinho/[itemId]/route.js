@@ -1,38 +1,34 @@
-// app/api/carrinho/[itemId]/route.js
-
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+//
 // 🔄 PUT: Alterar quantidade do item
-export async function PUT(req, { params }) {
-  const itemId = parseInt(params.itemId);
-  const { quantidade } = await req.json();
-
-  if (isNaN(itemId) || !quantidade || quantidade < 1) {
-    return NextResponse.json(
-      { error: "ID do item ou quantidade inválidos" },
-      { status: 400 }
-    );
-  }
-
+//
+export async function PUT(req) {
   try {
-    // 1. Busca o Item e dados relacionados
+    // Pega o itemId direto da URL
+    const itemId = parseInt(req.url.split("/").pop());
+    const { quantidade } = await req.json();
+
+    if (isNaN(itemId) || !quantidade || quantidade < 1) {
+      return NextResponse.json(
+        { error: "ID do item ou quantidade inválidos" },
+        { status: 400 }
+      );
+    }
+
+    // Busca o item
     const item = await prisma.vendaitem.findUnique({
       where: { id: itemId },
-      include: {
-        venda: {
-          select: { loja_id: true }
-        },
-      },
+      include: { venda: { select: { loja_id: true } } },
     });
 
     if (!item) {
       return NextResponse.json({ error: "Item não encontrado" }, { status: 404 });
     }
-    
-    // 2. Verifica Estoque
-    const lojaId = item.venda.loja_id; 
 
+    // Verifica estoque
+    const lojaId = item.venda.loja_id;
     const estoqueProduto = await prisma.produto.findUnique({
       where: { id: item.produto_id },
       include: {
@@ -44,25 +40,21 @@ export async function PUT(req, { params }) {
     });
 
     const estoqueDisponivel = estoqueProduto.estoque[0]?.quantidade ?? 0;
-    
     if (estoqueDisponivel < quantidade) {
       return NextResponse.json(
         { error: `Estoque insuficiente. Disponível: ${estoqueDisponivel}` },
         { status: 400 }
       );
     }
-    
-    // 3. Atualiza o Item
+
+    // Atualiza item
     const subtotal = quantidade * item.preco_unitario;
     const itemAtualizado = await prisma.vendaitem.update({
       where: { id: itemId },
-      data: {
-        quantidade: quantidade,
-        subtotal: subtotal,
-      },
+      data: { quantidade, subtotal },
     });
 
-    // 4. Atualiza o Total da Venda
+    // Atualiza total da venda
     const novoTotal = await prisma.vendaitem.aggregate({
       _sum: { subtotal: true },
       where: { venda_id: item.venda_id },
@@ -74,7 +66,6 @@ export async function PUT(req, { params }) {
     });
 
     return NextResponse.json({ success: true, item: itemAtualizado });
-
   } catch (err) {
     console.error("Erro ao atualizar quantidade:", err);
     return NextResponse.json(
@@ -84,19 +75,21 @@ export async function PUT(req, { params }) {
   }
 }
 
+//
 // ❌ DELETE: Remover item do carrinho
-export async function DELETE(req, { params }) {
-  const itemId = parseInt(params.itemId);
-
-  if (isNaN(itemId)) {
-    return NextResponse.json(
-      { error: "ID do item é obrigatório e deve ser um número válido" },
-      { status: 400 }
-    );
-  }
-
+//
+export async function DELETE(req) {
   try {
-    // 1. Busca o item para obter o venda_id
+    const itemId = parseInt(req.url.split("/").pop());
+
+    if (isNaN(itemId)) {
+      return NextResponse.json(
+        { error: "ID do item é obrigatório e deve ser um número válido" },
+        { status: 400 }
+      );
+    }
+
+    // Busca item
     const item = await prisma.vendaitem.findUnique({
       where: { id: itemId },
       select: { venda_id: true },
@@ -106,10 +99,10 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Item não encontrado" }, { status: 404 });
     }
 
-    // 2. Deleta o item
+    // Deleta item
     await prisma.vendaitem.delete({ where: { id: itemId } });
 
-    // 3. Atualiza o Total da Venda
+    // Atualiza total da venda
     const novoTotal = await prisma.vendaitem.aggregate({
       _sum: { subtotal: true },
       where: { venda_id: item.venda_id },
@@ -121,13 +114,12 @@ export async function DELETE(req, { params }) {
       include: { vendaitem: true },
     });
 
-    // 4. Se a venda ficar vazia, deleta a venda (limpeza)
+    // Se a venda ficar vazia, deleta a venda
     if (vendaAtualizada.vendaitem.length === 0) {
       await prisma.venda.delete({ where: { id: vendaAtualizada.id } });
     }
 
     return NextResponse.json({ success: true, vendaTotal: novoTotal._sum.subtotal ?? 0 });
-
   } catch (err) {
     console.error("Erro ao remover item:", err);
     return NextResponse.json(

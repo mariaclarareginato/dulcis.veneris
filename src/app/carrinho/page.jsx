@@ -139,7 +139,7 @@ export default function Carrinho({ produtos = [] }) {
             {/* Preço */}
             <div className="flex justify-between items-center pt-2 border-t">
               <span className="text-lg font-bold">Preço:</span>
-              <span className="text-lg font-bold text-gray-900">
+              <span className="text-lg font-bold">
                 R$ {item.produto.preco_venda.toFixed(2)}
               </span>
             </div>

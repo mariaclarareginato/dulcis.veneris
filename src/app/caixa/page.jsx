@@ -203,8 +203,14 @@ export default function CaixaPage() {
               {/* Conteúdo */}
               <CardContent className="p-4 flex-1 flex flex-col justify-between space-y-3">
                 <div>
-                  <h3 className="text-base font-bold line-clamp-1">{produto.nome}</h3>
-                  <p className="text-xs text-muted-foreground">
+                  <h3 className="text-base font-bold">{produto.nome}</h3>
+                  
+             
+                  <p className="text-sm text-muted-foreground line-clamp-3 min-h-[2.5rem] mt-5">
+                   {produto.descricao || "Sem descrição"}
+                  </p>
+
+                  <p className="text-xs text-muted-foreground mt-5">
                     {produto.sku} | {produto.categoria}
                   </p>
                 </div>
