@@ -246,7 +246,7 @@ export default function CaixaPage() {
                     "Sem Estoque"
                   ) : (
                     <>
-                      <ShoppingCart className="w-4 h-4 mr-2" /> Adicionar
+                      <ShoppingCart className="w-4 h-4 mr-2" /> Adicionar ao carrinho
                     </>
                   )}
                 </Button>
@@ -258,42 +258,79 @@ export default function CaixaPage() {
 
       {/* Carrinho */}
       {carrinho.length > 0 && (
-        <Card className="mt-8 p-6 border-2 border-primary">
-          <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <ShoppingCart className="w-6 h-6" /> Carrinho ({carrinho.length} {carrinho.length === 1 ? "item" : "itens"})
-          </h3>
+        <Card className="mt-8 p-4 sm:p-6 border-2 border-primary">
+  <h3 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2 flex-wrap">
+    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
+    Carrinho ({carrinho.length} {carrinho.length === 1 ? "item" : "itens"})
+  </h3>
 
-          <div className="space-y-3">
-            {carrinho.map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex-1">
-                  <p className="font-semibold">{item.produto.nome}</p>
-                  <p className="text-sm text-muted-foreground">R$ {item.preco_unitario?.toFixed(2)} x {item.quantidade}</p>
-                  <p className="text-xs text-yellow-600 mt-1">Estoque disponível: {item.estoque_disponivel || 0} unidades</p>
-                </div>
+  <div className="space-y-3">
+    {carrinho.map((item) => (
+      <div
+        key={item.id}
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border bg-card"
+      >
+        <div className="flex-1 text-center sm:text-left">
+          <p className="font-bold text-base sm:text-lg m-3">{item.produto.nome}</p>
+          <p className="text-sm text-muted-foreground">
+            R$ {item.preco_unitario?.toFixed(2)} x {item.quantidade}
+          </p>
+        </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 bg-white rounded-lg border px-3 py-1">
-                    <Button size="sm" variant="outline" onClick={() => alterarQuantidade(item.id, item.quantidade - 1)} disabled={item.quantidade <= 1}>-</Button>
-                    <span className="font-bold text-lg w-8 text-center">{item.quantidade}</span>
-                    <Button size="sm" variant="outline" onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}>+</Button>
-                  </div>
-                  <div className="text-right min-w-[80px]">
-                    <p className="font-bold text-lg">R$ {item.subtotal?.toFixed(2) || "0.00"}</p>
-                  </div>
-                  <Button variant="destructive" size="sm" onClick={() => removerDoCarrinho(item.id)}>Remover</Button>
-                </div>
-              </div>
-            ))}
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
+          {/* Controle de quantidade */}
+          <div className="flex items-center gap-2 rounded-lg border px-3 py-1">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}
+              disabled={item.quantidade <= 1}
+            >
+              -
+            </Button>
+            <span className="font-bold text-lg w-8 text-center">{item.quantidade}</span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}
+            >
+              +
+            </Button>
           </div>
 
-          <div className="flex justify-between items-center mt-6 pt-4 border-t-2">
-            <span className="text-2xl font-bold">Total:</span>
-            <span className="text-3xl font-bold text-green-600">R$ {total.toFixed(2)}</span>
+          {/* Subtotal */}
+          <div className="text-center sm:text-right min-w-[80px]">
+            <p className="font-bold text-lg">R$ {item.subtotal?.toFixed(2) || "0.00"}</p>
           </div>
 
-          <Button className="w-full mt-4" size="lg">Finalizar Venda</Button>
-        </Card>
+          {/* Botão Remover */}
+          <Button
+            variant="destructive"
+            size="lg"
+            className="w-full sm:w-auto"
+            onClick={() => removerDoCarrinho(item.id)}
+          >
+            Remover
+          </Button>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  {/* Total */}
+  <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t-2 gap-2">
+    <span className="text-xl sm:text-2xl font-bold">Total:</span>
+    <span className="text-2xl sm:text-3xl font-bold text-green-600">
+      R$ {total.toFixed(2)}
+    </span>
+  </div>
+
+  {/* Botão Finalizar */}
+  <Button className="w-full font-bold text-base sm:text-lg mt-4" size="lg">
+    Finalizar Venda
+  </Button>
+</Card>
+
       )}
     </div>
   );

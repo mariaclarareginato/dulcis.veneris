@@ -38,19 +38,25 @@ export async function POST(req) {
       }
 
       // 🛒 Cria nova venda conectando ao caixa (objeto relacional)
-      venda = await prisma.venda.create({
-        data: {
-          usuario_id: usuarioId,
-          loja_id: lojaId,
-          data_hora: new Date(),
-          total: 0,
-          status: "ABERTA",
-          caixa: {
-            connect: { id: caixaAberto.id },
-          },
-        },
-      });
+venda = await prisma.venda.create({
+  data: {
+    data_hora: new Date(),
+    total: 0,
+    status: "ABERTA",
+    caixa: {
+      connect: { id: caixaAberto.id },
+    },
+    loja: {
+      connect: { id: lojaId },
+    },
+    usuario: {
+      connect: { id: usuarioId },
+    },
+  },
+});
+
     }
+
 
     // Verifica preço e estoque
     const produto = await prisma.produto.findUnique({

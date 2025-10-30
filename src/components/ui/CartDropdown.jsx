@@ -1,56 +1,90 @@
 "use client";
-
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { useEffect, useState } from "react";
+import { getLoggedUser } from "@/lib/auth-client";
 
 export function CartDropdown() {
-    const router = useRouter(); 
+  const router = useRouter();
+  const [userData, setUserData] = useState(null);
+  const [carrinho, setCarrinho] = useState([]);
 
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: "Chocolate Amargo", quantity: 2, price: 12.5 },
-    { id: 2, name: "Trufa de Morango", quantity: 1, price: 8.0 },
-  ]);
+  // Carrega usuário logado
+  useEffect(() => {
+    const user = getLoggedUser();
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    setUserData(user);
+  }, [router]);
 
-  const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  // Busca carrinho
+  const fetchCarrinho = async () => {
+    if (!userData) return;
+    try {
+      const res = await fetch(
+        `/api/carrinho?usuarioId=${userData.id}&lojaId=${userData.loja_id}`
+      );
+      const data = await res.json();
+      setCarrinho(data.itens || []);
+    } catch (err) {
+      console.error("Erro ao buscar carrinho", err);
+    }
+  };
+
+  useEffect(() => {
+    if (userData) fetchCarrinho();
+  }, [userData]);
+
+  const total = carrinho.reduce(
+    (acc, item) => acc + (item.produto?.preco_venda || 0) * item.quantidade,
+    0
+  );
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon">
           <ShoppingCart className="h-5 w-5" />
-          <span className="sr-only">Abrir carrinho</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
-        {cartItems.length === 0 ? (
-          <DropdownMenuItem disabled>Sem nada no seu carrinho</DropdownMenuItem>
+
+      <DropdownMenuContent align="end" className="w-auto max-w-sm sm:max-w-sm">
+        {carrinho.length === 0 ? (
+          <DropdownMenuItem disabled>Seu carrinho está vazio</DropdownMenuItem>
         ) : (
           <>
-            {cartItems.map((item) => (
-              <DropdownMenuItem key={item.id} className="flex justify-between">
-                <span>{item.name} x{item.quantity}</span>
-                <span>${(item.price * item.quantity).toFixed(2)}</span>
+            {carrinho.map((item) => (
+              <DropdownMenuItem
+                key={item.id}
+                className="flex justify-between text-md"
+              >
+                <span className="w-full">{item.produto?.nome} x {item.quantidade}</span>
+                <span> R$ {((item.produto?.preco_venda || 0) * item.quantidade).toFixed(2)}
+                </span>
               </DropdownMenuItem>
             ))}
-            <DropdownMenuItem className="font-bold flex justify-between border-t mt-1 pt-1">
+
+            <DropdownMenuItem className="font-bold flex justify-between border-t mt-2 pt-5">
               <span>Total:</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>R$ {total.toFixed(2)}</span>
             </DropdownMenuItem>
+
             <DropdownMenuItem>
-             <Button 
-    onClick={() => router.push("/carrinho")} 
-    className="text-center w-full h-full text-gray-100 justify-center bg-red-800 cursor-pointer border-0 outline-none focus:ring-0 focus:outline-none"
-  >
-    Visualizar carrinho
-  </Button>
+              <Button
+                onClick={() => router.push("/carrinho")}
+                className="w-full bg-red-800 text-white hover:bg-red-700"
+              >
+                Visualizar carrinho
+              </Button>
             </DropdownMenuItem>
           </>
         )}

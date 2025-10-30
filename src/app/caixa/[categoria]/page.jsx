@@ -164,11 +164,11 @@ export default function CategoriaPage({ params }) {
   if (produtosFiltrados.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <Package className="w-16 h-16 text-muted-foreground" />
+        <Package className="w-16 h-16 text-muted-foreground"/>
         <h2 className="text-2xl font-bold text-center">
           Nenhum produto encontrado
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground font-bold">
           Não há produtos disponíveis na categoria "
           {decodeURIComponent(categoria)}"
         </p>
@@ -184,7 +184,7 @@ export default function CategoriaPage({ params }) {
         <h2 className="text-2xl font-bold capitalize">
           {decodeURIComponent(categoria)}
         </h2>
-        <p className="text-sm text-muted-foreground mt-4 mb-4 font-semibold">
+        <p className="text-sm text-muted-foreground mt-4 mb-4 font-bold">
           {produtosFiltrados.length}{" "}
           {produtosFiltrados.length === 1
             ? "produto encontrado"
@@ -334,7 +334,7 @@ export default function CategoriaPage({ params }) {
                   ) : (
                     <>
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      Adicionar ao Carrinho
+                      Adicionar ao carrinho
                     </>
                   )}
                 </Button>

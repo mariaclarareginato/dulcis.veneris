@@ -29,12 +29,12 @@ export function SiteHeader() {
   return (
     <header className="flex h-[--header-height] shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-[--header-height]">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-        <SidebarTrigger className="-ml-1" />
+        <SidebarTrigger />
 
-        <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
-      <h1 className="text-[20px] sm:text-[40px] text-red-800 font-bold text-center w-full ">
+<h1 className="text-xl sm:text-5xl text-red-800 m-3 font-bold italic tracking-wide text-center w-full">
   ✧ Dulcis Veneris ✧
 </h1>
+
 
         <div className="ml-auto flex items-center gap-2">
          
@@ -48,9 +48,9 @@ export function SiteHeader() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTheme("light")}>Light</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>Dark</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>System</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("light")}>Claro</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>Escuro</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>Sistema</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
