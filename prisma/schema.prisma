@@ -147,6 +147,7 @@ model usuario {
 
 model venda {
   id         Int         @id @default(autoincrement())
+  codigo_transacao  String          @unique @default(cuid())
   caixa_id   Int
   usuario_id Int
   loja_id    Int
@@ -181,8 +182,10 @@ model vendaitem {
 
 enum pagamento_tipo {
   DINHEIRO
-  CARTAO
+  CARTAO_CREDITO // Mais específico
+  CARTAO_DEBITO  // Mais específico
   PIX
+  BOLETO         // Adicionar Boleto
 }
 
 enum loja_tipo {
