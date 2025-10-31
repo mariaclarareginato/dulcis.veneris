@@ -1,10 +1,10 @@
 
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/app-sidebar2"
 import { SiteFooter } from "@/components/site-footer"
-import { SiteHeader } from "@/components/site-header"
+import { SiteHeader } from "@/components/site-header3"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
-export default function CaixaLayout({ children }) {
+export default function MatrizLayout({ children }) {
   return (
     <SidebarProvider
       style={{
