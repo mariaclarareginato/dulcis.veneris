@@ -107,7 +107,7 @@ export default function CaixaPage() {
 
       if (!res.ok) throw new Error(data.error || "Erro ao adicionar produto");
 
-      alert(`✅ ${produto.nome} adicionado ao carrinho!`);
+
       fetchCarrinho();
     } catch (err) {
       console.error(err);

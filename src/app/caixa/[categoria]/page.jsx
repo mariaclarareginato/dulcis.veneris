@@ -119,7 +119,7 @@ export default function CategoriaPage({ params }) {
     }
 
     // Feedback de sucesso
-    alert(`✅ ${produto.nome} adicionado ao carrinho!`);
+    
   } catch (err) {
     console.error(err);
     alert(err.message || "Erro ao adicionar produto ao carrinho");

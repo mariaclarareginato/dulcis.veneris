@@ -61,7 +61,6 @@ export default function Carrinho({ produtos = [] }) {
       if (!res.ok) throw new Error(data.error || "Erro ao adicionar");
 
       await fetchCarrinho(userData); // garante atualização antes do alert
-      alert(`✅ ${produto.nome} adicionado ao carrinho!`);
     } catch (err) {
       console.error(err);
       alert(err.message);
@@ -100,9 +99,24 @@ export default function Carrinho({ produtos = [] }) {
 
   return (
 <div className="p-6 w-full mx-auto">
+
+  
   <h2 className="text-2xl sm:text-4xl font-bold mb-6 text-center">
   Carrinho de: {userData.nome}
 </h2>
+
+
+  {carrinho.length > 0 && (
+    <div className="mt-8 flex flex-col items-end">
+
+      <Button
+        onClick={() => router.push("/caixa")}
+        className="  text-base sm:text-lg md:text-xl font-bold w-full sm:w-auto px-6 py-3 mb-8 sm:m-6 md:m-12 rounded-2xl shadow-md transition-all"
+      >
+        Adicionar produtos +
+      </Button>
+    </div>
+)}
 
 
   {carrinho.length === 0 ? (
@@ -191,14 +205,14 @@ export default function Carrinho({ produtos = [] }) {
       </p>
 
       <Button
-        onClick={() => router.push("/caixa")}
-        className="text-xl font-bold w-full md:w-auto mt-20"
+        onClick={() => router.push("/pagamento")}
+        className="text-xl font-bold p-10 w-full md:w-auto mt-20"
       >
-        Adicionar produtos +
+        Ir para pagamento
       </Button>
     </div>
   )}
 </div>
 
   );
-}
+};
