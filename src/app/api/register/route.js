@@ -1,3 +1,4 @@
+// app/api/register/route.js
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -6,7 +7,7 @@ import { withAuth } from "../middleware/authMiddleware";
 const prisma = new PrismaClient();
 
 async function handler(req) {
-  if (req.method && req.method !== "POST") {
+  if (req.method !== "POST") {
     return NextResponse.json(
       { message: "Método não permitido" },
       { status: 405 }
@@ -18,6 +19,7 @@ async function handler(req) {
     const { nome, email, senha, perfil, cpf, telefone, loja_id } = body;
     const criador = req.user;
 
+    // Validação básica
     if (!nome || !email || !senha || !perfil || !cpf || !telefone || !loja_id) {
       return NextResponse.json(
         { message: "Todos os campos são obrigatórios" },
@@ -25,7 +27,7 @@ async function handler(req) {
       );
     }
 
-    // regras de permissão
+    // Regras de permissão
     if (criador.perfil === "GERENTE" && perfil !== "CAIXA") {
       return NextResponse.json(
         { message: "Gerentes só podem criar caixas" },
@@ -40,17 +42,19 @@ async function handler(req) {
       );
     }
 
-    const senha_hash = await bcrypt.hash(senha, 10);
+    // Hash da senha
+    const hashedPassword = await bcrypt.hash(senha, 10);
 
+    // Criar usuário no banco
     const novoUsuario = await prisma.usuario.create({
       data: {
         nome,
         email,
-        senha_hash,
+        senha_hash: hashedPassword, 
         cpf,
         telefone,
         perfil,
-        loja_id,
+        loja_id: Number(loja_id), 
       },
     });
 
@@ -67,5 +71,5 @@ async function handler(req) {
   }
 }
 
-// apenas ADMIN e GERENTE podem criar usuários
+// Apenas ADMIN e GERENTE podem criar usuários
 export const POST = withAuth(handler, ["ADMIN", "GERENTE"]);

@@ -19,7 +19,7 @@ async function main() {
 
   const lojaMatriz = await prisma.loja.create({
     data: {
-      nome: "Dulce Venere - Matriz",
+      nome: "Dulcis Venere - Matriz",
       endereco: "Doutor Januário Miraglia, 120",
       cidade: "Campos do Jordão",
       estado: "SP",
@@ -29,7 +29,7 @@ async function main() {
 
   const lojaSP = await prisma.loja.create({
     data: {
-      nome: "Dulce Venere - São Paulo",
+      nome: "Dulcis Venere - São Paulo",
       endereco: "Rua das Amêndoas, 120",
       cidade: "São Paulo",
       estado: "SP",
@@ -39,7 +39,7 @@ async function main() {
 
   const lojaRJ = await prisma.loja.create({
     data: {
-      nome: "Dulce Venere - Rio de Janeiro",
+      nome: "Dulcis Venere - Rio de Janeiro",
       endereco: "Avenida Cacau, 87",
       cidade: "Rio de Janeiro",
       estado: "RJ",

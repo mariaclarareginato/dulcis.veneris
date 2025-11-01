@@ -1,5 +1,5 @@
 
-import { AppSidebar } from "@/components/app-sidebar2";
+import { AppSidebar } from "@/components/app-sidebar3";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header3";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";

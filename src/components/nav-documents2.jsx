@@ -16,7 +16,7 @@ export function NavDocuments({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel className="font-semibold text-base pt-5 pb-10">Nossas linhas: </SidebarGroupLabel>
+      <SidebarGroupLabel className="font-semibold text-base pt-5 pb-10">Matriz: </SidebarGroupLabel>
      
       <SidebarMenu>
         {items.map((item) => (

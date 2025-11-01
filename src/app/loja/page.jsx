@@ -2,36 +2,34 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
 import { getLoggedUser } from "@/lib/auth-client";
+import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button"
 
-export default function MatrizPage({ params }) {
-  const router = useRouter();
- 
 
-  //  Estados
+export default function LojaPage ({params}) {
+    const router = useRouter();
+
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Para buscar usuário 
 
-  //  1. BUSCA DADOS DO USUÁRIO LOGADO
   useEffect(() => {
     const user = getLoggedUser();
 
     if (!user) {
-      // Se não estiver logado, redireciona para login
-      router.push("/login");
-      return;
+        // Se não estiver logado, redireciona para login 
+        router.push("/login");
+        return;
     }
 
     setUserData(user);
     setLoading(false);
   }, [router]);
 
-
-
+  
     //  LOADING ENQUANTO VERIFICA AUTENTICAÇÃO
   if (!userData) {
     return (
@@ -64,14 +62,9 @@ export default function MatrizPage({ params }) {
     );
   }
 
+// Render principal 
 
-
-  //  RENDERIZAÇÃO PRINCIPAL
-  return (
-   
-     <Button onClick={() => router.push('/registro')}>
-       Registrar novo usuário 
-    </Button>
-
-  );
+return (
+    <Button onClick={()=> router.push('/registro')}> Registrar novo usuário</Button>
+);
 }

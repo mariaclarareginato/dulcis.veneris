@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { NavMain } from "@/components/nav-main"
-import { NavDocuments } from "@/components/nav-documents2"
-import { NavUser } from "@/components/nav-user"
+import { NavDocuments } from "@/components/nav-documents3"
+import { NavUser } from "@/components/nav-user2"
 import {
   Sidebar,
   SidebarContent,
@@ -27,8 +27,8 @@ const data = {
 
   catalogo: [
     {
-      name: "Matriz",
-      url: "/matriz",
+      name: "Loja",
+      url: "/loja",
     },
   ],
   linhas: [
