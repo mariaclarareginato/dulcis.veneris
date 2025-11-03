@@ -79,7 +79,7 @@ export default function CaixaPage() {
     if (userData) fetchCarrinho();
   }, [userData]);
 
-  // 44. Adicionar produto ao carrinho
+  // 4. Adicionar produto ao carrinho
   const adicionarAoCarrinho = async (produto) => {
     if (!userData) return;
 
@@ -332,7 +332,7 @@ export default function CaixaPage() {
   </div>
 
   {/* Botão Finalizar */}
-  <Button className="w-full font-bold text-base sm:text-lg mt-4" size="lg">
+  <Button onClick={() => router.push("/pagamento")} className="w-full font-bold text-base sm:text-lg mt-4" size="lg">
     Finalizar Venda
   </Button>
 </Card>

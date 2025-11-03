@@ -30,6 +30,7 @@ export default function Pagamento () {
   
   const [selectedMethod, setSelectedMethod] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
+  
 
 
   // Esta função é o callback chamado pelo PaymentForm após a simulação/input
