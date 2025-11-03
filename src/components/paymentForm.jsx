@@ -1,66 +1,31 @@
-// src/components/PaymentForm.js
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Clock, Loader2 } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
+import { getLoggedUser } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
-// --- Mapeamento de Dados e Constantes ---
+// --- Configurações de campos e textos ---
 const formFields = {
   CARTAO_DEBITO: [
-    {
-      id: "cardNumber",
-      label: "Número do Cartão",
-      type: "text",
-      placeholder: "xxxx xxxx xxxx xxxx",
-    },
-    {
-      id: "cardName",
-      label: "Nome no Cartão",
-      type: "text",
-      placeholder: "Nome impresso",
-    },
-    {
-      id: "expiryDate",
-      label: "Validade (MM/AA)",
-      type: "text",
-      placeholder: "MM/AA",
-    },
+    { id: "cardNumber", label: "Número do Cartão", type: "text", placeholder: "xxxx xxxx xxxx xxxx" },
+    { id: "cardName", label: "Nome no Cartão", type: "text", placeholder: "Nome impresso" },
+    { id: "expiryDate", label: "Validade (MM/AA)", type: "text", placeholder: "MM/AA" },
     { id: "cvv", label: "CVV", type: "password", placeholder: "***" },
   ],
   CARTAO_CREDITO: [
-    {
-      id: "cardNumber",
-      label: "Número do Cartão",
-      type: "text",
-      placeholder: "xxxx xxxx xxxx xxxx",
-    },
-    {
-      id: "cardName",
-      label: "Nome no Cartão",
-      type: "text",
-      placeholder: "Nome impresso",
-    },
-    {
-      id: "expiryDate",
-      label: "Validade (MM/AA)",
-      type: "text",
-      placeholder: "MM/AA",
-    },
+    { id: "cardNumber", label: "Número do Cartão", type: "text", placeholder: "xxxx xxxx xxxx xxxx" },
+    { id: "cardName", label: "Nome no Cartão", type: "text", placeholder: "Nome impresso" },
+    { id: "expiryDate", label: "Validade (MM/AA)", type: "text", placeholder: "MM/AA" },
     { id: "cvv", label: "CVV", type: "password", placeholder: "***" },
   ],
-  BOLETO: [
-    {
-      id: "cpfCnpj",
-      label: "CPF ou CNPJ",
-      type: "text",
-      placeholder: "000.000.000-00",
-    },
-  ],
+  BOLETO: [{ id: "cpfCnpj", label: "CPF ou CNPJ", type: "text", placeholder: "000.000.000-00" }],
 };
 
 const methodTitles = {
@@ -68,309 +33,202 @@ const methodTitles = {
   CARTAO_DEBITO: "Pagamento com Cartão de Débito",
   CARTAO_CREDITO: "Pagamento com Cartão de Crédito",
   BOLETO: "Pagamento com Boleto",
-  DINHEIRO: "Pagamento em Dinheiro (Troco)",
+  DINHEIRO: "Pagamento em Dinheiro",
 };
 
 // --- Componente Principal ---
-export default function PaymentForm({
-  method,
-  TOTAL_VENDA,
-  onTransactionSuccess,
-  isContextLoading,
-}) {
-  // CORREÇÃO: Garantir que 'total' seja um número
+export default function PaymentForm({ method, TOTAL_VENDA }) {
+  const router = useRouter();
+
+  
   const total = TOTAL_VENDA || 0;
-
-  // Estado para armazenar os dados do formulário
-  const [formData, setFormData] = useState({
-    valorRecebido: total.toFixed(2),
-  });
-
-  // Estado para o Pix
+  const [formData, setFormData] = useState({ valorRecebido: total.toFixed(2) });
   const [pixStatus, setPixStatus] = useState("Pendente");
+  const [isLoading, setIsLoading] = useState(false);
+  const [userData, setUserData] = useState(null);
 
-  // O form é desabilitado se o Contexto estiver finalizando a venda OU se o Pix estiver processando
-  const isFormDisabled =
-    isContextLoading || (method === "PIX" && pixStatus === "Processando");
-
-  const title = methodTitles[method] || "Método de Pagamento";
   const fields = formFields[method] || [];
+  const title = methodTitles[method] || "Método de Pagamento";
 
-  // CORREÇÃO: useCallback para evitar dependência circular
-  const finishTransactionFrontend = useCallback(
-    (data, methodType) => {
-      if (onTransactionSuccess) {
-        onTransactionSuccess(data, methodType);
-      }
-    },
-    [onTransactionSuccess]
-  );
+  // 🔹 Pegar usuário logado
+  useEffect(() => {
+    const user = getLoggedUser();
+    if (user) setUserData(user);
+  }, []);
 
-  // --- Efeito para Simulação do Pix (10 segundos) ---
+  // --- 🔹 Função Finalizar Venda no Servidor ---
+const finalizarVenda = async (data, methodType) => {
+  try {
+    setIsLoading(true);
+    const token = localStorage.getItem("token");
+    if (!token || !userData) return alert("Usuário não autenticado");
+
+    // Pega o carrinho
+    const resCarrinho = await fetch(`/api/carrinho?usuarioId=${userData.id}&lojaId=${userData.loja_id}`);
+    const carrinhoData = await resCarrinho.json();
+    if (!resCarrinho.ok || !carrinhoData.itens?.length) return alert("Carrinho vazio");
+
+    const itensCarrinho = carrinhoData.itens.map(item => ({
+      produto_id: item.produto.id,
+      quantidade: item.quantidade,
+      preco_unitario: item.preco_venda,
+      subtotal: item.quantidade * item.preco_venda,
+      pedidos: item.pedidos || "",
+    }));
+
+    const payload = {
+      usuarioId: userData.id,
+      lojaId: userData.loja_id,
+      caixaId: 1, // ou pegar dinamicamente o caixa aberto
+      itensCarrinho,
+      tipoPagamento: methodType,
+      detalhesPagamento: data,
+    };
+
+    const res = await fetch("/api/venda/finalizar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    });
+
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || "Erro ao finalizar venda");
+    alert("✅ Venda concluída com sucesso!");
+    router.push("/caixa");
+  } catch (err) {
+    console.error("Erro ao finalizar venda:", err);
+    alert("❌ Falha ao finalizar venda.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  // --- 🔹 QR Code PIX ---
+  const pixCode =
+    "00020126360014BR.GOV.BCB.PIX0114+55119999999952040000530398654045.005802BR5925NOME DO RECEBEDOR6009SAO PAULO62070503***6304ABCD";
+
+  // --- 🔹 Simulação do PIX (10s) ---
   useEffect(() => {
     let timer;
-
     if (method === "PIX" && pixStatus === "Processando") {
       timer = setTimeout(() => {
         setPixStatus("Confirmado");
-        // Não chama automaticamente - usuário clica em "Venda Concluída"
+        finalizarVenda(formData, "PIX");
       }, 10000);
     }
+    return () => clearTimeout(timer);
+  }, [pixStatus, method]);
 
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [method, pixStatus]);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
-
-  // Lógica de Submissão Geral
+  // --- 🔹 Lógica de exibição ---
   const handleSubmit = (e) => {
-    if (e) e.preventDefault();
-
-    // Tratamento especial para PIX (apenas inicia o timer/processamento)
+    e.preventDefault();
     if (method === "PIX") {
-      if (pixStatus === "Pendente") {
-        setPixStatus("Processando");
-      }
+      if (pixStatus === "Pendente") setPixStatus("Processando");
       return;
     }
-
-    // Para todos os outros métodos: submete diretamente
-    finishTransactionFrontend(formData, method);
+    finalizarVenda(formData, method);
   };
 
-  // Lógica de cálculo do troco para DINHEIRO
   const troco = useMemo(() => {
     if (method !== "DINHEIRO") return 0;
     const recebido = parseFloat(formData.valorRecebido) || 0;
     return recebido > total ? recebido - total : 0;
-  }, [formData.valorRecebido, method, total]);
+  }, [formData.valorRecebido, total, method]);
 
-  // --- Conteúdo Específico (Renderização) ---
-  const renderContent = () => {
-    // --- Caso PIX ---
-    if (method === "PIX") {
-      let statusIcon, statusText, statusColor;
+  // --- 🔹 Renderização do método PIX ---
+  const renderPix = () => {
+    let statusColor = "text-gray-500";
+    let statusText = "Aguardando Pagamento...";
+    let icon = <Clock className="w-12 h-12 text-gray-500" />;
 
-      if (pixStatus === "Pendente") {
-        statusIcon = <Clock className="w-12 h-12 text-gray-500" />;
-        statusText = "Aguardando Escaneamento";
-        statusColor = "text-gray-500";
-      } else if (pixStatus === "Processando") {
-        statusIcon = (
-          <Loader2 className="w-12 h-12 text-yellow-600 animate-spin" />
-        );
-        statusText = "Processando Pagamento (10s)...";
-        statusColor = "text-yellow-600";
-      } else {
-        // Confirmado
-        statusIcon = <CheckCircle className="w-12 h-12 text-green-600" />;
-        statusText = "Pagamento Confirmado!";
-        statusColor = "text-green-600";
-      }
-
-      return (
-        <div className="text-center">
-          <h3 className={`text-xl font-bold mb-4 ${statusColor}`}>
-            {statusText}
-          </h3>
-          <div className="flex justify-center mb-6">{statusIcon}</div>
-          <p className="mb-4 text-gray-600">
-            Total a Pagar:{" "}
-            <span className="font-bold text-lg">R$ {total.toFixed(2)}</span>
-          </p>
-
-          {/* QR Code e Botão só são visíveis se o pagamento não foi confirmado */}
-          {pixStatus !== "Confirmado" && (
-            <>
-              <div className="w-40 h-40 mx-auto border-4 border-primary p-2 rounded-lg bg-gray-100 flex items-center justify-center">
-                <p className="text-sm font-bold text-gray-700">
-                  QR Code Simulando
-                  {/* substituir por uma imagem */}
-                </p>
-              </div>
-              <Separator className="my-6" />
-              <div className="space-y-2">
-                <Label htmlFor="pixCode">Código Pix Copia e Cola</Label>
-                <Input
-                  id="pixCode"
-                  readOnly
-                  value="123456789ABCDEF..."
-                  className="font-mono text-xs cursor-text"
-                />
-                <Button
-                  onClick={() =>
-                    navigator.clipboard.writeText("123456789ABCDEF...")
-                  }
-                  className="w-full mt-2"
-                  disabled={pixStatus !== "Pendente"}
-                >
-                  Copiar Código
-                </Button>
-              </div>
-            </>
-          )}
-
-          {/* Botão de simulação/confirmação */}
-          {pixStatus === "Pendente" && (
-            <Button
-              className="w-full mt-4"
-              onClick={handleSubmit}
-              disabled={isFormDisabled}
-            >
-              Simular Pagamento (Iniciar Timer)
-            </Button>
-          )}
-
-          {pixStatus === "Processando" && (
-            <Button className="w-full mt-4" disabled>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Aguardando Confirmação...
-            </Button>
-          )}
-
-          {pixStatus === "Confirmado" && (
-            <Button
-              className="w-full mt-4 bg-green-600 hover:bg-green-700"
-              onClick={() => finishTransactionFrontend(formData, method)}
-              disabled={isFormDisabled}
-            >
-              {isContextLoading && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Venda Concluída!
-            </Button>
-          )}
-        </div>
-      );
-    }
-
-    // --- Caso DINHEIRO ---
-    if (method === "DINHEIRO") {
-      return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <p className="font-semibold text-lg">
-              Total da Venda:{" "}
-              <span className="font-bold text-primary">
-                R$ {total.toFixed(2)}
-              </span>
-            </p>
-            <Separator className="my-4" />
-            <Label htmlFor="valorRecebido">Valor Recebido do Cliente</Label>
-            <Input
-              id="valorRecebido"
-              type="number"
-              placeholder="0.00"
-              step="0.01"
-              value={formData.valorRecebido}
-              onChange={handleChange}
-              disabled={isFormDisabled}
-            />
-          </div>
-
-          <p
-            className={`text-2xl font-bold text-center mt-6 ${
-              troco > 0 ? "text-green-600" : "text-gray-500"
-            }`}
-          >
-            Troco: R$ {troco.toFixed(2)}
-          </p>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={
-              parseFloat(formData.valorRecebido) < total || isContextLoading
-            }
-          >
-            {isContextLoading && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            Finalizar Venda
-          </Button>
-        </form>
-      );
-    }
-
-    // --- Casos Cartão e Boleto ---
-    if (
-      method === "BOLETO" ||
-      method === "CARTAO_CREDITO" ||
-      method === "CARTAO_DEBITO"
-    ) {
-      return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <p className="mb-4 text-gray-600">
-            Total a Pagar:{" "}
-            <span className="font-bold text-lg">R$ {total.toFixed(2)}</span>
-          </p>
-          {fields.map((field) => (
-            <div key={field.id} className="space-y-2">
-              <Label htmlFor={field.id}>{field.label}</Label>
-              <Input
-                id={field.id}
-                type={field.type}
-                placeholder={field.placeholder}
-                value={formData[field.id] || ""}
-                onChange={handleChange}
-                disabled={isFormDisabled}
-              />
-            </div>
-          ))}
-          {method === "CARTAO_CREDITO" && (
-            <div className="space-y-2">
-              <Label htmlFor="installments">Parcelas</Label>
-              <Input
-                id="installments"
-                type="number"
-                defaultValue={1}
-                min={1}
-                max={12}
-                value={formData.installments || 1}
-                onChange={handleChange}
-                disabled={isFormDisabled}
-              />
-            </div>
-          )}
-          <Button type="submit" className="w-full" disabled={isContextLoading}>
-            {isContextLoading && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            Pagar com{" "}
-            {method === "CARTAO_CREDITO"
-              ? "Crédito"
-              : method === "CARTAO_DEBITO"
-              ? "Débito"
-              : "Boleto"}
-          </Button>
-        </form>
-      );
+    if (pixStatus === "Processando") {
+      statusColor = "text-yellow-600";
+      statusText = "Processando (10s)...";
+      icon = <Loader2 className="w-12 h-12 text-yellow-600 animate-spin" />;
+    } else if (pixStatus === "Confirmado") {
+      statusColor = "text-green-600";
+      statusText = "Pagamento Confirmado!";
+      icon = <CheckCircle className="w-12 h-12 text-green-600" />;
     }
 
     return (
-      <p className="text-red-500 font-semibold text-center">
-        Erro: Método de pagamento "{method}" não suportado.
-      </p>
+      <div className="text-center space-y-4">
+        <h3 className={`text-xl font-bold ${statusColor}`}>{statusText}</h3>
+        <div className="flex justify-center">{icon}</div>
+        {pixStatus !== "Confirmado" && (
+          <>
+            <div className="flex justify-center my-4">
+              <div className="p-2 bg-white border-4 border-yellow-500 rounded-lg">
+                <QRCodeCanvas value={pixCode} size={180} />
+              </div>
+            </div>
+            <Input readOnly value={pixCode} className="font-mono text-xs" />
+            <Button
+              className="w-full mt-2"
+              onClick={() => navigator.clipboard.writeText(pixCode)}
+            >
+              Copiar Código
+            </Button>
+          </>
+        )}
+
+        {pixStatus === "Pendente" && (
+          <Button className="w-full mt-4" onClick={handleSubmit}>
+            Simular Pagamento (Iniciar)
+          </Button>
+        )}
+
+        {pixStatus === "Processando" && (
+          <Button disabled className="w-full mt-4">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Aguardando...
+          </Button>
+        )}
+      </div>
     );
   };
 
-  // --- Renderização Principal ---
+  // --- 🔹 Render Principal ---
   return (
     <div className="flex justify-center w-full">
-      <Card className="w-full max-w-lg shadow-2xl">
+      <Card className="w-full max-w-lg shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl font-extrabold text-center">
-            {title}
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">{title}</CardTitle>
         </CardHeader>
-        <CardContent>{renderContent()}</CardContent>
+        <CardContent>
+          {method === "PIX" ? (
+            renderPix()
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <p className="text-gray-600">
+                Total: <strong>R$ {total.toFixed(2)}</strong>
+              </p>
+              {fields.map((f) => (
+                <div key={f.id} className="space-y-1">
+                  <Label htmlFor={f.id}>{f.label}</Label>
+                  <Input
+                    id={f.id}
+                    type={f.type}
+                    placeholder={f.placeholder}
+                    value={formData[f.id] || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, [e.target.id]: e.target.value })
+                    }
+                    disabled={isLoading}
+                  />
+                </div>
+              ))}
+              {method === "DINHEIRO" && (
+                <p className="font-bold text-green-600 text-center">
+                  Troco: R$ {troco.toFixed(2)}
+                </p>
+              )}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Finalizar Venda
+              </Button>
+            </form>
+          )}
+        </CardContent>
       </Card>
     </div>
   );
