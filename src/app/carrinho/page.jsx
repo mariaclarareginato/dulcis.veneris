@@ -14,14 +14,14 @@ export default function Carrinho({ produtos = [] }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // 🔹 Busca usuário logado
+  //  Busca usuário logado
   useEffect(() => {
     const user = getLoggedUser();
     if (user) setUserData(user);
     setLoading(false);
   }, []);
 
-  // 🔹 Função centralizada para buscar carrinho
+  //  Função centralizada para buscar carrinho
   const fetchCarrinho = async (user = userData) => {
     if (!user) return;
     try {
@@ -33,12 +33,12 @@ export default function Carrinho({ produtos = [] }) {
     }
   };
 
-  // 🔹 Atualiza carrinho sempre que o usuário estiver pronto
+  //  Atualiza carrinho sempre que o usuário estiver pronto
   useEffect(() => {
     if (userData) fetchCarrinho(userData);
   }, [userData]);
 
-  // 🔹 Adicionar produto
+  //  Adicionar produto
   const adicionarAoCarrinho = async (produto) => {
     if (!userData) {
       alert("Usuário não identificado!");
@@ -67,7 +67,7 @@ export default function Carrinho({ produtos = [] }) {
     }
   };
 
-  // 🔹 Alterar quantidade
+  //  Alterar quantidade
   const alterarQuantidade = async (itemId, quantidade) => {
     if (quantidade < 1) return;
     try {
@@ -82,7 +82,7 @@ export default function Carrinho({ produtos = [] }) {
     }
   };
 
-  // 🔹 Remover item
+  //  Remover item
   const removerDoCarrinho = async (itemId) => {
     try {
       await fetch(`/api/carrinho/${itemId}`, { method: "DELETE" });

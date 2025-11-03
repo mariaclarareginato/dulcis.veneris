@@ -12,9 +12,10 @@ export async function POST(req) {
       detalhesPagamento,
     } = body;
 
-    console.log("📦 Finalizando venda:", JSON.stringify(body, null, 2));
+    console.log("Finalizando venda:", JSON.stringify(body, null, 2));
 
-    // Busca a venda aberta do usuário
+    // 1. Busca a venda aberta do usuário
+
     const vendaAberta = await prisma.venda.findFirst({
       where: {
         usuario_id: Number(usuarioId),
@@ -43,13 +44,15 @@ export async function POST(req) {
       );
     }
 
-    // 🧮 Calcula total
+    //  2. Calcula total
+
     const total = vendaAberta.vendaitem.reduce(
       (acc, item) => acc + item.subtotal,
       0
     );
 
-    // 🧾 Finaliza a venda
+    //  3. Finaliza a venda
+
     const vendaFinalizada = await prisma.venda.update({
       where: { id: vendaAberta.id },
       data: {
@@ -70,7 +73,9 @@ export async function POST(req) {
       },
     });
 
-    // 📉 Atualiza o estoque de cada produto
+
+    // 4.  Atualiza o estoque de cada produto
+
     for (const item of vendaAberta.vendaitem) {
       const estoqueAtual = item.produto.estoque[0];
 
@@ -86,16 +91,16 @@ export async function POST(req) {
         });
 
         console.log(
-          `📦 Estoque atualizado: Produto ${item.produto_id} agora tem ${novaQuantidade} unidades`
+          ` Estoque atualizado: Produto ${item.produto_id} agora tem ${novaQuantidade} unidades`
         );
       } else {
         console.warn(
-          `⚠️ Nenhum registro de estoque encontrado para produto ${item.produto_id} na loja ${lojaId}`
+          ` Nenhum registro de estoque encontrado para produto ${item.produto_id} na loja ${lojaId}`
         );
       }
     }
 
-    console.log(`✅ Venda ${vendaFinalizada.id} finalizada e estoque atualizado.`);
+    console.log(` Venda ${vendaFinalizada.id} finalizada e estoque atualizado.`);
 
     return NextResponse.json({
       success: true,

@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-// ➕ POST: Adicionar ou incrementar produto ao carrinho
+
+
+//  POST: Adicionar ou incrementar produto ao carrinho
+
+
 export async function POST(req) {
   try {
     const { usuarioId, lojaId, produtoId, quantidade } = await req.json();
@@ -14,17 +18,17 @@ export async function POST(req) {
     }
 
     // Busca ou cria venda aberta
+
     let venda = await prisma.venda.findFirst({
       where: { usuario_id: usuarioId, loja_id: lojaId, status: "ABERTA" },
     });
 
     if (!venda) {
-      // 🔍 Busca caixa aberto
+      //  Busca caixa aberto
       let caixaAberto = await prisma.caixa.findFirst({
         where: { loja_id: lojaId, status: "ABERTO" },
       });
-
-      // 🧾 Se não houver caixa aberto, cria um novo
+      //  Se não houver caixa aberto, cria um novo
       if (!caixaAberto) {
         caixaAberto = await prisma.caixa.create({
           data: {
@@ -37,7 +41,7 @@ export async function POST(req) {
         });
       }
 
-      // 🛒 Cria nova venda conectando ao caixa (objeto relacional)
+      //  Cria nova venda conectando ao caixa (objeto relacional)
 venda = await prisma.venda.create({
   data: {
     data_hora: new Date(),
@@ -124,7 +128,9 @@ venda = await prisma.venda.create({
   }
 }
 
-// 🛍️ GET: Retorna o carrinho (venda aberta + itens + produtos)
+//  GET: Retorna o carrinho (venda aberta + itens + produtos)
+
+
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);

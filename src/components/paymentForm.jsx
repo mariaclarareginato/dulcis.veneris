@@ -50,13 +50,13 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
   const fields = formFields[method] || [];
   const title = methodTitles[method] || "Método de Pagamento";
 
-  // 🔹 Pegar usuário logado
+  //  Pegar usuário logado
   useEffect(() => {
     const user = getLoggedUser();
     if (user) setUserData(user);
   }, []);
 
-  // --- 🔹 Função Finalizar Venda no Servidor ---
+  // ---  Função Finalizar Venda no Servidor ---
 const finalizarVenda = async (data, methodType) => {
   try {
     setIsLoading(true);
@@ -103,11 +103,11 @@ const finalizarVenda = async (data, methodType) => {
   }
 };
 
-  // --- 🔹 QR Code PIX ---
+  // ---  QR Code PIX ---
   const pixCode =
     "00020126360014BR.GOV.BCB.PIX0114+55119999999952040000530398654045.005802BR5925NOME DO RECEBEDOR6009SAO PAULO62070503***6304ABCD";
 
-  // --- 🔹 Simulação do PIX (10s) ---
+  // ---  Simulação do PIX (10s) ---
   useEffect(() => {
     let timer;
     if (method === "PIX" && pixStatus === "Processando") {
@@ -119,7 +119,7 @@ const finalizarVenda = async (data, methodType) => {
     return () => clearTimeout(timer);
   }, [pixStatus, method]);
 
-  // --- 🔹 Lógica de exibição ---
+  // ---  Lógica de exibição ---
   const handleSubmit = (e) => {
     e.preventDefault();
     if (method === "PIX") {
@@ -135,7 +135,7 @@ const finalizarVenda = async (data, methodType) => {
     return recebido > total ? recebido - total : 0;
   }, [formData.valorRecebido, total, method]);
 
-  // --- 🔹 Renderização do método PIX ---
+  // ---  Renderização do método PIX ---
   const renderPix = () => {
     let statusColor = "text-gray-500";
     let statusText = "Aguardando Pagamento...";
@@ -187,7 +187,8 @@ const finalizarVenda = async (data, methodType) => {
     );
   };
 
-  // --- 🔹 Render Principal ---
+  // ---  Render Principal ---
+  
   return (
     <div className="flex justify-center w-full">
       <Card className="w-full max-w-lg shadow-lg">

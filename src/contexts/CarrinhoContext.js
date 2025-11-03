@@ -1,9 +1,9 @@
-// src/contexts/CarrinhoContext.js
+
 
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
-// Por favor, garanta que seu helper de autenticação está neste caminho
+
 import { getLoggedUser } from "@/lib/auth-client"; 
 
 const CarrinhoContext = createContext();
@@ -79,7 +79,7 @@ export function CarrinhoProvider({ children }) {
     }, [carrinho]);
 
     
-    // 🗑️ Reseta o carrinho (deve ser chamado APÓS a finalização da venda)
+    //  Reseta o carrinho (deve ser chamado APÓS a finalização da venda)
     const resetCarrinho = useCallback(async () => {
         if (!userData) {
             setCarrinho([]); // Limpa o estado local

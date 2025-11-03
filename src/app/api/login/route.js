@@ -38,7 +38,8 @@ export async function POST(req) {
       { status: 200 }
     );
 
-    // 🍪 grava cookie HTTP-only
+    //  grava cookie HTTP-only
+    
     response.cookies.set("token", token, {
       httpOnly: true,
       path: "/",

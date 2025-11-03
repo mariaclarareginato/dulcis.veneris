@@ -2,8 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 //
-// 🔄 PUT: Alterar quantidade do item
+//  PUT: Alterar quantidade do item
 //
+
 export async function PUT(req) {
   try {
     // Pega o itemId direto da URL
@@ -75,9 +76,11 @@ export async function PUT(req) {
   }
 }
 
+
 //
-// ❌ DELETE: Remover item do carrinho
+//  DELETE: Remover item do carrinho
 //
+
 export async function DELETE(req) {
   try {
     const itemId = parseInt(req.url.split("/").pop());

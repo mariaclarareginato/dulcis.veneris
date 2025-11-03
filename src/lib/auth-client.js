@@ -1,4 +1,4 @@
-// src/lib/auth-client.js CORRIGIDO
+
 import Cookies from 'js-cookie';
 
 /**
@@ -9,7 +9,7 @@ export function getLoggedUser() {
  if (typeof window === "undefined") return null;
 
  try {
- // Removemos a dependência do token aqui. 
+ // Removeme a dependência do token aqui. 
  // O Middleware Global garante que, se o token for inválido, o usuário 
  // nem chega no componente.
  const userString = sessionStorage.getItem("user"); 
@@ -27,7 +27,7 @@ return user;
 
 /**
  * Salva os dados do usuário no sessionStorage após login.
- * NOTA: O TOKEN JWT PRINCIPAL É SALVO PELO BACKEND COMO COOKIE HTTP.
+ *  O TOKEN JWT PRINCIPAL É SALVO PELO BACKEND COMO COOKIE HTTP.
  * @param {Object} user - Dados do usuário
  */
 export function saveUserData(user) {
@@ -47,7 +47,7 @@ export function clearUserData() {
 	sessionStorage.removeItem("user");
     
     // Remove o token do Cookie.
-    // NOTE: Se o backend tiver um endpoint de logout, é melhor chamá-lo
+    // Se o backend tiver um endpoint de logout, é melhor chamá-lo
     // para limpar o cookie de forma mais segura.
 	Cookies.remove("token"); 
 }

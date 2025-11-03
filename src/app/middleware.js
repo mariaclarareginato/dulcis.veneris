@@ -1,15 +1,15 @@
-// middleware.js
+
 import { NextResponse } from "next/server";
 import * as jose from 'jose'; 
 
-// 🚨 Garanta que esta chave é a MESMA usada para assinar o JWT no seu backend
+//  MESMA Chave usada para assinar o JWT no seu backend
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta';
 
 export async function middleware(request) {
     const { pathname } = request.nextUrl;
     
     // Rotas estritamente públicas (não exigem login)
-    // Se a raiz "/" é para ser a landing page, ela deve estar aqui.
+   
     const rotasPublicas = ["/login", "/registro", "/"]; 
     const isPublicRoute = rotasPublicas.includes(pathname);
     
@@ -25,13 +25,13 @@ export async function middleware(request) {
             isAuthenticated = true;
             userPayload = payload;
         } catch (error) {
-            // 🛑 CORREÇÃO CRÍTICA: Se o token for inválido/expirado,
-            // não podemos permitir o acesso à página atual.
+
+            // Se o token for inválido/expirado, não permitido o acesso à página atual.
             console.warn("Middleware: Token inválido/expirado. Redirecionando para / e limpando cookie.");
             isAuthenticated = false;
 
             const url = request.nextUrl.clone();
-            url.pathname = '/'; // 💡 Destino de segurança é a raiz
+            url.pathname = '/'; //  Destino de segurança é a raiz
             
             // Cria a resposta de redirecionamento
             const response = NextResponse.redirect(url);
@@ -39,7 +39,7 @@ export async function middleware(request) {
             // Limpa o cookie inválido para evitar o mesmo erro no próximo acesso
             response.cookies.delete('token'); 
             
-            return response; // ⬅️ RETORNA O REDIRECIONAMENTO IMEDIATO
+            return response; // ⬅ RETORNA O REDIRECIONAMENTO IMEDIATO
         }
     }
 
@@ -51,7 +51,7 @@ export async function middleware(request) {
     if (!isAuthenticated && !isPublicRoute) {
         console.log(`Middleware: Token ausente. Redirecionando ${pathname} para /`);
         
-        // 🛑 MUDANÇA DE DESTINO: Redireciona para a raiz "/"
+        //  MUDANÇA DE DESTINO: Redireciona para a raiz "/"
         const url = request.nextUrl.clone();
         url.pathname = '/';
         
@@ -64,7 +64,8 @@ export async function middleware(request) {
     
     // Se estiver logado e tentar acessar /login, /registro, ou a raiz (se ela não for o destino)
     if (isAuthenticated && (pathname === "/login" || pathname === "/registro")) {
-        // 💡 Redireciona para a página principal do perfil
+        
+        //  Redireciona para a página principal do perfil
         let redirectPath = '/caixa'; 
         if (userPayload?.perfil === "GERENTE") redirectPath = "/loja";
         else if (userPayload?.perfil === "ADMIN") redirectPath = "/matriz";

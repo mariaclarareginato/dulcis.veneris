@@ -19,7 +19,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // 🔹 Puxa as lojas do backend
+  //  Puxa as lojas do backend
   useEffect(() => {
     async function fetchLojas() {
       try {
@@ -37,12 +37,12 @@ export default function RegisterPage() {
     fetchLojas();
   }, []);
 
-  // 🔹 Atualiza os campos do formulário
+  //  Atualiza os campos do formulário
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  // 🔹 Envia o cadastro
+  //  Envia o cadastro
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -62,7 +62,7 @@ export default function RegisterPage() {
       return;
     }
 
-    console.log("Form data:", form); // ✅ Debug: veja no console se está certo
+    console.log("Form data:", form); 
 
     try {
       const res = await fetch("/api/register", {

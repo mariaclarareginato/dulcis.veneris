@@ -1,4 +1,4 @@
-// app/pagamento/page.js
+
 'use client'
 
 import React, { useState } from 'react'
@@ -9,6 +9,7 @@ import { useCarrinho } from '@/contexts/CarrinhoContext' // Puxando o Contexto
 import { useRouter } from 'next/navigation'
 
 // Mapeamento dos botões de interface para os valores do Enum Prisma
+
 const paymentMethods = [
   { id: 'PIX', label: 'Pix' },
   { id: 'CARTAO_DEBITO', label: 'Cartão de Débito' },
@@ -22,7 +23,9 @@ const methodTitles = { /* ... (Mapeamento de títulos, usado na tela de sucesso)
 
 export default function Pagamento () {
   const router = useRouter();
-  // 🎯 DESTRUCTURING DO CONTEXTO: Puxando o total e a lógica de finalização
+
+  //  DESTRUCTURING DO CONTEXTO: Puxando o total e a lógica de finalização
+
   const { total, isFinalizandoVenda, finalizarVenda } = useCarrinho();
   
   const [selectedMethod, setSelectedMethod] = useState(null)
@@ -64,6 +67,7 @@ export default function Pagamento () {
   // --- RENDERING ---
 
   // 1. Tela de Sucesso
+
   if (successMessage) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -89,6 +93,7 @@ export default function Pagamento () {
   }
 
   // 2. Formulário de Pagamento (Método Selecionado)
+
   if (selectedMethod) {
     return (
       <div className="min-h-screen p-4">
@@ -111,6 +116,7 @@ export default function Pagamento () {
   }
 
   // 3. Seleção do Método (Tela Inicial)
+  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4 text-center">
@@ -121,7 +127,7 @@ export default function Pagamento () {
       {total <= 0 ? (
         <Card className="p-6 text-center">
              <p className="text-xl text-red-500 font-bold mb-4">🛒 Carrinho Vazio!</p>
-             <Button onClick={() => router.push('/')} className="mt-4">Voltar e Adicionar Itens</Button>
+             <Button onClick={() => router.push('/caixa')} className="mt-4">Voltar e Adicionar Itens</Button>
         </Card>
       ) : (
         paymentMethods.map((method) => (

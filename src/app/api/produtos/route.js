@@ -14,10 +14,11 @@ export async function GET(req) {
     }
 
     // Busca produtos com estoque apenas da loja específica
+    
     const produtos = await prisma.produto.findMany({
       orderBy: { nome: "asc" },
       include: {
-        estoque: { // ✅ nome correto do relacionamento
+        estoque: {
           where: { loja_id: lojaId },
           select: {
             quantidade: true,
@@ -28,6 +29,7 @@ export async function GET(req) {
     });
 
     // Mapeia para incluir quantidade diretamente no produto
+
     const produtosComEstoque = produtos.map((produto) => ({
       ...produto,
       quantidade: produto.estoque[0]?.quantidade ?? 0,

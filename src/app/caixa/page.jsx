@@ -19,7 +19,7 @@ export default function CaixaPage() {
   const [adicionandoId, setAdicionandoId] = useState(null);
   const [error, setError] = useState(null);
 
-  // 1️⃣ Carrega usuário logado
+  // 1. Carrega usuário logado
   useEffect(() => {
     const user = getLoggedUser();
     if (!user) {
@@ -29,7 +29,7 @@ export default function CaixaPage() {
     setUserData(user);
   }, [router]);
 
-  // 2️⃣ Busca produtos da loja
+  // 2. Busca produtos da loja
   useEffect(() => {
     if (!userData) return;
     setLoading(true);
@@ -63,7 +63,7 @@ export default function CaixaPage() {
     return () => controller.abort();
   }, [userData]);
 
-  // 3️⃣ Busca carrinho
+  // 3. Busca carrinho
   const fetchCarrinho = async () => {
     if (!userData) return;
     try {
@@ -79,7 +79,7 @@ export default function CaixaPage() {
     if (userData) fetchCarrinho();
   }, [userData]);
 
-  // 4️⃣ Adicionar produto ao carrinho
+  // 44. Adicionar produto ao carrinho
   const adicionarAoCarrinho = async (produto) => {
     if (!userData) return;
 
@@ -117,7 +117,7 @@ export default function CaixaPage() {
     }
   };
 
-  // 5️⃣ Alterar quantidade do carrinho
+  // 5. Alterar quantidade do carrinho
   const alterarQuantidade = async (itemId, quantidade) => {
     if (quantidade < 1) return;
     try {
@@ -135,7 +135,7 @@ export default function CaixaPage() {
     }
   };
 
-  // 6️⃣ Remover do carrinho
+  // 6. Remover do carrinho
   const removerDoCarrinho = async (itemId) => {
     try {
       await fetch(`/api/carrinho/${itemId}`, { method: "DELETE" });

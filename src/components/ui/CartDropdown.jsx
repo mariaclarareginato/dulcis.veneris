@@ -12,14 +12,12 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { getLoggedUser } from "@/lib/auth-client";
 
-// Função fetcher padrão para o SWR
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export function CartDropdown() {
   const router = useRouter();
   const [userData, setUserData] = useState(null);
 
-  // Carrega usuário logado
   useEffect(() => {
     const user = getLoggedUser();
     if (!user) {
@@ -29,15 +27,14 @@ export function CartDropdown() {
     setUserData(user);
   }, [router]);
 
-  // Busca automática do carrinho com SWR
   const { data, error, mutate } = useSWR(
     userData
       ? `/api/carrinho?usuarioId=${userData.id}&lojaId=${userData.loja_id}`
       : null,
     fetcher,
     {
-      refreshInterval: 5000, // atualiza automaticamente a cada 5s
-      revalidateOnFocus: true, // atualiza ao voltar para a aba
+      refreshInterval: 5000,
+      revalidateOnFocus: true,
     }
   );
 
@@ -47,6 +44,17 @@ export function CartDropdown() {
     (acc, item) => acc + (item.produto?.preco_venda || 0) * item.quantidade,
     0
   );
+
+  // Remover do carrinho
+  const removerDoCarrinho = async (itemId) => {
+    try {
+      await fetch(`/api/carrinho/${itemId}`, { method: "DELETE" });
+      mutate(); // Atualiza o SWR
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao remover item");
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -73,14 +81,26 @@ export function CartDropdown() {
             {carrinho.map((item) => (
               <DropdownMenuItem
                 key={item.id}
-                className="flex justify-between text-md px-4 py-2 border-t"
+                className="flex flex-col border-t px-4 py-2"
               >
-                <span className=" w-full">
-                  {item.produto?.nome} x {item.quantidade}
-                </span>
-                <span className="ml-2">
-                  R$ {((item.produto?.preco_venda || 0) * item.quantidade).toFixed(2)}
-                </span>
+                <div className="flex justify-between items-center w-full">
+                   
+                  <span>
+                    {item.produto?.nome} x {item.quantidade}
+                  </span>
+                  <span>
+                    R$ {((item.produto?.preco_venda || 0) * item.quantidade).toFixed(2)}
+                  </span>
+                       <Button
+                  variant="destructive"
+                  size="sm"
+                  className="m-5 w-5 h-5 flex"
+                  onClick={() => removerDoCarrinho(item.id)}
+                >
+                  X
+                </Button>
+                </div>
+          
               </DropdownMenuItem>
             ))}
 
