@@ -67,7 +67,7 @@ Segurança: logs de auditoria para movimentações críticas.
 
 ### Modelagem de Dados (resumo)
 
-Loja, Usuário, Produto, Estoque, Caixa, Venda, VendaItem, Pagamento, Despesa, Fornecedor, LogAuditoria.
+Loja, Usuário, Produto, Estoque, Caixa, Venda, VendaItem, Pagamento, Despesa, Fornecedor, LogAuditoria, FornecedorPagamento.
 
 
 
