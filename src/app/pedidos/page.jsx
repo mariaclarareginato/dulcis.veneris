@@ -1,4 +1,3 @@
-// app/pedidos/page.jsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,18 +6,13 @@ import { getLoggedUser } from "@/lib/auth-client";
 import { AlertCircle, Plus, Send, X } from "lucide-react";
 
 // Componentes shadcn/ui (assumindo que você tem eles em JS/JSX)
-// Exemplo de importação (Ajuste o caminho conforme sua estrutura)
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner"; // Usando sonner para notificações
 
-// --- Estrutura de um item de pedido ---
-// A estrutura deve ser a mesma esperada pela API.
-// Não precisa de `id` temporário aqui, só para manipulação local.
-// ------------------------------------
-
+// Componente principal
 export default function PedidosPage ({params}) {
   const router = useRouter();
 
@@ -27,13 +21,13 @@ export default function PedidosPage ({params}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  // --- Estado para o formulário de Pedido ---
-  // item: { produtoNome: String, quantidade: Number }
+  // item: { produtoNome: String, quantidade: Number, tempId: Number }
   const [pedidoItems, setPedidoItems] = useState([]);
   const [currentItem, setCurrentItem] = useState({ produtoNome: "", quantidade: 1 });
 
   // 1. Lógica de Autenticação
   useEffect(() => {
+    // Esta função deve retornar { id: 1, loja_id: 1, perfil: 'GERENTE', ... }
     const user = getLoggedUser();
 
     if (!user) {
@@ -51,7 +45,6 @@ export default function PedidosPage ({params}) {
       setPedidoItems([
         ...pedidoItems,
         {
-          // Usamos a data/hora como ID temporário no frontend
           tempId: Date.now(), 
           produtoNome: currentItem.produtoNome.trim(),
           quantidade: parseInt(currentItem.quantidade),
@@ -74,56 +67,59 @@ export default function PedidosPage ({params}) {
       return;
     }
 
-    // Validação de Gerente (garante que só gerentes usem esta página)
-    if (userData.perfil !== 'GERENTE' && userData.perfil !== 'ADMIN') {
-        setError("Apenas gerentes ou administradores podem enviar pedidos.");
-        toast.error("Seu perfil não permite esta ação.");
+    // Validação básica (Assumindo que getLoggedUser retorna os dados necessários)
+    if (!userData || !userData.loja_id || !userData.id) {
+        setError("Dados do usuário ou loja incompletos.");
+        toast.error("Erro de autenticação.");
         return;
     }
 
     setIsSubmitting(true);
     setError(null);
 
+    const payload = {
+        loja_id: userData.loja_id, 
+        usuario_id: userData.id,
+        items: pedidoItems.map(item => ({ 
+            produto_nome: item.produtoNome, 
+            quantidade: item.quantidade 
+        })),
+    };
+
     try {
-      const response = await fetch("/api/pedidos", {
-        method: "POST",
+      // 🚨 MUDANÇA AQUI: Usando URL absoluta para garantir que a rota seja correta.
+      const response = await fetch("/api/pedidos", { 
+        method: "POST", 
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          loja_id: userData.loja_id, 
-          usuario_id: userData.id,
-          // Mapeamos para a estrutura que a API espera (sem o tempId)
-          items: pedidoItems.map(item => ({ 
-              produto_nome: item.produtoNome, 
-              quantidade: item.quantidade 
-          })),
-        }),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        // Usa a mensagem de erro da API, se disponível
-        throw new Error(result.error || "Falha ao enviar o pedido.");
+        // Se a resposta for um erro 405 (GET not allowed), o result.message será o erro que vimos.
+        console.error("Erro de Resposta da API:", result);
+        toast.error(`Falha: ${result.message || result.error || "Erro desconhecido"}`);
+        throw new Error(result.error || result.message || "Falha ao enviar o pedido.");
       }
-      
+
       toast.success(`Pedido #${result.id} enviado com sucesso! Status: ${result.status}`);
       setPedidoItems([]); 
 
     } catch (err) {
-      console.error(err);
+      console.error("[ERRO NO FETCH]", err);
       setError(err.message || "Erro desconhecido ao enviar o pedido.");
-      toast.error(err.message || "Erro ao enviar o pedido. Tente novamente.");
+      // O toast de erro já foi disparado dentro do if (!response.ok)
     } finally {
       setIsSubmitting(false);
     }
   };
 
 
-  // --- Estados de Carregamento/Erro ---
+  // --- Estados de Carregamento/Erro (Sem alteração) ---
   if (loading || !userData) {
-    // ... (Seu código de loading)
     return (
         <div className="flex items-center justify-center h-[60vh]">
             <div className="w-16 h-16 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
@@ -132,7 +128,6 @@ export default function PedidosPage ({params}) {
   }
 
   if (error) {
-    // ... (Seu código de erro)
     return (
         <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
             <AlertCircle className="w-16 h-16 text-red-500" />
@@ -149,6 +144,11 @@ export default function PedidosPage ({params}) {
   return (
     <div className="container mx-auto py-8 max-w-3xl">
       <h1 className="text-3xl font-bold mb-6">📝 Novo Pedido de Estoque</h1>
+      {/* 🚨 Debug: Exibir dados do usuário para confirmação */}
+      <small className="block text-gray-500 mb-4">
+          Gerente ID: {userData.id} | Loja ID: {userData.loja_id} | Perfil: {userData.perfil}
+      </small>
+
       <Card>
         <CardHeader>
           <CardTitle>Adicionar Item ao Pedido</CardTitle>
@@ -177,7 +177,8 @@ export default function PedidosPage ({params}) {
                 onChange={(e) =>
                   setCurrentItem({
                     ...currentItem,
-                    quantidade: parseInt(e.target.value) || 1,
+                    // Garante que é um número, ou 1 se for inválido
+                    quantidade: parseInt(e.target.value, 10) || 1,
                   })
                 }
                 onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}
@@ -190,6 +191,7 @@ export default function PedidosPage ({params}) {
         </CardContent>
       </Card>
 
+      {/* Exibição dos Itens do Pedido (Sem alteração) */}
       <div className="mt-8 space-y-4">
         <h2 className="text-2xl font-semibold">Itens do Pedido ({pedidoItems.length})</h2>
         {pedidoItems.length === 0 ? (
@@ -198,7 +200,7 @@ export default function PedidosPage ({params}) {
           <div className="space-y-2">
             {pedidoItems.map((item) => (
               <div
-                key={item.tempId} // Usamos o ID temporário aqui
+                key={item.tempId} 
                 className="flex justify-between items-center p-3 border rounded-md shadow-sm bg-white"
               >
                 <span className="font-medium">

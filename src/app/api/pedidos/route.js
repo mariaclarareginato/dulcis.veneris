@@ -1,11 +1,9 @@
-// app/api/pedidos/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
 export async function POST(request) {
-  // O uso de `request.json()` é o padrão para Next.js App Router (v13+)
   let body;
   try {
     body = await request.json();
@@ -20,7 +18,7 @@ export async function POST(request) {
   }
 
   try {
-    // 1. Opcional: Verificar se o usuario tem o perfil de GERENTE/ADMIN
+    // 1. Opcional: Verificar se o usuario tem o perfil de GERENTE/ADMIN e se está na loja correta
     const usuario = await prisma.usuario.findUnique({
         where: { id: usuario_id },
         select: { perfil: true, loja_id: true }
@@ -31,17 +29,18 @@ export async function POST(request) {
     }
     
     // 2. Transação para criar o Pedido e seus Itens
+    // O campo 'status' será automaticamente definido como PedidoStatus.PENDENTE
+    // graças ao @default(PENDENTE) no schema.prisma.
     const novoPedido = await prisma.pedido.create({
       data: {
         loja_id: loja_id,
         usuario_id: usuario_id,
-        // Conecta/Cria todos os itens no modelo `itempedido`
+        // O status é default(PENDENTE) no schema, não precisa ser passado aqui.
         itens_pedido: {
           createMany: {
             data: items.map(item => ({
               produto_nome: item.produto_nome,
               quantidade: item.quantidade,
-              // produto_id pode ser adicionado aqui se você fizer uma busca prévia na tabela `produto`
             })),
           },
         },
@@ -55,11 +54,13 @@ export async function POST(request) {
 
   } catch (error) {
     console.error("Erro ao processar pedido:", error);
+    // Adicione o log detalhado para debug no console do servidor
+    console.error("Prisma error details:", error.message); 
+    
     return NextResponse.json({ error: 'Erro interno do servidor ao enviar o pedido.' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
 }
 
-// Para usar a rota no App Router (Next.js 13+)
 export const GET = (req) => NextResponse.json({ message: "Método GET não permitido" }, { status: 405 });

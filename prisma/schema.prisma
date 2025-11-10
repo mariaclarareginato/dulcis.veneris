@@ -184,31 +184,31 @@ model vendaitem {
 }
 
 model pedido {
-  id          Int      @id @default(autoincrement())
-  loja_id     Int // A loja que está fazendo o pedido (Filial)
-  usuario_id  Int // O gerente que fez o pedido
-  data_pedido DateTime @default(now())
-  status      String   @default("PENDENTE") // PENDENTE, EM_PROCESSAMENTO, ENVIADO, CANCELADO
-  tipo        String   @default("REPOSICAO_ESTOQUE")
-
-  loja         loja         @relation(fields: [loja_id], references: [id])
-  usuario      usuario      @relation(fields: [usuario_id], references: [id])
-  itens_pedido itempedido[]
+  id              Int          @id @default(autoincrement())
+  loja_id         Int          // A loja que está fazendo o pedido (Filial)
+  usuario_id      Int          // O gerente que fez o pedido
+  data_pedido     DateTime     @default(now())
+  status          PedidoStatus @default(PENDENTE) // AGORA USANDO O ENUM
+  tipo            String       @default("REPOSICAO_ESTOQUE")
+  
+  loja            loja         @relation(fields: [loja_id], references: [id])
+  usuario         usuario      @relation(fields: [usuario_id], references: [id])
+  itens_pedido    itempedido[]
 
   @@index([loja_id])
   @@index([usuario_id])
 }
 
 model itempedido {
-  id           Int    @id @default(autoincrement())
-  pedido_id    Int
-  produto_id   Int? // Referência ao produto existente, se for um produto padronizado
-  produto_nome String // Nome do produto (para pedidos não padronizados ou fallback)
-  quantidade   Int
+  id              Int       @id @default(autoincrement())
+  pedido_id       Int
+  produto_id      Int?      // Referência ao produto existente, se for um produto padronizado
+  produto_nome    String    // Nome do produto (para pedidos não padronizados ou fallback)
+  quantidade      Int
 
-  pedido  pedido   @relation(fields: [pedido_id], references: [id])
-  produto produto? @relation(fields: [produto_id], references: [id])
-
+  pedido          pedido    @relation(fields: [pedido_id], references: [id])
+  produto         produto?  @relation(fields: [produto_id], references: [id])
+  
   @@index([pedido_id])
   @@index([produto_id])
 }
@@ -230,4 +230,11 @@ enum usuario_perfil {
   CAIXA
   GERENTE
   ADMIN
+}
+
+enum PedidoStatus {
+  PENDENTE
+  EM_PROCESSAMENTO
+  ENVIADO
+  CANCELADO
 }
