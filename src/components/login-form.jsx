@@ -38,7 +38,7 @@ if (!res.ok) {
 
  // NAVEGAÇÃO: O Cookie (token) e o SessionStorage (user) agora estão presentes.
 if (data.user.perfil === "CAIXA") router.push("/caixa")
-else if (data.user.perfil === "GERENTE") router.push("/loja")
+else if (data.user.perfil === "GERENTE") router.push("/gerencia")
 else if (data.user.perfil === "ADMIN") router.push("/matriz")
  else router.push("/caixa")
  }

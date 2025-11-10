@@ -9,7 +9,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-export function NavDocuments({
+export function NavDocuments2({
   items
 }) {
   const { isMobile } = useSidebar()

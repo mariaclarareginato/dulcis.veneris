@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { NavMain } from "@/components/nav-main"
-import { NavDocuments } from "@/components/nav-documents2"
+import { NavDocuments2 } from "@/components/nav-documents2"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -12,7 +12,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 
-export function AppSidebar({ ...props }) {
+export function AppSidebar2({ ...props }) {
   const [user, setUser] = useState({ name: "", email: "" })
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const data = {
 
       <SidebarContent>
          <NavMain items={data.catalogo} />
-        <NavDocuments items={data.linhas} />
+        <NavDocuments2 items={data.linhas} />
       </SidebarContent>
 
       <SidebarFooter>

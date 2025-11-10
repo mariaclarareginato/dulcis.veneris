@@ -17,7 +17,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-export function NavUser({ user }) {
+export function NavUser2({ user }) {
   const { isMobile } = useSidebar()
 
   const handleLogout = () => {

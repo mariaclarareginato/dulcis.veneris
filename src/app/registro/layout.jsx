@@ -1,10 +1,10 @@
 
-import { AppSidebar } from "@/components/app-sidebar2";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header3";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-export default function MatrizLayout({ children }) {
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader2 } from "@/components/site-header2";
+import {  SidebarProvider } from "@/components/ui/sidebar";
+
+export default function RegistroLayout({ children }) {
   return (
     <SidebarProvider
       style={{
@@ -12,14 +12,13 @@ export default function MatrizLayout({ children }) {
         "--header-height": "calc(var(--spacing) * 12)",
       }}
     >
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col p-6">
-          {children}
-          <SiteFooter />
-        </div>
-      </SidebarInset>
+      
+        <div className="min-h-screen flex flex-col w-full">
+              <SiteHeader2 />
+              <main className="flex-1 p-6">{children}</main>
+              <SiteFooter />
+            </div>
+
     </SidebarProvider>
   );
 }

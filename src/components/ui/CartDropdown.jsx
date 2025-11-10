@@ -88,7 +88,7 @@ export function CartDropdown() {
                   <span>
                     {item.produto?.nome} x {item.quantidade}
                   </span>
-                  <span>
+                  <span className="font-bold px-4">
                     R$ {((item.produto?.preco_venda || 0) * item.quantidade).toFixed(2)}
                   </span>
                        <Button
@@ -104,7 +104,7 @@ export function CartDropdown() {
               </DropdownMenuItem>
             ))}
 
-            <DropdownMenuItem className="font-bold flex justify-between border-t mt-2 pt-2 px-4">
+            <DropdownMenuItem className="font-extrabold flex justify-between border-t mt-2 pt-2 px-4">
               <span>Total:</span>
               <span>R$ {total.toFixed(2)}</span>
             </DropdownMenuItem>

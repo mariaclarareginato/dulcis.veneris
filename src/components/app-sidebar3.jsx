@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { NavMain } from "@/components/nav-main"
-import { NavDocuments } from "@/components/nav-documents3"
-import { NavUser } from "@/components/nav-user2"
+import { NavDocuments3 } from "@/components/nav-documents3"
+import { NavUser2 } from "@/components/nav-user2"
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +11,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 
-export function AppSidebar({ ...props }) {
+export function AppSidebar3({ ...props }) {
   const [user, setUser] = useState({ name: "", email: "" })
 
   useEffect(() => {
@@ -25,17 +24,12 @@ export function AppSidebar({ ...props }) {
  
 const data = {
 
-  catalogo: [
-    {
-      name: "Loja",
-      url: "/loja",
-    },
-  ],
   linhas: [
-    { name: "l1", url: "#" },
-    { name: "l2", url: "#" },
-    { name: "l3", url: "#" },
-    { name: "l4", url: "#" },
+
+    { name: "Lucro e despesas", url: "/gerencia" },
+    { name: "Gerenciamento de usuários", url: "usuarios" },
+    { name: "Pedidos", url: "/pedidos" },
+  
   ],
 };
 
@@ -57,12 +51,12 @@ const data = {
       </SidebarHeader>
 
       <SidebarContent>
-         <NavMain items={data.catalogo} />
-        <NavDocuments items={data.linhas} />
+       
+        <NavDocuments3 items={data.linhas} />
       </SidebarContent>
 
       <SidebarFooter>
-        {user.email ? <NavUser user={user} /> : null}
+        {user.email ? <NavUser2 user={user} /> : null}
 
          {/* Se usuário não estiver logado, mostrar link de login */}
         {!user.email && (

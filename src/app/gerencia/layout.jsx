@@ -1,10 +1,10 @@
 
-import { AppSidebar } from "@/components/app-sidebar3";
+import { AppSidebar3 } from "@/components/app-sidebar3";
 import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header3";
+import { SiteHeader3 } from "@/components/site-header3";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-export default function MatrizLayout({ children }) {
+export default function GerenciaLayoutLayout({ children }) {
   return (
     <SidebarProvider
       style={{
@@ -12,9 +12,9 @@ export default function MatrizLayout({ children }) {
         "--header-height": "calc(var(--spacing) * 12)",
       }}
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar3 variant="inset" />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader3 />
         <div className="flex flex-1 flex-col p-6">
           {children}
           <SiteFooter />

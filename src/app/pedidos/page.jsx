@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getLoggedUser } from "@/lib/auth-client";
 import { AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button"
+import { Text } from "lucide-react";
 
 
-export default function LojaPage ({params}) {
+
+export default function PedidosPage ({params}) {
     const router = useRouter();
 
   const [userData, setUserData] = useState(null);
@@ -65,6 +66,6 @@ export default function LojaPage ({params}) {
 // Render principal 
 
 return (
-    <Button onClick={()=> router.push('/registro')}> Registrar novo usuário</Button>
+    <Text>Pedidos</Text>
 );
 }
