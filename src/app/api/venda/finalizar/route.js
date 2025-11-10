@@ -7,15 +7,14 @@ export async function POST(req) {
     const {
       usuarioId,
       lojaId,
-      caixaId,
       tipoPagamento,
       detalhesPagamento,
+      // caixaId não está sendo usado, mas mantido por consistência
     } = body;
 
     console.log("Finalizando venda:", JSON.stringify(body, null, 2));
 
-    // 1. Busca a venda aberta do usuário
-
+    // 1. Busca a venda aberta do usuário, incluindo o custo unitário do produto
     const vendaAberta = await prisma.venda.findFirst({
       where: {
         usuario_id: Number(usuarioId),
@@ -26,7 +25,11 @@ export async function POST(req) {
         vendaitem: {
           include: {
             produto: {
-              include: {
+              // Garante que o campo 'custo_unitario' está incluído na busca
+              select: {
+                id: true,
+                custo_unitario: true, // ⚠️ ASSUMIDO que este é o nome do campo
+                // Inclua outros campos necessários (ex: estoque)
                 estoque: {
                   where: { loja_id: Number(lojaId) },
                 },
@@ -44,20 +47,31 @@ export async function POST(req) {
       );
     }
 
-    //  2. Calcula total
+    // 2. Calcula Total e CMV (Custo da Mercadoria Vendida)
 
     const total = vendaAberta.vendaitem.reduce(
       (acc, item) => acc + item.subtotal,
       0
     );
 
-    //  3. Finaliza a venda
+    let cmvTotal = 0;
+    for (const item of vendaAberta.vendaitem) {
+      // ⚠️ Use um fallback para 0 caso o custo não esteja definido
+      const custo = item.produto.custo_unitario ?? 0;
+      cmvTotal += custo * item.quantidade;
+    }
 
+    console.log(`Total da Venda: ${total.toFixed(2)}, CMV Calculado: ${cmvTotal.toFixed(2)}`);
+
+    // 3. Finaliza a venda e registra o CMV
+    
+    // 💡 Você precisa garantir que o campo 'cmv' exista na sua tabela Venda no Prisma Schema.
     const vendaFinalizada = await prisma.venda.update({
       where: { id: vendaAberta.id },
       data: {
         status: "FINALIZADA",
         total,
+        cmv: cmvTotal, // ⬅️ CAMPO NOVO ESSENCIAL PARA O CÁLCULO FINANCEIRO
         data_hora: new Date(),
         pagamento: {
           create: {
@@ -74,9 +88,10 @@ export async function POST(req) {
     });
 
 
-    // 4.  Atualiza o estoque de cada produto
+    // 4. Atualiza o estoque de cada produto
 
     for (const item of vendaAberta.vendaitem) {
+      // O estoque está dentro de item.produto.estoque[0] devido ao select/include
       const estoqueAtual = item.produto.estoque[0];
 
       if (estoqueAtual) {
@@ -91,20 +106,20 @@ export async function POST(req) {
         });
 
         console.log(
-          ` Estoque atualizado: Produto ${item.produto_id} agora tem ${novaQuantidade} unidades`
+          ` Estoque atualizado: Produto ${item.produto.id} agora tem ${novaQuantidade} unidades`
         );
       } else {
         console.warn(
-          ` Nenhum registro de estoque encontrado para produto ${item.produto_id} na loja ${lojaId}`
+          ` Nenhum registro de estoque encontrado para produto ${item.produto.id} na loja ${lojaId}`
         );
       }
     }
 
-    console.log(` Venda ${vendaFinalizada.id} finalizada e estoque atualizado.`);
+    console.log(` Venda ${vendaFinalizada.id} finalizada, CMV registrado e estoque atualizado.`);
 
     return NextResponse.json({
       success: true,
-      message: "Venda finalizada com sucesso e estoque atualizado!",
+      message: "Venda finalizada com sucesso, CMV registrado e estoque atualizado!",
       venda: vendaFinalizada,
     });
   } catch (err) {

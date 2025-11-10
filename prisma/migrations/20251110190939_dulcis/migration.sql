@@ -114,8 +114,8 @@ CREATE TABLE `produto` (
     `nome` VARCHAR(191) NOT NULL,
     `descricao` VARCHAR(191) NULL,
     `img` VARCHAR(191) NULL,
-    `preco_venda` DOUBLE NOT NULL,
-    `custo` DOUBLE NOT NULL,
+    `preco_venda` DECIMAL(10, 2) NOT NULL,
+    `custo` DECIMAL(10, 2) NOT NULL,
     `categoria` VARCHAR(191) NOT NULL,
 
     UNIQUE INDEX `Produto_sku_key`(`sku`),
@@ -148,7 +148,8 @@ CREATE TABLE `venda` (
     `usuario_id` INTEGER NOT NULL,
     `loja_id` INTEGER NOT NULL,
     `data_hora` DATETIME(3) NOT NULL,
-    `total` DOUBLE NOT NULL,
+    `total` DECIMAL(10, 2) NOT NULL,
+    `cmv` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     `status` VARCHAR(191) NOT NULL,
 
     UNIQUE INDEX `venda_codigo_transacao_key`(`codigo_transacao`),
@@ -165,8 +166,8 @@ CREATE TABLE `vendaitem` (
     `pedidos` VARCHAR(191) NULL,
     `produto_id` INTEGER NOT NULL,
     `quantidade` INTEGER NOT NULL,
-    `preco_unitario` DOUBLE NOT NULL,
-    `subtotal` DOUBLE NOT NULL,
+    `preco_unitario` DECIMAL(10, 2) NOT NULL,
+    `subtotal` DECIMAL(10, 2) NOT NULL,
 
     INDEX `VendaItem_produto_id_fkey`(`produto_id`),
     INDEX `VendaItem_venda_id_fkey`(`venda_id`),

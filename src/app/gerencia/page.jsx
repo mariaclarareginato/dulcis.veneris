@@ -5,7 +5,9 @@ import { getLoggedUser } from "@/lib/auth-client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 
-const COLORS = ["#dc2626", "#16a34a"]; // vermelho e verde
+// CORES CORRIGIDAS: Verde (Lucro) no índice 0, Vermelho (Despesas) no índice 1
+// Isso evita que, se Despesas vier primeiro, ele pegue o verde.
+const COLORS = ["#16a34a", "#dc2626"]; // verde e vermelho
 
 export default function FinanceiroPage() {
   const [dados, setDados] = useState(null);
@@ -23,6 +25,8 @@ export default function FinanceiroPage() {
   useEffect(() => {
     if (!userData) return;
 
+    // Assumindo que a API de financeiro agora retorna:
+    // { loja: "Nome da Loja", totalDespesas: "X.XX", lucro: "Y.YY", margemLucro: "Z.ZZ" }
     fetch(`/api/financeiro?lojaId=${userData.loja_id}`)
       .then(res => res.json())
       .then(data => setDados(data))
@@ -36,9 +40,16 @@ export default function FinanceiroPage() {
       </div>
     );
 
+  // --- Conversão de Decimal (String) para Float para cálculos e visualização ---
+
+  const totalDespesas = parseFloat(dados.totalDespesas ?? 0);
+  const lucro = parseFloat(dados.lucro ?? 0);
+  const margemLucro = parseFloat(dados.margemLucro ?? 0);
+    
+  // A ordem foi invertida para seguir a ordem das cores (Lucro = Verde, Despesas = Vermelho)
   const chartData = [
-    { name: "Despesas", value: dados.totalDespesas ?? 0 },
-    { name: "Lucro", value: dados.lucro ?? 0 },
+    { name: "Lucro", value: lucro }, 
+    { name: "Despesas", value: totalDespesas }, 
   ];
 
   return (
@@ -53,7 +64,7 @@ export default function FinanceiroPage() {
             <CardTitle>Despesas x Lucro</CardTitle>
           </CardHeader>
           <CardContent>
-            {dados.totalDespesas === 0 && dados.lucro === 0 ? (
+            {totalDespesas === 0 && lucro === 0 ? (
               <p className="text-center text-muted-foreground py-12">
                 Nenhum dado disponível ainda.
               </p>
@@ -69,11 +80,14 @@ export default function FinanceiroPage() {
                     fill="#8884d8"
                     dataKey="value"
                   >
+                    {/* A cor agora mapeia Lucro (Verde) e Despesas (Vermelho) */}
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    formatter={(value, name) => [`R$ ${value.toFixed(2)}`, name]}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -82,24 +96,23 @@ export default function FinanceiroPage() {
         </Card>
 
         <Card className="shadow-lg flex flex-col justify-center items-center text-center py-8">
-        
           <CardContent className="space-y-3 text-lg">
             <p>
-              💸 <strong>Despesas:</strong> R$ {(dados.totalDespesas ?? 0).toFixed(2)}
+              💸 <strong>Despesas Operacionais:</strong> R$ {totalDespesas.toFixed(2)}
             </p>
             <p>
-              💰 <strong>Lucro:</strong> R$ {(dados.lucro ?? 0).toFixed(2)}
+              💰 <strong>Lucro Líquido:</strong> R$ {lucro.toFixed(2)}
             </p>
             <p>
               📈 <strong>Margem de lucro:</strong>{" "}
               <span
                 className={
-                  (dados.margemLucro ?? 0) >= 0
+                  margemLucro >= 0
                     ? "text-green-500 font-bold"
                     : "text-red-500 font-bold"
                 }
               >
-                {(dados.margemLucro ?? 0)}%
+                {margemLucro.toFixed(2)}%
               </span>
             </p>
           </CardContent>

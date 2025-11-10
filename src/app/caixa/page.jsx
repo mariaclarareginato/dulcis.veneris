@@ -3,10 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+// Assumindo que você tem esses componentes disponíveis (shadcn/ui ou similar)
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package, ShoppingCart, AlertCircle } from "lucide-react";
 import { getLoggedUser } from "@/lib/auth-client";
+
+// Função utilitária para converter Decimal (string) para float formatado
+const formatCurrency = (value) => {
+  const num = parseFloat(value || 0);
+  return num.toFixed(2);
+};
 
 export default function CaixaPage() {
   const router = useRouter();
@@ -84,7 +91,8 @@ export default function CaixaPage() {
     if (!userData) return;
 
     if (produto.quantidade <= 0) {
-      alert("Produto sem estoque disponível!");
+      // NOTE: Usando console.error/log em vez de alert()
+      console.log("Produto sem estoque disponível!");
       return;
     }
 
@@ -111,7 +119,8 @@ export default function CaixaPage() {
       fetchCarrinho();
     } catch (err) {
       console.error(err);
-      alert(err.message || "Erro ao adicionar produto");
+      // NOTE: Usando console.log em vez de alert()
+      console.log(err.message || "Erro ao adicionar produto");
     } finally {
       setAdicionandoId(null);
     }
@@ -131,7 +140,8 @@ export default function CaixaPage() {
       fetchCarrinho();
     } catch (err) {
       console.error(err);
-      alert(err.message || "Erro ao atualizar quantidade");
+      // NOTE: Usando console.log em vez de alert()
+      console.log(err.message || "Erro ao atualizar quantidade");
     }
   };
 
@@ -142,11 +152,13 @@ export default function CaixaPage() {
       fetchCarrinho();
     } catch (err) {
       console.error(err);
-      alert("Erro ao remover item");
+      // NOTE: Usando console.log em vez de alert()
+      console.log("Erro ao remover item");
     }
   };
 
-  const total = carrinho.reduce((acc, item) => acc + (item.subtotal || 0), 0);
+  // 7. Cálculo do total corrigido (usando parseFloat)
+  const total = carrinho.reduce((acc, item) => acc + parseFloat(item.subtotal || 0), 0);
 
   // Loading ou erro
   if (!userData || loading) {
@@ -205,9 +217,9 @@ export default function CaixaPage() {
                 <div>
                   <h3 className="text-base font-bold">{produto.nome}</h3>
                   
-             
+                  
                   <p className="text-sm text-muted-foreground line-clamp-3 min-h-[2.5rem] mt-5">
-                   {produto.descricao || "Sem descrição"}
+                    {produto.descricao || "Sem descrição"}
                   </p>
 
                   <p className="text-xs text-muted-foreground mt-5">
@@ -229,11 +241,11 @@ export default function CaixaPage() {
                   {estoqueMinimo && !semEstoque && <AlertCircle className="w-5 h-5 text-yellow-600" />}
                 </div>
 
-                {/* Preço */}
+                {/* Preço (CORRIGIDO: usando parseFloat) */}
                 <div className="flex justify-between items-center pt-2 border-t mt-auto">
                   <span className="text-sm text-muted-foreground">Preço:</span>
                   <span className="text-lg font-bold text-black-600">
-                    R$ {produto.preco_venda ? produto.preco_venda.toFixed(2) : "0.00"}
+                    R$ {formatCurrency(produto.preco_venda)}
                   </span>
                 </div>
 
@@ -265,77 +277,78 @@ export default function CaixaPage() {
       {/* Carrinho */}
       {carrinho.length > 0 && (
         <Card className="mt-8 p-4 sm:p-6 border-2 border-primary">
-  <h3 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2 flex-wrap">
-    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
-    Carrinho ({carrinho.length} {carrinho.length === 1 ? "item" : "itens"})
-  </h3>
+          <h3 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2 flex-wrap">
+            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
+            Carrinho ({carrinho.length} {carrinho.length === 1 ? "item" : "itens"})
+          </h3>
 
-  <div className="space-y-3">
-    {carrinho.map((item) => (
-      <div
-        key={item.id}
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border bg-card"
-      >
-        <div className="flex-1 text-center sm:text-left">
-          <p className="font-bold text-base sm:text-lg m-3">{item.produto.nome}</p>
-          <p className="text-sm text-muted-foreground">
-            R$ {item.preco_unitario?.toFixed(2)} x {item.quantidade}
-          </p>
-        </div>
+          <div className="space-y-3">
+            {carrinho.map((item) => (
+              <div
+                key={item.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border bg-card"
+              >
+                <div className="flex-1 text-center sm:text-left">
+                  <p className="font-bold text-base sm:text-lg m-3">{item.produto.nome}</p>
+                  {/* Preço Unitário (CORRIGIDO: usando parseFloat) */}
+                  <p className="text-sm text-muted-foreground">
+                    R$ {formatCurrency(item.preco_unitario)} x {item.quantidade}
+                  </p>
+                </div>
 
-        <div className="flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
-          {/* Controle de quantidade */}
-          <div className="flex items-center gap-2 rounded-lg border px-3 py-1">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}
-              disabled={item.quantidade <= 1}
-            >
-              -
-            </Button>
-            <span className="font-bold text-lg w-8 text-center">{item.quantidade}</span>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}
-            >
-              +
-            </Button>
+                <div className="flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
+                  {/* Controle de quantidade */}
+                  <div className="flex items-center gap-2 rounded-lg border px-3 py-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}
+                      disabled={item.quantidade <= 1}
+                    >
+                      -
+                    </Button>
+                    <span className="font-bold text-lg w-8 text-center">{item.quantidade}</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}
+                    >
+                      +
+                    </Button>
+                  </div>
+
+                  {/* Subtotal (CORRIGIDO: usando parseFloat) */}
+                  <div className="text-center sm:text-right min-w-[80px]">
+                    <p className="font-bold text-lg">R$ {formatCurrency(item.subtotal)}</p>
+                  </div>
+
+                  {/* Botão Remover */}
+                  <Button
+                    variant="destructive"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                    onClick={() => removerDoCarrinho(item.id)}
+                  >
+                    Remover
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Subtotal */}
-          <div className="text-center sm:text-right min-w-[80px]">
-            <p className="font-bold text-lg">R$ {item.subtotal?.toFixed(2) || "0.00"}</p>
+          {/* Total (CORRIGIDO: o total já é um Number, então só toFixed) */}
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t-2 gap-2">
+            <span className="text-xl sm:text-2xl font-bold">Total:</span>
+            <span className="text-2xl sm:text-3xl font-bold text-green-600">
+              R$ {total.toFixed(2)}
+            </span>
           </div>
 
-          {/* Botão Remover */}
-          <Button
-            variant="destructive"
-            size="lg"
-            className="w-full sm:w-auto"
-            onClick={() => removerDoCarrinho(item.id)}
-          >
-            Remover
+          {/* Botão Finalizar */}
+          <Button onClick={() => router.push("/pagamento")} className="w-full font-bold text-base sm:text-lg mt-4" size="lg">
+            Finalizar Venda
           </Button>
-        </div>
-      </div>
-    ))}
-  </div>
-
-  {/* Total */}
-  <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t-2 gap-2">
-    <span className="text-xl sm:text-2xl font-bold">Total:</span>
-    <span className="text-2xl sm:text-3xl font-bold text-green-600">
-      R$ {total.toFixed(2)}
-    </span>
-  </div>
-
-  {/* Botão Finalizar */}
-  <Button onClick={() => router.push("/pagamento")} className="w-full font-bold text-base sm:text-lg mt-4" size="lg">
-    Finalizar Venda
-  </Button>
-</Card>
+        </Card>
 
       )}
     </div>

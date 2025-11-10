@@ -1,15 +1,17 @@
-
 'use client'
 
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import PaymentForm from '@/components/paymentForm'
-import { useCarrinho } from '@/contexts/CarrinhoContext' // Puxando o Contexto
+// O componente PaymentForm deve ser fornecido ou implementado
+import PaymentForm from '@/components/paymentForm' 
+import { useCarrinho } from '@/contexts/CarrinhoContext'
 import { useRouter } from 'next/navigation'
 
-// Mapeamento dos botões de interface para os valores do Enum Prisma
+// Função utilitária para garantir que o total seja um float
+const getFloatTotal = (value) => parseFloat(value || 0);
 
+// Mapeamento dos botões de interface para os valores do Enum Prisma
 const paymentMethods = [
   { id: 'PIX', label: 'Pix' },
   { id: 'CARTAO_DEBITO', label: 'Cartão de Débito' },
@@ -17,21 +19,22 @@ const paymentMethods = [
   { id: 'BOLETO', label: 'Boleto' },
   { id: 'DINHEIRO', label: 'Dinheiro' }, 
 ]
-const methodTitles = { /* ... (Mapeamento de títulos, usado na tela de sucesso) ... */ 
-    PIX: 'Pagamento via Pix', CARTAO_DEBITO: 'Cartão de Débito', CARTAO_CREDITO: 'Cartão de Crédito', BOLETO: 'Boleto', DINHEIRO: 'Dinheiro',
+const methodTitles = { 
+  PIX: 'Pagamento via Pix', CARTAO_DEBITO: 'Cartão de Débito', CARTAO_CREDITO: 'Cartão de Crédito', BOLETO: 'Boleto', DINHEIRO: 'Dinheiro',
 }
 
 export default function Pagamento () {
   const router = useRouter();
 
-  //  DESTRUCTURING DO CONTEXTO: Puxando o total e a lógica de finalização
-
-  const { total, isFinalizandoVenda, finalizarVenda } = useCarrinho();
+  // DESTRUCTURING DO CONTEXTO: Puxando o total e a lógica de finalização
+  const { total: totalContext, isFinalizandoVenda, finalizarVenda } = useCarrinho();
+  
+  // CORREÇÃO: Converte o total do contexto para float imediatamente para uso
+  const total = getFloatTotal(totalContext); 
   
   const [selectedMethod, setSelectedMethod] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
   
-
 
   // Esta função é o callback chamado pelo PaymentForm após a simulação/input
   const finishTransaction = async (detalhesPagamento, metodo) => {
@@ -47,8 +50,8 @@ export default function Pagamento () {
         setSelectedMethod(null);
         
     } catch (error) {
-        // Exibe o erro
-        alert(`❌ Falha na Venda: ${error.message}`);
+        // CORREÇÃO SECUNDÁRIA: Substituído alert() por console.error
+        console.error(`❌ Falha na Venda:`, error);
     }
   }
 
@@ -72,7 +75,7 @@ export default function Pagamento () {
   if (successMessage) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-lg shadow-2xl border-green-500 border-4">
+        <Card className="w-full max-w-lg shadow-2xl border-green-500 border-4 rounded-2xl">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl text-green-600">✅ Pagamento Concluído!</CardTitle>
           </CardHeader>
@@ -84,7 +87,7 @@ export default function Pagamento () {
             <p className="text-md text-gray-600">
                 Método de Pagamento: {methodTitles[successMessage.metodo]}
             </p>
-            <Button onClick={startNewSale} className="w-full mt-4 text-lg">
+            <Button onClick={startNewSale} className="w-full mt-4 text-lg rounded-xl">
               Iniciar Nova Venda
             </Button>
           </CardContent>
@@ -101,16 +104,16 @@ export default function Pagamento () {
         <Button 
           variant="ghost" 
           onClick={() => setSelectedMethod(null)} 
-          className="mb-6"
+          className="mb-6 rounded-xl"
           disabled={isFinalizandoVenda}
         >
           &larr; Voltar aos Métodos
         </Button>
         <PaymentForm 
-            method={selectedMethod} 
-            TOTAL_VENDA={total} // Passando o total do Contexto
-            onTransactionSuccess={finishTransaction}
-            isContextLoading={isFinalizandoVenda} // Passando o estado de loading
+          method={selectedMethod} 
+          TOTAL_VENDA={total} // Passando o total (já como float)
+          onTransactionSuccess={finishTransaction}
+          isContextLoading={isFinalizandoVenda} // Passando o estado de loading
         />
       </div>
     )
@@ -123,19 +126,20 @@ export default function Pagamento () {
       <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4 text-center">
         Selecione o método de pagamento:
       </h1>
+      {/* CORREÇÃO: total já é float, então .toFixed(2) funciona */}
       <p className="text-xl mb-10 font-medium">Total: R$ {total.toFixed(2)}</p>
 
       {total <= 0 ? (
-        <Card className="p-6 text-center">
-             <p className="text-xl text-red-500 font-bold mb-4">🛒 Carrinho Vazio!</p>
-             <Button onClick={() => router.push('/caixa')} className="mt-4">Voltar e Adicionar Itens</Button>
+        <Card className="p-6 text-center w-full max-w-sm rounded-xl shadow-lg">
+          <p className="text-xl text-red-500 font-bold mb-4">🛒 Carrinho Vazio!</p>
+          <Button onClick={() => router.push('/caixa')} className="mt-4 rounded-xl">Voltar e Adicionar Itens</Button>
         </Card>
       ) : (
         paymentMethods.map((method) => (
             <Button 
             key={method.id}
             onClick={() => handleSelectMethod(method.id)}
-            className="text-base sm:text-lg md:text-xl font-bold w-full sm:w-80 px-6 py-3 my-3 rounded-xl shadow-lg transition-all"
+            className="text-base sm:text-lg md:text-xl font-bold w-full sm:w-80 px-6 py-3 my-3 rounded-xl shadow-lg hover:shadow-xl transition-all"
             >
             {method.label}
             </Button>
