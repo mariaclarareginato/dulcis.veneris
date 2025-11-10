@@ -101,6 +101,7 @@ model loja {
   estoque  estoque[]
   usuario  usuario[]
   venda    venda[]
+  pedido   pedido[]
 }
 
 model pagamento {
@@ -127,6 +128,7 @@ model produto {
   estoque      estoque[]
   logauditoria logauditoria[]
   vendaitem    vendaitem[]
+  itempedido   itempedido[]
 }
 
 model usuario {
@@ -141,24 +143,25 @@ model usuario {
   caixa      caixa[]
   loja       loja           @relation(fields: [loja_id], references: [id], onDelete: Cascade, map: "Usuario_loja_id_fkey")
   venda      venda[]
+  pedido     pedido[]
 
   @@index([loja_id], map: "Usuario_loja_id_fkey")
 }
 
 model venda {
-  id         Int         @id @default(autoincrement())
-  codigo_transacao  String          @unique @default(cuid())
-  caixa_id   Int
-  usuario_id Int
-  loja_id    Int
-  data_hora  DateTime
-  total      Float
-  status     String
-  pagamento  pagamento[]
-  caixa      caixa       @relation(fields: [caixa_id], references: [id], map: "Venda_caixa_id_fkey")
-  loja       loja        @relation(fields: [loja_id], references: [id], map: "Venda_loja_id_fkey")
-  usuario    usuario     @relation(fields: [usuario_id], references: [id], map: "Venda_usuario_id_fkey")
-  vendaitem  vendaitem[]
+  id               Int         @id @default(autoincrement())
+  codigo_transacao String      @unique @default(cuid())
+  caixa_id         Int
+  usuario_id       Int
+  loja_id          Int
+  data_hora        DateTime
+  total            Float
+  status           String
+  pagamento        pagamento[]
+  caixa            caixa       @relation(fields: [caixa_id], references: [id], map: "Venda_caixa_id_fkey")
+  loja             loja        @relation(fields: [loja_id], references: [id], map: "Venda_loja_id_fkey")
+  usuario          usuario     @relation(fields: [usuario_id], references: [id], map: "Venda_usuario_id_fkey")
+  vendaitem        vendaitem[]
 
   @@index([caixa_id], map: "Venda_caixa_id_fkey")
   @@index([loja_id], map: "Venda_loja_id_fkey")
@@ -180,12 +183,42 @@ model vendaitem {
   @@index([venda_id], map: "VendaItem_venda_id_fkey")
 }
 
+model pedido {
+  id          Int      @id @default(autoincrement())
+  loja_id     Int // A loja que está fazendo o pedido (Filial)
+  usuario_id  Int // O gerente que fez o pedido
+  data_pedido DateTime @default(now())
+  status      String   @default("PENDENTE") // PENDENTE, EM_PROCESSAMENTO, ENVIADO, CANCELADO
+  tipo        String   @default("REPOSICAO_ESTOQUE")
+
+  loja         loja         @relation(fields: [loja_id], references: [id])
+  usuario      usuario      @relation(fields: [usuario_id], references: [id])
+  itens_pedido itempedido[]
+
+  @@index([loja_id])
+  @@index([usuario_id])
+}
+
+model itempedido {
+  id           Int    @id @default(autoincrement())
+  pedido_id    Int
+  produto_id   Int? // Referência ao produto existente, se for um produto padronizado
+  produto_nome String // Nome do produto (para pedidos não padronizados ou fallback)
+  quantidade   Int
+
+  pedido  pedido   @relation(fields: [pedido_id], references: [id])
+  produto produto? @relation(fields: [produto_id], references: [id])
+
+  @@index([pedido_id])
+  @@index([produto_id])
+}
+
 enum pagamento_tipo {
   DINHEIRO
   CARTAO_CREDITO // Mais específico
-  CARTAO_DEBITO  // Mais específico
+  CARTAO_DEBITO // Mais específico
   PIX
-  BOLETO         // Adicionar Boleto
+  BOLETO // Adicionar Boleto
 }
 
 enum loja_tipo {
