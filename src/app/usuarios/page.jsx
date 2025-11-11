@@ -3,35 +3,65 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getLoggedUser } from "@/lib/auth-client";
-import { AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button"
+import {
+  AlertCircle,
+  TrendingUp,
+  DollarSign,
+  ShoppingCart,
+  User,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-
-export default function UsuariosPage ({params}) {
-    const router = useRouter();
-
+export default function UsuariosPage() {
+  const router = useRouter();
   const [userData, setUserData] = useState(null);
+  const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Para buscar usuário 
-
+  // Autenticação
   useEffect(() => {
     const user = getLoggedUser();
-
     if (!user) {
-        // Se não estiver logado, redireciona para login 
-        router.push("/login");
-        return;
+      router.push("/login");
+      return;
     }
-
     setUserData(user);
-    setLoading(false);
   }, [router]);
 
-  
-    //  LOADING ENQUANTO VERIFICA AUTENTICAÇÃO
-  if (!userData) {
+  // Busca de usuários
+  useEffect(() => {
+    if (!userData) return;
+
+    const fetchUsuarios = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `/api/usuarios/stats?lojaId=${userData.loja_id}`
+        );
+        if (!res.ok) throw new Error("Erro ao buscar usuários");
+        const data = await res.json();
+        setUsuarios(data);
+      } catch {
+        setError("Erro ao carregar dados dos usuários");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsuarios();
+  }, [userData]);
+
+  // Estados de carregamento e erro
+  if (!userData || loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="w-16 h-16 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
@@ -39,17 +69,6 @@ export default function UsuariosPage ({params}) {
     );
   }
 
-  //  ESTADO DE CARREGAMENTO
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="w-16 h-16 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
-      </div>
-    );
-  }
- 
-
-  //  ESTADO DE ERRO
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
@@ -62,9 +81,173 @@ export default function UsuariosPage ({params}) {
     );
   }
 
-// Render principal 
+  // Cálculos totais
+  const totais = usuarios.reduce(
+    (acc, usuario) => ({
+      vendas: acc.vendas + usuario.stats.numeroVendas,
+      faturamento: acc.faturamento + usuario.stats.totalVendas,
+      lucro: acc.lucro + usuario.stats.lucro,
+    }),
+    { vendas: 0, faturamento: 0, lucro: 0 }
+  );
 
-return (
-    <Button onClick={()=> router.push('/registro')}> Registrar novo usuário</Button>
-);
+  // Render principal
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Desempenho dos Caixas</h1>
+          <p className="text-muted-foreground mt-2">
+            Acompanhe o desempenho e registre novos usuários
+          </p>
+        </div>
+        <Button onClick={() => router.push("/registro")}>
+          Registrar Novo Usuário
+        </Button>
+      </div>
+
+      {/* Cards de Resumo */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total de Vendas
+            </CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totais.vendas}</div>
+            <p className="text-xs text-muted-foreground">vendas finalizadas</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">
+              Faturamento Total
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              R$ {totais.faturamento.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground">em vendas</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Lucro Total</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">
+              R$ {totais.lucro.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground">lucro líquido</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Lista de Usuários */}
+      {usuarios.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <User className="w-16 h-16 text-muted-foreground mb-4" />
+            <p className="text-lg font-semibold">Nenhum operador encontrado</p>
+            <p className="text-muted-foreground">Registre novos usuários</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {usuarios.map((usuario, index) => (
+            <Card
+              key={usuario.id}
+              className="hover:shadow-lg transition-shadow"
+            >
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-primary/10 p-3 rounded-full">
+                      <User className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{usuario.nome}</CardTitle>
+                      <CardDescription className="mt-1">
+                        {usuario.email}
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Badge variant={index === 0 ? "default" : "secondary"}>
+                    {index === 0 ? "🏆 Melhor Desempenho" : `#${index + 1}`}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <ShoppingCart className="w-4 h-4" /> Vendas
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {usuario.stats.numeroVendas}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <DollarSign className="w-4 h-4" /> Faturamento
+                    </p>
+                    <p className="text-2xl font-bold text-green-600">
+                      R$ {usuario.stats.totalVendas.toFixed(2)}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <TrendingUp className="w-4 h-4" /> Lucro
+                    </p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      R$ {usuario.stats.lucro.toFixed(2)}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Ticket Médio
+                    </p>
+                    <p className="text-2xl font-bold text-yellow-600">
+                      R$ {usuario.stats.ticketMedio.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-primary h-2 rounded-full transition-all"
+                      style={{
+                        width: `${
+                          (usuario.stats.totalVendas / totais.faturamento) * 100
+                        }%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {(
+                      (usuario.stats.totalVendas / totais.faturamento) *
+                      100
+                    ).toFixed(1)}
+                    % do faturamento total
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
