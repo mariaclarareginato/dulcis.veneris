@@ -180,8 +180,24 @@ export default function UsuariosPage() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant={index === 0 ? "default" : "secondary"}>
-                    {index === 0 ? "🏆 Melhor Desempenho" : `#${index + 1}`}
+                  <Badge
+                    className={
+                      index === 0
+                        ? "bg-yellow-500 text-white"
+                        : index === 1
+                        ? "bg-gray-400 text-white"
+                        : index === 2
+                        ? "bg-amber-700 text-white"
+                        : "bg-gray-200 text-black"
+                    }
+                  >
+                    {index === 0
+                      ? "🥇 1º Lugar"
+                      : index === 1
+                      ? "🥈 2º Lugar"
+                      : index === 2
+                      ? "🥉 3º Lugar"
+                      : `#${index + 1}`}
                   </Badge>
                 </div>
               </CardHeader>
