@@ -288,14 +288,14 @@ export default function CategoriaPage({ params }) {
                       Preço de Venda:
                     </span>
                     <span className="text-xl font-bold text-green-600">
-                      R$ {produto.preco_venda?.toFixed(2) || "0.00"}
+                    R$ {Number(produto.preco_venda ?? 0).toFixed(2)}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-muted-foreground">Custo:</span>
                     <span className="text-muted-foreground">
-                      R$ {produto.custo?.toFixed(2) || "0.00"}
+                     R$ {Number(produto.custo ?? 0).toFixed(2)}
                     </span>
                   </div>
 

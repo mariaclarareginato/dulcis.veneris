@@ -4,36 +4,29 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const {
-      usuarioId,
-      lojaId,
-      tipoPagamento,
-      detalhesPagamento,
-      // caixaId não está sendo usado, mas mantido por consistência
-    } = body;
+    const { usuarioId, lojaId, tipoPagamento, detalhesPagamento, caixaId } = body;
 
-    console.log("Finalizando venda:", JSON.stringify(body, null, 2));
+    console.log("🧾 Dados recebidos para finalizar venda:", JSON.stringify(body, null, 2));
 
-    // 1. Busca a venda aberta do usuário, incluindo o custo unitário do produto
+    // 🔹 Conversões seguras
+    const totalBody = Number(body.total) || 0;
+    const cmvBody = Number(body.cmvTotal) || 0;
+
+    console.log("📊 Tipos => total:", typeof totalBody, "cmvTotal:", typeof cmvBody);
+
+    // 1️⃣ Busca a venda aberta do usuário
     const vendaAberta = await prisma.venda.findFirst({
       where: {
-        usuario_id: Number(usuarioId),
-        loja_id: Number(lojaId),
+        usuario_id: usuarioId,
+        loja_id: lojaId,
+        caixa_id: caixaId,
         status: "ABERTA",
       },
       include: {
         vendaitem: {
           include: {
             produto: {
-              // Garante que o campo 'custo_unitario' está incluído na busca
-              select: {
-                id: true,
-                custo_unitario: true, // ⚠️ ASSUMIDO que este é o nome do campo
-                // Inclua outros campos necessários (ex: estoque)
-                estoque: {
-                  where: { loja_id: Number(lojaId) },
-                },
-              },
+              select: { preco_venda: true, custo: true, nome: true, estoque: true },
             },
           },
         },
@@ -47,36 +40,39 @@ export async function POST(req) {
       );
     }
 
-    // 2. Calcula Total e CMV (Custo da Mercadoria Vendida)
+    // 2️⃣ Calcula Total e CMV
+    let totalCalc = 0;
+    let cmvCalc = 0;
 
-    const total = vendaAberta.vendaitem.reduce(
-      (acc, item) => acc + item.subtotal,
-      0
-    );
-
-    let cmvTotal = 0;
     for (const item of vendaAberta.vendaitem) {
-      // ⚠️ Use um fallback para 0 caso o custo não esteja definido
-      const custo = item.produto.custo_unitario ?? 0;
-      cmvTotal += custo * item.quantidade;
+      const subtotalNum = Number(item.subtotal) || 0;
+      const precoVendaNum = Number(item.produto?.preco_venda) || 0;
+      const custoNum = Number(item.produto?.custo) || 0;
+      const quantidade = Number(item.quantidade) || 0;
+
+      totalCalc += subtotalNum || precoVendaNum * quantidade;
+      cmvCalc += custoNum * quantidade;
     }
 
-    console.log(`Total da Venda: ${total.toFixed(2)}, CMV Calculado: ${cmvTotal.toFixed(2)}`);
+    const totalFinalNumber = parseFloat(totalCalc);
+    const cmvFinalNumber = parseFloat(cmvCalc);
 
-    // 3. Finaliza a venda e registra o CMV
-    
-    // 💡 Você precisa garantir que o campo 'cmv' exista na sua tabela Venda no Prisma Schema.
+    console.log(
+      `💰 Total da Venda: R$ ${totalFinalNumber.toFixed(2)} | 🧾 CMV Calculado: R$ ${cmvFinalNumber.toFixed(2)}`
+    );
+
+    // 3️⃣ Finaliza a venda
     const vendaFinalizada = await prisma.venda.update({
       where: { id: vendaAberta.id },
       data: {
         status: "FINALIZADA",
-        total,
-        cmv: cmvTotal, // ⬅️ CAMPO NOVO ESSENCIAL PARA O CÁLCULO FINANCEIRO
+        total: totalFinalNumber, // ✅ campo corrigido
+        cmv: cmvFinalNumber,     // ✅ campo existente (você criou ele no schema)
         data_hora: new Date(),
         pagamento: {
           create: {
             tipo: tipoPagamento || "NÃO INFORMADO",
-            valor: total,
+            valor: totalFinalNumber,
             detalhe: JSON.stringify(detalhesPagamento || {}),
           },
         },
@@ -87,41 +83,29 @@ export async function POST(req) {
       },
     });
 
-
-    // 4. Atualiza o estoque de cada produto
-
+    // 4️⃣ Atualiza o estoque
     for (const item of vendaAberta.vendaitem) {
-      // O estoque está dentro de item.produto.estoque[0] devido ao select/include
-      const estoqueAtual = item.produto.estoque[0];
-
+      const estoqueAtual = item.produto.estoque?.[0];
       if (estoqueAtual) {
-        const novaQuantidade = Math.max(
-          0,
-          estoqueAtual.quantidade - item.quantidade
-        );
-
+        const novaQuantidade = Math.max(0, estoqueAtual.quantidade - item.quantidade);
         await prisma.estoque.update({
           where: { id: estoqueAtual.id },
           data: { quantidade: novaQuantidade },
         });
-
-        console.log(
-          ` Estoque atualizado: Produto ${item.produto.id} agora tem ${novaQuantidade} unidades`
-        );
+        console.log(`📦 Estoque atualizado: Produto ${item.produto.nome} agora tem ${novaQuantidade} unidades`);
       } else {
-        console.warn(
-          ` Nenhum registro de estoque encontrado para produto ${item.produto.id} na loja ${lojaId}`
-        );
+        console.warn(`⚠️ Nenhum registro de estoque encontrado para o produto ${item.produto.nome}`);
       }
     }
 
-    console.log(` Venda ${vendaFinalizada.id} finalizada, CMV registrado e estoque atualizado.`);
+    console.log(`✅ Venda ${vendaFinalizada.id} finalizada, CMV registrado e estoque atualizado.`);
 
     return NextResponse.json({
       success: true,
-      message: "Venda finalizada com sucesso, CMV registrado e estoque atualizado!",
+      message: "Venda finalizada com sucesso!",
       venda: vendaFinalizada,
     });
+
   } catch (err) {
     console.error("❌ Erro ao finalizar venda:", err);
     return NextResponse.json(

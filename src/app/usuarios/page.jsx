@@ -131,7 +131,7 @@ export default function UsuariosPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              R$ {totais.faturamento.toFixed(2)}
+             R$ {Number(totais.faturamento).toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">em vendas</p>
           </CardContent>
@@ -217,7 +217,7 @@ export default function UsuariosPage() {
                       <DollarSign className="w-4 h-4" /> Faturamento
                     </p>
                     <p className="text-2xl font-bold text-green-600">
-                      R$ {usuario.stats.totalVendas.toFixed(2)}
+                      R$ {Number(usuario.stats.totalVendas).toFixed(2)}
                     </p>
                   </div>
 
@@ -226,7 +226,7 @@ export default function UsuariosPage() {
                       <TrendingUp className="w-4 h-4" /> Lucro
                     </p>
                     <p className="text-2xl font-bold text-blue-600">
-                      R$ {usuario.stats.lucro.toFixed(2)}
+                      R$ {Number(usuario.stats.lucro).toFixed(2)}
                     </p>
                   </div>
 
@@ -235,7 +235,7 @@ export default function UsuariosPage() {
                       Ticket Médio
                     </p>
                     <p className="text-2xl font-bold text-yellow-600">
-                      R$ {usuario.stats.ticketMedio.toFixed(2)}
+                      R$ {Number(usuario.stats.ticketMedio).toFixed(2)}
                     </p>
                   </div>
                 </div>
