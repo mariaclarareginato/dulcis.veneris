@@ -99,11 +99,11 @@ export default function UsuariosPage() {
         <div>
           <h1 className="text-3xl font-bold">Desempenho dos Caixas</h1>
           <p className="text-muted-foreground mt-2">
-            Acompanhe o desempenho e registre novos usuários
+            Acompanhe o desempenho dos seus caixas e registre novos usuários
           </p>
         </div>
         <Button onClick={() => router.push("/registro")}>
-          Registrar Novo Usuário
+          <strong className="font-bold">Registrar novo usuário</strong>
         </Button>
       </div>
 
@@ -183,12 +183,12 @@ export default function UsuariosPage() {
                   <Badge
                     className={
                       index === 0
-                        ? "bg-yellow-500 text-white"
+                        ? "bg-yellow-500 font-extrabold text-black"
                         : index === 1
-                        ? "bg-gray-400 text-white"
+                        ? "bg-gray-400 font-extrabold text-black"
                         : index === 2
-                        ? "bg-amber-700 text-white"
-                        : "bg-gray-200 text-black"
+                        ? "bg-amber-600 text-black font-extrabold"
+                        : "bg-gray-200 text-black font-extrabold "
                     }
                   >
                     {index === 0

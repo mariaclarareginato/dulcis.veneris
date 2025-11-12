@@ -26,8 +26,8 @@ const data = {
 
   linhas: [
 
-    { name: "Lucro e despesas", url: "/gerencia" },
-    { name: "Gerenciamento de usuários", url: "usuarios" },
+    { name: "Despesas e lucro", url: "/gerencia" },
+    { name: "Caixas e usuários", url: "caixas.usuarios" },
     { name: "Pedidos", url: "/pedidos" },
   
   ],

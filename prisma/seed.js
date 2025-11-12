@@ -19,7 +19,7 @@ async function main() {
 
   const lojaMatriz = await prisma.loja.create({
     data: {
-      nome: "Dulcis Venere - Matriz",
+      nome: "Dulcis Veneris - Matriz",
       endereco: "Doutor Januário Miraglia, 120",
       cidade: "Campos do Jordão",
       estado: "SP",
@@ -29,7 +29,7 @@ async function main() {
 
   const lojaSP = await prisma.loja.create({
     data: {
-      nome: "Dulcis Venere - São Paulo",
+      nome: "Dulcis Veneris - São Paulo",
       endereco: "Rua das Amêndoas, 120",
       cidade: "São Paulo",
       estado: "SP",
@@ -39,7 +39,7 @@ async function main() {
 
   const lojaRJ = await prisma.loja.create({
     data: {
-      nome: "Dulcis Venere - Rio de Janeiro",
+      nome: "Dulcis Veneris - Rio de Janeiro",
       endereco: "Avenida Cacau, 87",
       cidade: "Rio de Janeiro",
       estado: "RJ",
@@ -140,7 +140,7 @@ async function main() {
       {
         nome: "Caixa RJ 3",
         cpf: "999.999.999-99",
-        email: "  ",
+        email: "caixa3@rj.com ",
         senha_hash: senhaHash,
         telefone: "(99)99999-9999",
         perfil: "CAIXA",

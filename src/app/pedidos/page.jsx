@@ -156,7 +156,7 @@ export default function PedidosPage({ params }) {
   // --- Render principal ---
   return (
     <div className="container mx-auto py-8 max-w-3xl">
-      <h1 className="text-3xl font-bold mt-10">📝 Novo Pedido de Estoque</h1>
+      <h1 className="text-3xl font-bold mt-10">Novo Pedido de Estoque</h1>
 
       <small className="block font-semibold mt-10">
         Gerente ID: {userData.id} | Loja ID: {userData.loja_id} | Perfil: {userData.perfil}

@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { CheckCircle, Clock, Loader2 } from "lucide-react";
+import { CheckCircle, Clock, Loader2, XCircle } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { getLoggedUser } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -36,90 +35,119 @@ const methodTitles = {
   DINHEIRO: "Pagamento em Dinheiro",
 };
 
-// --- Componente Principal ---
 export default function PaymentForm({ method, TOTAL_VENDA }) {
   const router = useRouter();
-
-  
   const total = TOTAL_VENDA || 0;
-  const [formData, setFormData] = useState({ valorRecebido: total.toFixed(2) });
-  const [pixStatus, setPixStatus] = useState("Pendente");
+
+  const [formData, setFormData] = useState({ valorRecebido: total.toFixed(2), troco: 0 });
+  const [pixStatus, setPixStatus] = useState("Pendente"); // "Pendente" | "Processando" | "Confirmado" | "Expirado"
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [countdown, setCountdown] = useState(10);
 
   const fields = formFields[method] || [];
   const title = methodTitles[method] || "Método de Pagamento";
 
-  //  Pegar usuário logado
+  // --- Pegar usuário logado ---
   useEffect(() => {
     const user = getLoggedUser();
     if (user) setUserData(user);
   }, []);
 
-  // ---  Função Finalizar Venda no Servidor ---
-const finalizarVenda = async (data, methodType) => {
-  try {
-    setIsLoading(true);
-    const token = localStorage.getItem("token");
-    if (!token || !userData) return alert("Usuário não autenticado");
+  // --- Função Finalizar Venda ---
+  const finalizarVenda = async (data, methodType) => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token || !userData) return alert("Usuário não autenticado");
 
-    // Pega o carrinho
-    const resCarrinho = await fetch(`/api/carrinho?usuarioId=${userData.id}&lojaId=${userData.loja_id}`);
-    const carrinhoData = await resCarrinho.json();
-    if (!resCarrinho.ok || !carrinhoData.itens?.length) return alert("Carrinho vazio");
+      const resCarrinho = await fetch(`/api/carrinho?usuarioId=${userData.id}&lojaId=${userData.loja_id}`);
+      const carrinhoData = await resCarrinho.json();
+      if (!resCarrinho.ok || !carrinhoData.itens?.length) return alert("Carrinho vazio");
 
-    const itensCarrinho = carrinhoData.itens.map(item => ({
-      produto_id: item.produto.id,
-      quantidade: item.quantidade,
-      preco_unitario: item.preco_venda,
-      subtotal: item.quantidade * item.preco_venda,
-      pedidos: item.pedidos || "",
-    }));
+      const itensCarrinho = carrinhoData.itens.map((item) => ({
+        produto_id: item.produto.id,
+        quantidade: item.quantidade,
+        preco_unitario: item.preco_venda,
+        subtotal: item.quantidade * item.preco_venda,
+        pedidos: item.pedidos || "",
+      }));
 
-    const payload = {
-      usuarioId: userData.id,
-      lojaId: userData.loja_id,
-      caixaId: 1, // ou pegar dinamicamente o caixa aberto
-      itensCarrinho,
-      tipoPagamento: methodType,
-      detalhesPagamento: data,
-    };
+      const payload = {
+        usuarioId: userData.id,
+        lojaId: userData.loja_id,
+        caixaId: 1,
+        itensCarrinho,
+        tipoPagamento: methodType,
+        detalhesPagamento: {
+          ...data,
+          valorRecebido: parseFloat(formData.valorRecebido) || 0,
+          troco: troco,
+        },
+      };
 
-    const res = await fetch("/api/venda/finalizar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(payload),
-    });
+      const res = await fetch("/api/venda/finalizar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.message || "Erro ao finalizar venda");
-    alert("✅ Venda concluída com sucesso!");
-    router.push("/caixa");
-  } catch (err) {
-    console.error("Erro ao finalizar venda:", err);
-    alert("❌ Falha ao finalizar venda.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Erro ao finalizar venda");
 
-  // ---  QR Code PIX ---
+      alert("✅ Venda concluída com sucesso!");
+      router.push("/caixa");
+    } catch (err) {
+      console.error("Erro ao finalizar venda:", err);
+      alert("❌ Falha ao finalizar venda.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // --- Código PIX ---
+
+
   const pixCode =
     "00020126360014BR.GOV.BCB.PIX0114+55119999999952040000530398654045.005802BR5925NOME DO RECEBEDOR6009SAO PAULO62070503***6304ABCD";
 
-  // ---  Simulação do PIX (10s) ---
+  <p className="text-center text-lg"> Total: <strong className="text-green-600">R$ {total.toFixed(2)}</strong></p>
+
+  // --- Contagem regressiva PIX ---
   useEffect(() => {
     let timer;
     if (method === "PIX" && pixStatus === "Processando") {
-      timer = setTimeout(() => {
-        setPixStatus("Confirmado");
-        finalizarVenda(formData, "PIX");
-      }, 10000);
+      setCountdown(10);
+      timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setPixStatus("Expirado");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
-    return () => clearTimeout(timer);
+    return () => clearInterval(timer);
   }, [pixStatus, method]);
 
-  // ---  Lógica de exibição ---
+  // --- Simulação de pagamento PIX ---
+  useEffect(() => {
+    if (method === "PIX" && pixStatus === "Processando") {
+      const confirmTimeout = setTimeout(() => {
+        // simula pagamento confirmado no meio da contagem
+        setPixStatus("Confirmado");
+        finalizarVenda({}, "PIX");
+      }, 5000);
+      return () => clearTimeout(confirmTimeout);
+    }
+  }, [pixStatus, method]);
+
+  // --- Lógica de envio ---
   const handleSubmit = (e) => {
     e.preventDefault();
     if (method === "PIX") {
@@ -129,13 +157,17 @@ const finalizarVenda = async (data, methodType) => {
     finalizarVenda(formData, method);
   };
 
+  // --- Troco ---
   const troco = useMemo(() => {
     if (method !== "DINHEIRO") return 0;
     const recebido = parseFloat(formData.valorRecebido) || 0;
-    return recebido > total ? recebido - total : 0;
+    const calculado = recebido > total ? recebido - total : 0;
+    setFormData((prev) => ({ ...prev, troco: calculado }));
+    return calculado;
   }, [formData.valorRecebido, total, method]);
 
-  // ---  Renderização do método PIX ---
+  // --- Renderização PIX ---
+
   const renderPix = () => {
     let statusColor = "text-gray-500";
     let statusText = "Aguardando Pagamento...";
@@ -143,30 +175,37 @@ const finalizarVenda = async (data, methodType) => {
 
     if (pixStatus === "Processando") {
       statusColor = "text-yellow-600";
-      statusText = "Processando (10s)...";
+      statusText = `Processando pagamento... (${countdown}s)`;
       icon = <Loader2 className="w-12 h-12 text-yellow-600 animate-spin" />;
     } else if (pixStatus === "Confirmado") {
       statusColor = "text-green-600";
       statusText = "Pagamento Confirmado!";
       icon = <CheckCircle className="w-12 h-12 text-green-600" />;
+    } else if (pixStatus === "Expirado") {
+      statusColor = "text-red-600";
+      statusText = "⏰ Tempo esgotado! Tente novamente.";
+      icon = <XCircle className="w-12 h-12 text-red-600" />;
     }
 
     return (
       <div className="text-center space-y-4">
+
+         <p className="text-lg">
+          Total: R$ <strong className="text-green-600 font-bold">{total.toFixed(2)}</strong>
+        </p>
+
         <h3 className={`text-xl font-bold ${statusColor}`}>{statusText}</h3>
         <div className="flex justify-center">{icon}</div>
-        {pixStatus !== "Confirmado" && (
+
+        {pixStatus !== "Confirmado" && pixStatus !== "Expirado" && (
           <>
             <div className="flex justify-center my-4">
-              <div className="p-2 bg-white border-4 border-yellow-500 rounded-lg">
-                <QRCodeCanvas value={pixCode} size={180} />
+              <div className="p-3 bg-white border-4 border-yellow-500 rounded-lg shadow">
+                <QRCodeCanvas value={pixCode} size={200} />
               </div>
             </div>
             <Input readOnly value={pixCode} className="font-mono text-xs" />
-            <Button
-              className="w-full mt-2"
-              onClick={() => navigator.clipboard.writeText(pixCode)}
-            >
+            <Button className="w-full mt-2" onClick={() => navigator.clipboard.writeText(pixCode)}>
               Copiar Código
             </Button>
           </>
@@ -177,18 +216,21 @@ const finalizarVenda = async (data, methodType) => {
             Simular Pagamento (Iniciar)
           </Button>
         )}
-
         {pixStatus === "Processando" && (
           <Button disabled className="w-full mt-4">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Aguardando...
+          </Button>
+        )}
+        {pixStatus === "Expirado" && (
+          <Button className="w-full mt-4" onClick={() => setPixStatus("Pendente")}>
+            Tentar Novamente
           </Button>
         )}
       </div>
     );
   };
 
-  // ---  Render Principal ---
-  
+  // --- Render Principal ---
   return (
     <div className="flex justify-center w-full">
       <Card className="w-full max-w-lg shadow-lg">
@@ -199,31 +241,53 @@ const finalizarVenda = async (data, methodType) => {
           {method === "PIX" ? (
             renderPix()
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <p className="text-gray-600">
-                Total: <strong>R$ {total.toFixed(2)}</strong>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <p className="text-center text-lg">
+                Total: <strong className="text-green-600">R$ {total.toFixed(2)}</strong>
               </p>
-              {fields.map((f) => (
-                <div key={f.id} className="space-y-1">
-                  <Label htmlFor={f.id}>{f.label}</Label>
-                  <Input
-                    id={f.id}
-                    type={f.type}
-                    placeholder={f.placeholder}
-                    value={formData[f.id] || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, [e.target.id]: e.target.value })
-                    }
-                    disabled={isLoading}
-                  />
-                </div>
-              ))}
-              {method === "DINHEIRO" && (
-                <p className="font-bold text-green-600 text-center">
-                  Troco: R$ {troco.toFixed(2)}
-                </p>
-              )}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+
+              <div className="space-y-5">
+                {fields.map((f) => (
+                  <div key={f.id} className="space-y-2">
+                    <Label htmlFor={f.id} className="text-sm font-semibold">
+                      {f.label}
+                    </Label>
+                    <Input
+                      id={f.id}
+                      type={f.type}
+                      placeholder={f.placeholder}
+                      value={formData[f.id] || ""}
+                      onChange={(e) => setFormData({ ...formData, [e.target.id]: e.target.value })}
+                      disabled={isLoading}
+                    />
+                  </div>
+                ))}
+
+                {method === "DINHEIRO" && (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="valorRecebido" className="text-sm font-semibold mb-3">
+                        Valor Recebido
+                      </Label>
+                     
+                      <Input
+                        id="valorRecebido"
+                        type="number"
+                        step="0.01"
+                        value={formData.valorRecebido}
+                        onChange={(e) =>
+                          setFormData({ ...formData, valorRecebido: e.target.value })
+                        }
+                      />
+                    </div>
+                    <p className="text-center text-lg">
+                      Troco: <span className="font-bold text-yellow-700">R$ {troco.toFixed(2)}</span>
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full py-2 text-base" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Finalizar Venda
               </Button>
