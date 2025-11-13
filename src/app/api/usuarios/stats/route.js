@@ -47,17 +47,20 @@ export async function GET(req) {
           },
         });
 
-        // Calcula total de vendas
-        const totalVendas = vendas.reduce((sum, venda) => sum + venda.total, 0);
+        // ✅ CORREÇÃO: Converte Decimal para Number explicitamente
+        const totalVendas = vendas.reduce((sum, venda) => {
+          return sum + parseFloat(venda.total || 0);
+        }, 0);
 
-        // Calcula lucro (total - custo dos produtos)
+        // ✅ CORREÇÃO: Calcula lucro convertendo Decimals
         const lucro = vendas.reduce((sum, venda) => {
+          const totalVenda = parseFloat(venda.total || 0);
           const custoVenda = venda.vendaitem.reduce(
             (custoSum, item) =>
-              custoSum + item.quantidade * (item.produto?.custo || 0),
+              custoSum + item.quantidade * parseFloat(item.produto?.custo || 0),
             0
           );
-          return sum + (venda.total - custoVenda);
+          return sum + (totalVenda - custoVenda);
         }, 0);
 
         // Número de vendas

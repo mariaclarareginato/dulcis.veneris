@@ -131,7 +131,7 @@ export default function UsuariosPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-             R$ {Number(totais.faturamento).toFixed(2)}
+              R$ {Number(totais.faturamento).toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">em vendas</p>
           </CardContent>
