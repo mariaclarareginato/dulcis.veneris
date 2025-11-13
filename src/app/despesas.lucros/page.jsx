@@ -7,7 +7,7 @@ import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recha
 
 // CORES CORRIGIDAS: Verde (Lucro) no índice 0, Vermelho (Despesas) no índice 1
 // Isso evita que, se Despesas vier primeiro, ele pegue o verde.
-const COLORS = ["#16a34a", "#dc2626"]; // verde e vermelho
+const COLORS = ["#136130ff", "#852626ff"]; // verde e vermelho
 
 export default function FinanceiroPage() {
   const [dados, setDados] = useState(null);
@@ -108,8 +108,8 @@ export default function FinanceiroPage() {
               <span
                 className={
                   margemLucro >= 0
-                    ? "text-green-500 font-bold"
-                    : "text-red-500 font-bold"
+                    ? "text-green-700 font-extrabold"
+                    : "text-red-700 font-extrabold"
                 }
               >
                 {margemLucro.toFixed(2)}%
