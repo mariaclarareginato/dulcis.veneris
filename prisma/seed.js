@@ -148,6 +148,21 @@ async function main() {
       },
     ],
   });
+console.log("💵 Criando despesas fixas...");
+  const despesasfixas = await prisma.despesa.createMany({
+    data: [
+      {
+  "loja_id": 1,
+  "tipo": "FIXA",
+  "descricao": "Fatura de Internet - Nov/2025",
+  "valor": 150.00,
+  "data_vencimento": "2025-11-15T00:00:00.000Z",
+  "pago": true
+},
+
+]
+  })
+
 
   // ----------------------------
   // 4. Criar produtos

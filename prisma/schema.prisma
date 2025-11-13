@@ -25,18 +25,18 @@ venda                 venda[]
 }
 
 model despesa {
-id                    Int       @id @default(autoincrement())
-loja_id               Int
-tipo                  String
-descricao             String
-valor                 Float
-data_vencimento       DateTime
-pago                  Boolean   @default(false)
-data_pagamento        DateTime?
-loja                  loja      @relation(fields: [loja_id], references: [id], map: "Despesa_loja_id_fkey")
-fornecedorpagamento fornecedorpagamento[]
+  id                    Int             @id @default(autoincrement())
+  loja_id               Int
+  tipo                  TipoDespesa     // ⬅️ ALTERADO PARA USAR O ENUM
+  descricao             String
+  valor                 Decimal         @db.Decimal(10, 2) // ⬅️ ALTERADO PARA DECIMAL (Importante para dinheiro!)
+  data_vencimento       DateTime
+  pago                  Boolean         @default(false)
+  data_pagamento        DateTime?
+  loja                  loja            @relation(fields: [loja_id], references: [id], map: "Despesa_loja_id_fkey")
+  fornecedorpagamento fornecedorpagamento[]
 
-@@index([loja_id], map: "Despesa_loja_id_fkey")
+  @@index([loja_id], map: "Despesa_loja_id_fkey")
 }
 
 model estoque {
@@ -238,4 +238,11 @@ PENDENTE
 EM_PROCESSAMENTO
 ENVIADO
 CANCELADO
+}
+
+enum TipoDespesa {
+  FIXA // Para Aluguel, Internet, Água, Energia, Salários, etc.
+  CUSTO_PEDIDO // Para despesas específicas relacionadas ao processo de pedido (ex: frete de recebimento)
+  VARIAVEL // Ex: Comissões, Frete de Vendas
+  OUTRA
 }
