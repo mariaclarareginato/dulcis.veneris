@@ -57,7 +57,7 @@ else if (data.user.perfil === "ADMIN") router.push("/matriz")
 <CardHeader>
 <CardTitle className="text-center text-red-500 font-bold text-[30px]">Bem vindo!</CardTitle>
 <CardDescription>
-Digite suas informações para acessar nosso site de caixa e gerenciamento de lojas:
+Digite suas informações para acessar nosso site gerenciador das nossas lojas e caixas:
 </CardDescription>
  </CardHeader>
 <CardContent>

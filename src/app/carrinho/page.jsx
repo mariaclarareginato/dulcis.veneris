@@ -116,17 +116,6 @@ export default function Carrinho({ produtos = [] }) {
       </h2>
 
 
-      {carrinho.length > 0 && (
-        <div className="mt-8 flex flex-col items-end">
-
-          <Button
-            onClick={() => router.push("/caixa")}
-            className="text-base sm:text-lg md:text-xl font-bold w-full sm:w-auto px-6 py-3 mb-8 sm:m-6 md:m-12 rounded-2xl shadow-md transition-all"
-          >
-            Adicionar produtos +
-          </Button>
-        </div>
-      )}
 
 
       {carrinho.length === 0 ? (
