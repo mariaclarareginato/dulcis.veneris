@@ -101,12 +101,20 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
       alert("✅ Venda concluída com sucesso!");
       router.push("/caixa");
     } catch (err) {
-      console.error("Erro ao finalizar venda:", err);
-      alert("❌ Falha ao finalizar venda.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  console.error("Erro ao finalizar venda:", err);
+  
+  // Verifica se o método de pagamento é PIX e ajusta a mensagem
+  const errorMessage = 
+    methodType === "PIX" 
+      ? "⏰ Tempo esgotado! Tente novamente." 
+      : "❌ Falha ao finalizar venda.";
+      
+  alert(errorMessage);
+  
+} finally {
+  setIsLoading(false);
+}
+};
 
   // --- Código PIX ---
 
@@ -135,17 +143,19 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
     return () => clearInterval(timer);
   }, [pixStatus, method]);
 
-  // --- Simulação de pagamento PIX ---
-  useEffect(() => {
-    if (method === "PIX" && pixStatus === "Processando") {
-      const confirmTimeout = setTimeout(() => {
-        // simula pagamento confirmado no meio da contagem
-        setPixStatus("Confirmado");
-        finalizarVenda({}, "PIX");
-      }, 5000);
-      return () => clearTimeout(confirmTimeout);
-    }
-  }, [pixStatus, method]);
+
+// --- Simulação de pagamento PIX ---
+ useEffect(() => {
+ if (method === "PIX" && pixStatus === "Processando") {
+ const confirmTimeout = setTimeout(() => {
+ // Apenas tenta finalizar a venda. O status visual só muda
+ // se a finalização na API for bem-sucedida (o que não ocorre aqui).
+ finalizarVenda({}, "PIX");
+ }, 5000);
+ return () => clearTimeout(confirmTimeout);
+ }
+ }, [pixStatus, method]);
+
 
   // --- Lógica de envio ---
   const handleSubmit = (e) => {

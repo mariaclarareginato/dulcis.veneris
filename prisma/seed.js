@@ -14,6 +14,30 @@ async function main() {
 ]);
 
 
+// --- Lógica para obter a data do mês atual ---
+
+const dataAtual = new Date();
+const ano = dataAtual.getFullYear();
+// getMonth() retorna de 0 (Janeiro) a 11 (Dezembro), por isso somamos 1.
+const mesNumero = dataAtual.getMonth() + 1; 
+const nomeMes = dataAtual.toLocaleString('pt-BR', { month: 'long' }); // Ex: "novembro"
+
+// Formata o mês para ter 2 dígitos (ex: 01, 10, 11)
+const mesFormatado = mesNumero.toString().padStart(2, '0');
+
+// --- Definição das Datas de Vencimento ---
+// Usaremos o dia 5 para Salários e o dia 15 para as contas de consumo/Aluguel.
+
+const diaVencimentoContas = 15;
+const diaVencimentoSalario = 5;
+
+// Estrutura yyyy-mm-ddT00:00:00.000Z para as contas (dia 15)
+const dataVencimentoContasStr = `${ano}-${mesFormatado}-${diaVencimentoContas.toString().padStart(2, '0')}T00:00:00.000Z`;
+
+// Estrutura yyyy-mm-ddT00:00:00.000Z para os salários (dia 5)
+const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.toString().padStart(2, '0')}T00:00:00.000Z`;
+
+
 
   console.log("🏪 Criando lojas...");
 
@@ -148,21 +172,60 @@ async function main() {
       },
     ],
   });
-console.log("💵 Criando despesas fixas...");
-  const despesasfixas = await prisma.despesa.createMany({
-    data: [
-      {
-  "loja_id": 1,
+
+
+// (Despesas)
+
+console.log("💵 Criando despesas fixas para a Loja 1 e Loja 2...");
+
+// Define o array base das despesas (inicialmente Loja 1)
+const despesasBase = [
+ {
+ "tipo": "FIXA",
+ "descricao": `Aluguel da Loja - ${nomeMes}/${ano}`,
+ "valor": 2500.00,
+ "data_vencimento": dataVencimentoContasStr,
+ "pago": false
+ },
+ {
+ "tipo": "FIXA",
+ "descricao": `Fatura de Internet - ${nomeMes}/${ano}`,
+ "valor": 500.00,
+ "data_vencimento": dataVencimentoContasStr,
+ "pago": false
+ },
+ {
   "tipo": "FIXA",
-  "descricao": "Fatura de Internet - Nov/2025",
-  "valor": 150.00,
-  "data_vencimento": "2025-11-15T00:00:00.000Z",
-  "pago": true
-},
+ "descricao": `Conta de Água - ${nomeMes}/${ano}`,
+ "valor": 1000.00,
+ "data_vencimento": dataVencimentoContasStr,
+ "pago": false
+ },
+ {
+ "tipo": "FIXA",
+ "descricao": `Conta de Luz/Energia - ${nomeMes}/${ano}`,
+ "valor": 1000.00,
+ "data_vencimento": dataVencimentoContasStr,
+ "pago": false
+ },
+ {
+ "tipo": "FIXA",
+ "descricao": `Salários dos Funcionários - ${nomeMes}/${ano}`,
+ "valor": 5000.00,
+ "data_vencimento": dataVencimentoSalarioStr, // Vencimento no dia 5
+ "pago": false
+ },
+];
 
-]
-  })
+// Cria os dados finais, mapeando para Loja 1 e Loja 2
+const despesasLoja1 = despesasBase.map(d => ({ ...d, loja_id: 2 }));
+const despesasLoja2 = despesasBase.map(d => ({ ...d, loja_id: 3 }));
 
+const despesasfixas = await prisma.despesa.createMany({
+ data: [...despesasLoja1, ...despesasLoja2], // Combina os dados
+ skipDuplicates: true,
+});
+console.log(`✅ ${despesasfixas.count} despesas fixas criadas (Loja 1 e Loja 2).`);
 
   // ----------------------------
   // 4. Criar produtos
@@ -176,8 +239,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "A linha Clássicos Dulce Venere representa a essência e a tradição da marca, sendo os verdadeiros carros-chefe e os mais vendidos do nosso portfólio. Reúne os sabores que encantam diferentes paladares e atravessam gerações. Composta pelo Chocolate ao Leite, cremoso e equilibrado; o Chocolate Meio-Amargo 70% Cacau, intenso e sofisticado; e o Chocolate Branco, delicado e aveludado, essa seleção foi criada para oferecer experiências únicas em cada mordida. Uma verdadeira celebração do cacau em suas formas mais apreciadas, unindo tradição, qualidade e prazer em cada detalhe.",
         img: "/catalogo/chocolates.png",
-        preco_venda: 40.0,
-        custo: 70.0,
+        preco_venda: 70.0,
+        custo: 40.0,
         categoria: "Chocolates",
       },
       {
@@ -187,8 +250,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Um encontro perfeito entre intensidade e frescor. O Chocolate Meio-Amargo 70% Cacau com Laranja e Mel Dulce Venere combina o sabor marcante do cacau de alta qualidade com notas cítricas delicadas da laranja. O resultado é uma barra sofisticada, equilibrada e refrescante, que proporciona uma experiência sensorial única e inesquecível.",
         img: "/catalogo/chocolate4.png",
-        preco_venda: 60.0,
-        custo: 90.0,
+        preco_venda: 90.0,
+        custo: 80.0,
         categoria: "Chocolates",
       },
       {
@@ -198,8 +261,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "O Chocolate Cecilia é a união perfeita entre suavidade e frescor. Elaborado com chocolate branco de altíssima qualidade e um toque cítrico vibrante, oferece uma experiência cremosa, delicada e surpreendente. Cada pedaço revela uma combinação única de doçura aveludada e notas refrescantes, trazendo leveza e elegância em cada mordida.",
         img: "/catalogo/chocolate5.png",
-        preco_venda: 50.0,
-        custo: 95.0,
+        preco_venda: 100.0,
+        custo: 90.0,
         categoria: "Chocolates",
       },
       {
@@ -209,8 +272,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "O Chocolate Expresso é a escolha ideal para os amantes de sabores intensos. Combinando o cacau nobre ao aroma marcante do café expresso, resulta em uma barra sofisticada, envolvente e energizante. A fusão do amargor equilibrado com a cremosidade do chocolate cria uma experiência sensorial única, perfeita para quem aprecia prazer e intensidade em cada detalhe.",
         img: "/catalogo/chocolate6.png",
-        preco_venda: 50.0,
-        custo: 95.0,
+        preco_venda: 100.0,
+        custo: 90.0,
         categoria: "Chocolates",
       },
       {
@@ -220,8 +283,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Uma combinação irresistível de contrastes. O Chocolate Caramelo & Flor de Sal Dulce Venere une a intensidade do cacau nobre ao dulçor cremoso do caramelo, equilibrado pelo toque sofisticado da flor de sal. Essa harmonia perfeita entre doce e salgado proporciona uma explosão de sabor que surpreende o paladar e transforma cada mordida em uma experiência gourmet inesquecível.",
         img: "/catalogo/chocolate7.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -231,8 +294,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Refinado e vibrante, o Chocolate Branco com Frutas Vermelhas Dulce Venere combina a suavidade cremosa do chocolate branco com a intensidade das frutas vermelhas. O contraste perfeito entre a doçura delicada e a acidez natural das frutas cria uma experiência sofisticada, fresca e inesquecível. Cada pedaço é um convite ao prazer e à elegância, transformando momentos simples em celebrações de sabor.",
         img: "/catalogo/chocolate8.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -242,8 +305,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Com um toque de luxo e uma alma clássica, o Chocolate ao Leite com Avelã Dulce Venere é a perfeita fusão da riqueza do chocolate cremoso com o recheio aveludado de avelã. A combinação sublime entre a suavidade do chocolate e o sabor marcante e profundo da avelã resulta numa experiência de degustação memorável. É uma celebração de puro deleite e requinte.",
         img: "/catalogo/chocolate9.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -253,8 +316,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Uma combinação ousada e refrescante, o Chocolate ao Leite com Maracujá Dulce Venere surpreende ao unir a doçura familiar do chocolate ao leite com a explosão de acidez e frescor do maracujá. O contraste vibrante de sabores cria uma jornada sensorial única, que é tanto cativante quanto elegante. Cada mordida é um convite para uma descoberta de sabor.",
         img: "/catalogo/chocolate10.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -264,8 +327,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Com sua personalidade única e sabor inconfundível, o Chocolate ao Leite com Pistache Dulce Venere é a definição de indulgência sofisticada. A suavidade aveludada do chocolate ao leite encontra o sabor delicado e a crocância sutil do pistache, criando uma harmonia de texturas e paladares. O resultado é uma experiência de degustação rara, que celebra a união de ingredientes clássicos de uma forma moderna e irresistível.",
         img: "/catalogo/chocolate11.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -275,8 +338,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Uma celebração de sabores clássicos, o Chocolate ao Leite com Baunilha Dulce Venere combina a riqueza aveludada do chocolate com o aroma e o sabor reconfortantes da baunilha. A fusão da cremosidade do chocolate com as notas sutis e doces da baunilha cria uma experiência de degustação suave e indulgente. É a perfeita união de simplicidade e sofisticação, transformando cada pedaço em um momento de puro prazer.",
         img: "/catalogo/chocolate12.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -286,8 +349,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Uma combinação tropical e indulgente, o Chocolate ao Leite com Coco Dulce Venere evoca a união perfeita entre a riqueza aveludada do chocolate e a leveza e frescor do coco. O contraste entre a intensidade do cacau e a doçura suave e exótica do recheio cria uma experiência de degustação que é ao mesmo tempo ousada e reconfortante. É a perfeita celebração de um sabor clássico com um toque de paraíso.",
         img: "/catalogo/chocolate13.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -297,8 +360,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Um deleite com personalidade e conforto, o Chocolate ao Leite com Amendoim Dulce Venere é a celebração da união perfeita entre a suavidade do chocolate e a riqueza salgada e aveludada do amendoim. A fusão da doçura com a textura e o sabor marcante do amendoim cria uma experiência de degustação inesquecível, que é ao mesmo tempo familiar e sofisticada. Cada mordida é um convite para o prazer de uma combinação atemporal.",
         img: "/catalogo/chocolate14.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -308,8 +371,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Um abraço em forma de chocolate, o Chocolate ao Leite com Doce de Leite Dulce Venere celebra a união perfeita da riqueza aveludada do chocolate com a doçura e cremosidade clássicas do doce de leite. A fusão da intensidade do cacau com o sabor familiar e reconfortante do doce de leite cria uma experiência de degustação luxuosa, mas ao mesmo tempo acolhedora.",
         img: "/catalogo/chocolate15.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -319,8 +382,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Uma delícia ousada e cheia de personalidade, o Chocolate ao Leite com Cheesecake de Morango Dulce Venere desafia o paladar com a combinação da doçura familiar do chocolate ao leite e a acidez suave e irresistível do cheesecake de morango. A fusão de texturas - a cremosidade do chocolate e o recheio aveludado - cria uma experiência gastronômica que é pura inovação e requinte.",
         img: "/catalogo/chocolate16.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -330,8 +393,8 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Uma combinação lúdica e sofisticada, o Chocolate ao Leite com Recheio Cremoso e Crocante de Kinder Bueno Dulce Venere é a união perfeita da riqueza do chocolate com uma textura surpreendente. A suavidade do recheio cremoso contrasta com a leveza e a crocância de cada pedaço, criando uma experiência de degustação que é tanto nostálgica quanto elegante. Cada mordida é uma viagem de volta a um sabor inesquecível, mas com um toque de requinte.",
         img: "/catalogo/chocolate17.png",
-        preco_venda: 45.0,
-        custo: 80.0,
+        preco_venda: 60.0,
+        custo: 45.0,
         categoria: "Chocolates",
       },
       {
@@ -396,7 +459,7 @@ console.log("💵 Criando despesas fixas...");
         descricao:
           "Uma jornada de sabores em uma única caixa. Nosso Kit Degustação é uma seleção exclusiva dos mais deliciosos pães de mel, cuidadosamente criados para uma experiência sensorial completa. Desvende a complexidade de cada recheio e a riqueza das nossas coberturas artesanais. Ideal para presentear ou para desfrutar de momentos de pura indulgência, este kit convida você a explorar o melhor da linha Nectar Veneris.",
         img: "/catalogo/menud.png",
-        preco_venda: 65.0,
+        preco_venda: 80.0,
         custo: 38.0,
         categoria: "paes-de-mel",
       },

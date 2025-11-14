@@ -113,32 +113,7 @@ export default function Pagamento() {
     );
   }
 
-  //  1. Tela de sucesso
-  if (successMessage) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-lg shadow-2xl border-green-500 border-4 rounded-2xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl text-green-600">
-              ✅ Pagamento Concluído!
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p className="text-lg">Transação finalizada com sucesso.</p>
-            <p className="text-2xl font-bold text-gray-800">
-              Código da Venda: #{successMessage.id}
-            </p>
-            <p className="text-md text-gray-600">
-              Método de Pagamento: {methodTitles[successMessage.metodo]}
-            </p>
-            <Button onClick={startNewSale} className="w-full mt-4 text-lg rounded-xl">
-              Iniciar Nova Venda
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+ 
 
   //  2. Tela do formulário do método
   if (selectedMethod) {
@@ -150,7 +125,7 @@ export default function Pagamento() {
           className="mb-6 rounded-xl"
           disabled={isFinalizandoVenda}
         >
-          &larr; Voltar aos Métodos
+          &larr; Voltar aos métodos
         </Button>
         <PaymentForm
           method={selectedMethod}
@@ -165,6 +140,17 @@ export default function Pagamento() {
   //  3. Tela inicial de seleção de método
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
+
+      <div className="absolute left-10 top-20">
+  <Button
+    variant="ghost"
+    onClick={() => router.push("/caixa")}
+    className="rounded-full p-1 font-extrabold"
+  >
+      ← Voltar 
+  </Button>
+</div>
+
       <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-center">
         Selecione o método de pagamento:
       </h1>

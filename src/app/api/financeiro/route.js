@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
-// O Prisma Client agora tem acesso ao enum TipoDespesa
 const prisma = new PrismaClient();
 
 export async function GET(req) {
@@ -16,84 +15,74 @@ export async function GET(req) {
       );
     }
 
-    // --- 1. SOMAS DE DESPESAS PAGAS ---
-    // Consulta para as Despesas Fixas (inclui Aluguel, Água, Energia, INTERNET, etc.)
-    const despesasFixasResult = await prisma.despesa.aggregate({
-      _sum: { valor: true },
-      where: { loja_id: lojaId, pago: true, tipo: "FIXA" },
-    });
+    // Corrige fuso (UTC)
+    const now = new Date();
+    const firstDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const lastDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59));
 
-    // Consulta para o Custo de Pedido (se for uma despesa operacional, como frete de recebimento)
-    const custoPedidoResult = await prisma.despesa.aggregate({
-        _sum: { valor: true },
-        where: { loja_id: lojaId, pago: true, tipo: "CUSTO_PEDIDO" },
-    });
-
-    // Consulta para TODAS as despesas pagas (para o cálculo do lucro líquido)
-    const totalDespesasResult = await prisma.despesa.aggregate({
-      _sum: { valor: true },
-      where: { loja_id: lojaId, pago: true },
-    });
-    
-    // --- 2. CÁLCULO DO CUSTO DOS PRODUTOS VENDIDOS (CMV) ---
-    // Buscar itens das vendas finalizadas e incluir o custo dos produtos
-    const vendaItens = await prisma.vendaitem.findMany({
+    // TOTAL VENDAS
+    const vendas = await prisma.venda.aggregate({
+      _sum: { total: true },
       where: {
-        venda: { loja_id: lojaId, status: "FINALIZADA" },
+        loja_id: lojaId,
+        status: "FINALIZADA",
       },
-      include: { produto: true },
     });
 
-    // Calcular o Custo da Mercadoria Vendida (CMV)
-    const custoProdutosVendidos = vendaItens.reduce(
-      (sum, item) => sum + Number(item.quantidade) * (Number(item.produto?.custo) || 0),
+    const totalVendas = Number(vendas._sum.total || 0);
+
+    // CMV
+    const cmv = await prisma.venda.aggregate({
+      _sum: { cmv: true },
+      where: {
+        loja_id: lojaId,
+        status: "FINALIZADA",
+      },
+    });
+
+    const totalCMV = Number(cmv._sum.cmv || 0);
+
+    // Despesas PENDENTES do mês
+    const despesasPendentes = await prisma.despesa.findMany({
+      where: {
+        loja_id: lojaId,
+        pago: false,
+        data_vencimento: {
+          gte: firstDay,
+          lte: lastDay,
+        },
+      },
+      orderBy: { data_vencimento: "asc" },
+    });
+
+    const totalDespesasPendentes = despesasPendentes.reduce(
+      (acc, d) => acc + Number(d.valor || 0),
       0
     );
 
-    // --- 3. SOMA DAS VENDAS FINALIZADAS (RECEITA) ---
-    const totalVendasResult = await prisma.venda.aggregate({
-      _sum: { total: true },
-      where: { loja_id: lojaId, status: "FINALIZADA" },
-    });
+    // Cálculos finais
+    const lucro = totalVendas - (totalCMV + totalDespesasPendentes);
+    const margemLucro =
+      totalVendas > 0 ? ((lucro / totalVendas) * 100).toFixed(2) : "0.00";
 
-    // --- 4. PREPARAR VALORES E CALCULAR LUCRO ---
-    
-    // Convertendo resultados para números seguros (o Prisma retorna Decimal, que é manipulado como string/object)
-    const vendas = Number(totalVendasResult._sum.total) || 0;
-    const custo = custoProdutosVendidos || 0;
-    
-    const todasDespesas = Number(totalDespesasResult._sum.valor) || 0;
-    const despesasFixas = Number(despesasFixasResult._sum.valor) || 0;
-    const custoPedido = Number(custoPedidoResult._sum.valor) || 0;
-
-    // Lucro Líquido = Vendas - (CMV + Todas as Despesas Operacionais Pagas)
-    const lucro = vendas - (custo + todasDespesas);
-    const margemLucro = vendas > 0 ? ((lucro / vendas) * 100).toFixed(1) : 0;
-
-    // --- 5. NOME DA LOJA ---
     const loja = await prisma.loja.findUnique({
       where: { id: lojaId },
       select: { nome: true },
     });
 
-    // --- 6. RETORNO ---
     return NextResponse.json({
-      loja: loja?.nome || "Loja desconhecida",
-      totalVendas: vendas,
-      
-      // Detalhamento das despesas
-      totalDespesas: todasDespesas, // Total usado no cálculo do lucro
-      despesasFixas: despesasFixas,
-      custoPedido: custoPedido, // Novo campo de despesa isolado
-
-      custoProdutos: custo,
+      loja: loja?.nome || "Loja",
+      totalVendas,
+      totalCMV,
+      totalDespesasPendentes,
       lucro,
       margemLucro,
+      despesasPendentes,
     });
   } catch (error) {
-    console.error("Erro ao buscar dados financeiros:", error);
+    console.error("❌ Erro financeiro:", error);
     return NextResponse.json(
-      { message: "Erro interno do servidor" },
+      { message: "Erro interno", error: error.message },
       { status: 500 }
     );
   }

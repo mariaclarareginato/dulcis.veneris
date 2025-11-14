@@ -60,6 +60,79 @@ export default function UsuariosPage() {
     fetchUsuarios();
   }, [userData]);
 
+
+  // Função para gerar pdf
+
+  async function gerarPDF() {
+  const { jsPDF } = await import("jspdf");
+  const autoTable = (await import("jspdf-autotable")).default;
+
+  const doc = new jsPDF();
+
+  // Logo
+  const img = await fetch("/logos/logo2.png")
+    .then((res) => res.blob())
+    .then((b) => convertBlobToBase64(b));
+
+  doc.addImage(img, "PNG", 70, 10, 70, 40);
+
+  // Título
+  doc.setFontSize(18);
+  doc.text(
+    `Desempenho dos Caixas — ${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)} ${anoAtual}`,
+    105,
+    60,
+    { align: "center" }
+  );
+
+  // Totais
+  autoTable(doc, {
+    startY: 80,
+    head: [["Indicador", "Valor"]],
+    body: [
+      ["Total de Vendas", totais.vendas],
+      ["Faturamento Total", `R$ ${totais.faturamento.toFixed(2)}`],
+      ["Lucro Total", `R$ ${totais.lucro.toFixed(2)}`],
+    ],
+    headStyles: {
+      fillColor: "darkred",
+  
+    }
+  });
+
+  // Tabela usuários
+  autoTable(doc, {
+    startY: doc.lastAutoTable.finalY + 15,
+    head: [["Nome", "Email", "Vendas", "Faturamento", "Lucro"]],
+    body: usuarios.map((u) => [
+      u.nome,
+      u.email,
+      u.stats.numeroVendas,
+      `R$ ${u.stats.totalVendas.toFixed(2)}`,
+      `R$ ${u.stats.lucro.toFixed(2)}`,
+    ]),
+    headStyles: {
+      fillColor: "darkred",
+    }
+  });
+
+  doc.save(`desempenhocaixas-${nomeMes}-${anoAtual}.pdf`);
+}
+
+function convertBlobToBase64(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Mês e ano atuais
+
+const nomeMes = new Date().toLocaleString("pt-BR", { month: "long" });
+const anoAtual = new Date().getFullYear();
+
+
   // Estados de carregamento e erro
   if (!userData || loading) {
     return (
@@ -95,14 +168,14 @@ export default function UsuariosPage() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:justify-between gap-4 md:items-center ">
         <div>
           <h1 className="text-3xl font-bold">Desempenho dos Caixas</h1>
           <p className="text-muted-foreground mt-2">
             Acompanhe o desempenho dos seus caixas e registre novos usuários
           </p>
         </div>
-        <Button onClick={() => router.push("/registro")}>
+        <Button className="w-full md:w-auto" onClick={() => router.push("/registro")}>
           <strong className="font-bold">Registrar novo usuário</strong>
         </Button>
       </div>
@@ -165,10 +238,10 @@ export default function UsuariosPage() {
           {usuarios.map((usuario, index) => (
             <Card
               key={usuario.id}
-              className="hover:shadow-lg transition-shadow"
+              className="hover:shadow-lg transition-shadow p-2"
             >
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary/10 p-3 rounded-full">
                       <User className="w-6 h-6 text-primary" />
@@ -264,6 +337,13 @@ export default function UsuariosPage() {
           ))}
         </div>
       )}
+
+      <div className="flex justify-center mt-10">
+  <Button onClick={gerarPDF}>
+    Gerar PDF
+  </Button>
+</div>
+
     </div>
   );
 }
