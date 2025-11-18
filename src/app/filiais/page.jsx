@@ -112,7 +112,7 @@ export default function MatrizPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Gestão de Filiais</h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-2 font-bold">
             Visão completa de todas as operações das filiais
           </p>
         </div>
@@ -456,7 +456,15 @@ export default function MatrizPage() {
               </CardContent>
             )}
           </Card>
+
         ))}
+
+            <div className="flex justify-center mt-10">
+  <Button onClick={() => router.push('/registro') }>
+   Criar novo Usuário
+  </Button>
+</div>
+
       </div>
     </div>
   );

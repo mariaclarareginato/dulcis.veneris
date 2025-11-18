@@ -129,6 +129,7 @@ estoque         estoque[]
 logauditoria    logauditoria[]
 vendaitem       vendaitem[]
 itempedido      itempedido[]
+ativo Boolean @default(true)
 }
 
 model usuario {
