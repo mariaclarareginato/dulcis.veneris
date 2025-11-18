@@ -44,7 +44,7 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
   const lojaMatriz = await prisma.loja.create({
     data: {
       nome: "Dulcis Veneris - Matriz",
-      endereco: "Doutor Januário Miraglia, 120",
+      endereco: "Av. Sen. Roberto Simonsen - Capivari, Campos do Jordão - SP",
       cidade: "Campos do Jordão",
       estado: "SP",
       tipo: "MATRIZ",
@@ -54,7 +54,7 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
   const lojaSP = await prisma.loja.create({
     data: {
       nome: "Dulcis Veneris - São Paulo",
-      endereco: "Rua das Amêndoas, 120",
+      endereco: "Av. Higienópolis - Higienópolis, São Paulo - SP",
       cidade: "São Paulo",
       estado: "SP",
       tipo: "FILIAL",
@@ -64,12 +64,27 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
   const lojaRJ = await prisma.loja.create({
     data: {
       nome: "Dulcis Veneris - Rio de Janeiro",
-      endereco: "Avenida Cacau, 87",
+      endereco: "Av. Epitácio Pessoa - Lagoa, Rio de Janeiro - RJ",
       cidade: "Rio de Janeiro",
       estado: "RJ",
       tipo: "FILIAL",
     },
   });
+
+   const lojaBH = await prisma.loja.create({
+    data: {
+      nome: "Dulcis Veneris - Belo Horizonte",
+      endereco: "Praça da Liberdade - Funcionários, Belo Horizonte - MG",
+      cidade: "Belo Horizonte",
+      estado: "MG",
+      tipo: "FILIAL",
+    },
+  });
+
+
+
+  /// Usuários ///
+
 
   console.log("Criando usuários...");
 
@@ -89,6 +104,7 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
   });
 
   // Gerentes
+
   const gerenteSP = await prisma.usuario.create({
     data: {
       nome: "Gustavo",
@@ -113,7 +129,20 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
     },
   });
 
+    const gerenteBH = await prisma.usuario.create({
+    data: {
+      nome: "Marcela",
+      cpf: "888.888.888-88",
+      email: "marcela@email.com",
+      senha_hash: senhaHash,
+      telefone: "(44)44444-4444",
+      perfil: "GERENTE",
+      loja_id: lojaBH.id,
+    },
+  });
+
   // Caixas
+
   await prisma.usuario.createMany({
     data: [
       {
@@ -154,7 +183,7 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
       },
       {
         nome: "Caixa RJ 2",
-        cpf: "888.888.888-88",
+        cpf: "888.888.888-80",
         email: "caixa2@rj.com",
         senha_hash: senhaHash,
         telefone: "(88)88888-8888",
@@ -163,20 +192,47 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
       },
       {
         nome: "Caixa RJ 3",
-        cpf: "999.999.999-99",
+        cpf: "999.999.999-90",
         email: "caixa3@rj.com ",
         senha_hash: senhaHash,
         telefone: "(99)99999-9999",
         perfil: "CAIXA",
         loja_id: lojaRJ.id,
       },
+           {
+        nome: "Caixa BH 1",
+        cpf: "333.333.333-30",
+        email: "caixa1@bh.com",
+        senha_hash: senhaHash,
+        telefone: "(55)55555-5555",
+        perfil: "CAIXA",
+        loja_id: lojaBH.id,
+      },
+      {
+        nome: "Caixa BH 2",
+        cpf: "111.111.111-10",
+        email: "caixa2@bh.com",
+        senha_hash: senhaHash,
+        telefone: "(88)88888-8888",
+        perfil: "CAIXA",
+        loja_id: lojaBH.id,
+      },
+      {
+        nome: "Caixa BH 3",
+        cpf: "222.222.222-20",
+        email: "caixa3@bh.com ",
+        senha_hash: senhaHash,
+        telefone: "(22)22222-2222",
+        perfil: "CAIXA",
+        loja_id: lojaBH.id,
+      },
     ],
   });
 
 
-// (Despesas)
+// (Despesas) //
 
-console.log("💵 Criando despesas fixas para a Loja 1 e Loja 2...");
+console.log("💵 Criando despesas fixas para as filiais...");
 
 // Define o array base das despesas (inicialmente Loja 1)
 const despesasBase = [
@@ -217,19 +273,22 @@ const despesasBase = [
  },
 ];
 
-// Cria os dados finais, mapeando para Loja 1 e Loja 2
-const despesasLoja1 = despesasBase.map(d => ({ ...d, loja_id: 2 }));
-const despesasLoja2 = despesasBase.map(d => ({ ...d, loja_id: 3 }));
+// Cria os dados finais, mapeando para FILIAIS
+
+const despesasLojabh = despesasBase.map(d => ({ ...d,loja_id: lojaBH.id, descricao: `${d.descricao} - BH`}));
+const despesasLojarj = despesasBase.map(d => ({ ...d, loja_id: lojaRJ.id, descricao: `${d.descricao} - RJ`}));
+const despesasLojasp = despesasBase.map(d => ({ ...d, loja_id: lojaSP.id, descricao: `${d.descricao} - SP`}));
 
 const despesasfixas = await prisma.despesa.createMany({
- data: [...despesasLoja1, ...despesasLoja2], // Combina os dados
+ data: [...despesasLojarj, ...despesasLojasp, ...despesasLojabh], // Combina os dados
  skipDuplicates: true,
 });
-console.log(`✅ ${despesasfixas.count} despesas fixas criadas (Loja 1 e Loja 2).`);
+console.log(`✅ ${despesasfixas.count} despesas fixas criadas para as filiais.`);
 
-  // ----------------------------
-  // 4. Criar produtos
-  // ----------------------------
+
+  
+  //  Criar produtos //
+
   console.log("🍫 Criando produtos...");
   const produtosData = [
       {
@@ -435,7 +494,7 @@ console.log(`✅ ${despesasfixas.count} despesas fixas criadas (Loja 1 e Loja 2)
         codigo: "COD019",
         nome: "Pão de Mel de Leite Ninho",
         descricao:
-          "Experimente a paixão em cada mordida com o nosso Pão de Mel Frutas do Bosque. Um recheio vibrante de frutas vermelhas frescas – framboesas e cerejas – oferece uma explosão agridoce que dança em perfeita harmonia com a intensidade do chocolate amargo que o envolve. Finalizado com um toque de pó de ouro, esta é uma ode à frescura e ao contraste de sabores, uma experiência audaciosa e memorável.",
+          "Uma explosão de cremosidade e suavidade. O Pão de Mel de Leite Ninho traz um recheio generoso e macio feito com leite ninho, oferecendo um sabor doce, leve e aconchegante. Envolto em chocolate branco de alta qualidade e finalizado com detalhes delicados, é a escolha perfeita para quem ama combinações suaves e inesquecíveis.",
         img: "/catalogo/paomel4.png",
         preco_venda: 35.0,
         custo: 20.0,
@@ -609,9 +668,9 @@ console.log(`✅ ${despesasfixas.count} despesas fixas criadas (Loja 1 e Loja 2)
     )
   );
 
-  // ----------------------------
-  // 5. Criar estoques
-  // ----------------------------
+ 
+   // Estoques //
+ 
 
   console.log("📦 Criando estoques aleatórios por loja...");
 

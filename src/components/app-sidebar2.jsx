@@ -25,17 +25,12 @@ export function AppSidebar2({ ...props }) {
  
 const data = {
 
-  catalogo: [
-    {
-      name: "Matriz",
-      url: "/matriz",
-    },
-  ],
+ 
   linhas: [
-    { name: "l1", url: "#" },
-    { name: "l2", url: "#" },
-    { name: "l3", url: "#" },
-    { name: "l4", url: "#" },
+    { name: "Produtos", url: "/produtos" },
+    { name: "Pedidios e transporte ", url: "/pedidosetransporte" },
+    { name: "Filiais", url: "/filiais" },
+ 
   ],
 };
 
@@ -57,7 +52,7 @@ const data = {
       </SidebarHeader>
 
       <SidebarContent>
-         <NavMain items={data.catalogo} />
+        
         <NavDocuments2 items={data.linhas} />
       </SidebarContent>
 
