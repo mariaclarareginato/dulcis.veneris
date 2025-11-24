@@ -171,7 +171,7 @@ const anoAtual = new Date().getFullYear();
       <div className="flex flex-col md:flex-row md:justify-between gap-4 md:items-center ">
         <div>
           <h1 className="text-3xl font-bold">Desempenho dos Caixas</h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-2 text-lg font-semibold">
             Acompanhe o desempenho dos seus caixas e registre novos usuários
           </p>
         </div>
@@ -256,12 +256,12 @@ const anoAtual = new Date().getFullYear();
                   <Badge
                     className={
                       index === 0
-                        ? "bg-yellow-500 font-extrabold text-black"
+                        ? "bg-yellow-500 font-bold text-black"
                         : index === 1
-                        ? "bg-gray-400 font-extrabold text-black"
+                        ? "bg-gray-400 font-bold text-black"
                         : index === 2
-                        ? "bg-amber-600 text-black font-extrabold"
-                        : "bg-gray-200 text-black font-extrabold "
+                        ? "bg-amber-600 text-black font-bold"
+                        : "bg-gray-200 text-black font-bold "
                     }
                   >
                     {index === 0
@@ -340,7 +340,7 @@ const anoAtual = new Date().getFullYear();
 
       <div className="flex justify-center mt-10">
   <Button onClick={gerarPDF}>
-    Gerar PDF
+    <h1 className="font-semibold">Gerar PDF</h1>
   </Button>
 </div>
 
