@@ -21,6 +21,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 export default function MatrizPage() {
   const router = useRouter();
@@ -188,12 +189,12 @@ export default function MatrizPage() {
         {filiais.map((filial) => (
           <Card key={filial.id} className="overflow-hidden">
             <CardHeader
-              className="cursor-pointer hover:bg-accent/50 transition-colors"
+              className="cursor-pointer transition-colors"
               onClick={() => toggleFilialDetails(filial.id)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
+                  <div className=" p-3 rounded-full">
                     <Store className="w-6 h-6 text-primary" />
                   </div>
                   <div>
@@ -221,7 +222,7 @@ export default function MatrizPage() {
             {expandedFilial === filial.id && (
               <CardContent className="pt-6">
                 <Tabs defaultValue="resumo" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full mb-14 grid-cols-2 bg-transparent shadow-none rounded-none">
                     <TabsTrigger value="resumo">Resumo</TabsTrigger>
                     <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
                     <TabsTrigger value="estoque">Estoque</TabsTrigger>
@@ -232,7 +233,7 @@ export default function MatrizPage() {
                   <TabsContent value="resumo" className="space-y-4">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <p className="text-sm  flex items-center gap-2">
                           <DollarSign className="w-4 h-4" />
                           Faturamento
                         </p>
@@ -297,7 +298,7 @@ export default function MatrizPage() {
                         </span>
                       </div>
 
-                      <div className="flex justify-between items-center p-4 border rounded-lg bg-accent">
+                      <div className="flex justify-between items-center p-4 border rounded-lg">
                         <span className="font-bold">Lucro Líquido</span>
                         <span className="text-2xl font-bold text-blue-600">
                           R$ {filial.stats.lucro.toFixed(2)}
@@ -356,6 +357,8 @@ export default function MatrizPage() {
                       </div>
                     )}
 
+                   <Separator/>
+                    
                     <div className="mt-6">
                       <h3 className="text-lg font-semibold mb-4">
                         Pedidos Pendentes
@@ -404,7 +407,7 @@ export default function MatrizPage() {
                           className="flex justify-between items-center p-3 border rounded-lg"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="bg-primary/10 p-2 rounded-full">
+                            <div className="p-2 rounded-full">
                               <Users className="w-4 h-4 text-primary" />
                             </div>
                             <span className="font-medium">{func.nome}</span>
@@ -461,7 +464,7 @@ export default function MatrizPage() {
 
             <div className="flex justify-center mt-10">
   <Button onClick={() => router.push('/registro') }>
-   Criar novo Usuário
+   <p className="font-bold">Criar novo Usuário</p>
   </Button>
 </div>
 

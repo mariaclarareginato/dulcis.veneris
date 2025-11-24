@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader3 } from "@/components/site-header3";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-export default function ProdutosLayout({ children }) {
+export default function CriarProdutosLayout({ children }) {
   return (
     <SidebarProvider
       style={{

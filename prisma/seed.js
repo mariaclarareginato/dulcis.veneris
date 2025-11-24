@@ -669,54 +669,54 @@ console.log(`✅ ${despesasfixas.count} despesas fixas criadas para as filiais.`
   );
 
  
-   // Estoques //
- 
+// === ESTOQUES === //
 
-  console.log("📦 Criando estoques aleatórios por loja...");
+console.log("📦 Criando estoques aleatórios por loja...");
 
-  // busca todas as lojas e produtos
-  const lojas = await prisma.loja.findMany();
-  const todosProdutos = await prisma.produto.findMany();
+// busca lojas e produtos
+const lojas = await prisma.loja.findMany();
+const todosProdutos = await prisma.produto.findMany();
 
-  // função utilitária: pega N produtos aleatórios sem repetir
-  function pegarProdutosAleatorios(lista, quantidade) {
-    const copia = [...lista];
-    const selecionados = [];
-    for (let i = 0; i < quantidade && copia.length > 0; i++) {
-      const index = Math.floor(Math.random() * copia.length);
-      selecionados.push(copia.splice(index, 1)[0]);
-    }
-    return selecionados;
+// pega N produtos aleatórios
+function pegarProdutosAleatorios(lista, quantidade) {
+  const copia = [...lista];
+  const selecionados = [];
+
+  for (let i = 0; i < quantidade && copia.length > 0; i++) {
+    const index = Math.floor(Math.random() * copia.length);
+    selecionados.push(copia.splice(index, 1)[0]);
   }
 
-
-  for (const loja of lojas) {
-    console.log(`➡️ Criando estoque para ${loja.nome}...`);
-
-    // define número de produtos por loja
-    const qtdProdutos = loja.tipo === "MATRIZ" ? 30 : 20;
-
-    // escolhe produtos aleatórios
-    const produtosAleatorios = pegarProdutosAleatorios(todosProdutos, qtdProdutos);
-
-    // cria os registros de estoque
-    for (const produto of produtosAleatorios) {
-      const quantidade = Math.floor(Math.random() * 200) + 50; // 50–250 unidades
-      const estoqueMinimo = Math.floor(Math.random() * 20) + 5; // 5–25 unidades
-
-      await prisma.estoque.create({
-        data: {
-          loja_id: loja.id,
-          produto_id: produto.id,
-          quantidade,
-          estoque_minimo: estoqueMinimo,
-        },
-      });
-    }
-  }
-
-  console.log("✅ Estoques criados com sucesso!");
+  return selecionados;
 }
+
+// cria estoque para cada loja
+for (const loja of lojas) {
+  console.log(`➡️ Criando estoque para ${loja.nome}...`);
+
+  const qtdProdutos = loja.tipo === "MATRIZ" ? 30 : 20;
+
+  const produtosAleatorios = pegarProdutosAleatorios(
+    todosProdutos,
+    qtdProdutos
+  );
+
+  for (const produto of produtosAleatorios) {
+    const quantidade = Math.floor(Math.random() * 200) + 50; // 50–250 unidades
+    const estoqueMinimo = Math.floor(Math.random() * 20) + 5; // 5–25 unidades
+
+    await prisma.estoque.create({
+      data: {
+        loja_id: loja.id,
+        produto_id: produto.id,
+        quantidade,
+        estoque_minimo: estoqueMinimo,
+      },
+    });
+  }
+}
+
+console.log("✅ Estoques criados com sucesso!");
 
 main()
   .then(async () => {
@@ -728,4 +728,4 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
-
+}

@@ -1,19 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-// DESATIVAR PRODUTO (tirar de linha)
+// DESATIVAR e ATIVAR PRODUTO (tirar de linha e colocar na linha)
 
 export async function PATCH(req, { params }) {
   try {
     const id = parseInt(params.id);
+    const { ativo } = await req.json();
 
     const produto = await prisma.produto.update({
       where: { id },
-      data: { ativo: false },
+      data: { ativo },
     });
 
     return NextResponse.json({
-      message: "Produto retirado de linha",
+      message: ativo ? "Produto ativado" : "Produto desativado",
       produto,
     });
   } catch (err) {
@@ -23,4 +24,4 @@ export async function PATCH(req, { params }) {
       { status: 500 }
     );
   }
-}
+};
