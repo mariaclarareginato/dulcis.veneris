@@ -18,9 +18,9 @@ CREATE TABLE `caixa` (
 CREATE TABLE `despesa` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `loja_id` INTEGER NOT NULL,
-    `tipo` VARCHAR(191) NOT NULL,
+    `tipo` ENUM('FIXA', 'CUSTO_PEDIDO', 'VARIAVEL', 'OUTRA') NOT NULL,
     `descricao` VARCHAR(191) NOT NULL,
-    `valor` DOUBLE NOT NULL,
+    `valor` DECIMAL(10, 2) NOT NULL,
     `data_vencimento` DATETIME(3) NOT NULL,
     `pago` BOOLEAN NOT NULL DEFAULT false,
     `data_pagamento` DATETIME(3) NULL,
