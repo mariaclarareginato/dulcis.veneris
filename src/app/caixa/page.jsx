@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 // Assumindo que você tem esses componentes disponíveis (shadcn/ui ou similar)
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package, ShoppingCart, AlertCircle } from "lucide-react";
 import { getLoggedUser } from "@/lib/auth-client";
+import { Separator } from "@/components/ui/separator";
 
 // Função utilitária para converter Decimal (string) para float formatado
 const formatCurrency = (value) => {
@@ -20,7 +21,7 @@ export default function CaixaPage() {
 
   // Estados
   const [userData, setUserData] = useState(null);
-  const [produtos, setProdutos] = useState([]);
+  const [produtos, setProdutos] = useState([]); // todos os produtos retornados da API
   const [carrinho, setCarrinho] = useState([]);
   const [loading, setLoading] = useState(true);
   const [adicionandoId, setAdicionandoId] = useState(null);
@@ -50,19 +51,29 @@ export default function CaixaPage() {
       })
       .then((data) => {
         if (Array.isArray(data)) {
-          // Ordena: produtos com estoque primeiro
-          const ordenados = [...data].sort((a, b) => {
-            if (a.quantidade === 0 && b.quantidade > 0) return 1;
-            if (a.quantidade > 0 && b.quantidade === 0) return -1;
+          // Garantir ordenação: produtos ativos com estoque primeiro, depois ativos sem estoque,
+          // e inativos serão exibidos separadamente.
+          const ativos = data.filter(p => p.ativo !== false); // ativo undefined or true => considered active
+          const inativos = data.filter(p => p.ativo === false);
+
+          const ordenadosAtivos = [...ativos].sort((a, b) => {
+            // Coloca os com quantidade > 0 antes; se ambos >0, mantém ordem original
+            if ((a.quantidade || 0) === 0 && (b.quantidade || 0) > 0) return 1;
+            if ((a.quantidade || 0) > 0 && (b.quantidade || 0) === 0) return -1;
             return 0;
           });
-          setProdutos(ordenados);
+
+          // Mantemos produtos no estado combinando ativos primeiro (ordenados) e inativos depois
+          setProdutos([...ordenadosAtivos, ...inativos]);
+        } else {
+          setProdutos([]);
         }
       })
       .catch((err) => {
         if (err.name !== "AbortError") {
           console.error(err);
           setError("Erro ao carregar produtos");
+          setProdutos([]);
         }
       })
       .finally(() => setLoading(false));
@@ -90,9 +101,13 @@ export default function CaixaPage() {
   const adicionarAoCarrinho = async (produto) => {
     if (!userData) return;
 
-    if (produto.quantidade <= 0) {
-      // NOTE: Usando console.error/log em vez de alert()
+    // Bloqueia adicionar se produto estiver sem estoque ou fora de linha
+    if ((produto.quantidade || 0) <= 0) {
       console.log("Produto sem estoque disponível!");
+      return;
+    }
+    if (produto.ativo === false) {
+      console.log("Produto fora de linha - não pode ser adicionado.");
       return;
     }
 
@@ -115,11 +130,9 @@ export default function CaixaPage() {
 
       if (!res.ok) throw new Error(data.error || "Erro ao adicionar produto");
 
-
       fetchCarrinho();
     } catch (err) {
       console.error(err);
-      // NOTE: Usando console.log em vez de alert()
       console.log(err.message || "Erro ao adicionar produto");
     } finally {
       setAdicionandoId(null);
@@ -140,7 +153,6 @@ export default function CaixaPage() {
       fetchCarrinho();
     } catch (err) {
       console.error(err);
-      // NOTE: Usando console.log em vez de alert()
       console.log(err.message || "Erro ao atualizar quantidade");
     }
   };
@@ -152,13 +164,16 @@ export default function CaixaPage() {
       fetchCarrinho();
     } catch (err) {
       console.error(err);
-      // NOTE: Usando console.log em vez de alert()
       console.log("Erro ao remover item");
     }
   };
 
   // 7. Cálculo do total corrigido (usando parseFloat)
   const total = carrinho.reduce((acc, item) => acc + parseFloat(item.subtotal || 0), 0);
+
+  // Separar produtos em ativos e fora de linha (para renderizar seções)
+  const produtosAtivos = produtos.filter(p => p.ativo !== false);
+  const produtosForaDeLinha = produtos.filter(p => p.ativo === false);
 
   // Loading ou erro
   if (!userData || loading) {
@@ -186,23 +201,32 @@ export default function CaixaPage() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold">Produtos Disponíveis</h2>
-          <p className="text-muted-foreground mt-2 font-semibold">
+          <p className="text-muted-foreground mt-2 font-semibold text-lg">
             Bem-vindo(a), {userData.nome} | Loja: {userData.loja_id}
           </p>
         </div>
       </div>
 
-      {/* Grid de produtos */}
+      {/* Grid de produtos ATIVOS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {produtos.map((produto) => {
-          const semEstoque = produto.quantidade <= 0;
+        {produtosAtivos.length === 0 && (
+          <div className="col-span-full text-center text-muted-foreground">
+            Nenhum produto ativo encontrado.
+          </div>
+        )}
+
+        {produtosAtivos.map((produto) => {
+          const semEstoque = (produto.quantidade || 0) <= 0;
           const estoqueMinimo = produto.quantidade > 0 && produto.quantidade <= produto.estoque_minimo;
           const isAdicionando = adicionandoId === produto.id;
 
           return (
-            <Card key={produto.id} className={`rounded-2xl shadow-md hover:shadow-lg transition-all flex flex-col ${semEstoque ? "opacity-60" : ""}`}>
+            <Card
+              key={produto.id}
+              className={`rounded-2xl shadow-md hover:shadow-lg transition-all flex flex-col ${semEstoque ? "opacity-70" : ""}`}
+            >
               {/* Imagem */}
-              <div className="relative w-full h-48 overflow-hidden rounded-t-2xl flex-shrink-0">
+              <div className="relative w-full h-70 overflow-hidden rounded-t-2xl flex-shrink-0">
                 {produto.img ? (
                   <Image src={produto.img} alt={produto.nome} fill className="object-cover" />
                 ) : (
@@ -216,13 +240,12 @@ export default function CaixaPage() {
               <CardContent className="p-4 flex-1 flex flex-col justify-between space-y-3">
                 <div>
                   <h3 className="text-base font-bold">{produto.nome}</h3>
-                  
-                  
-                  <p className="text-sm text-muted-foreground line-clamp-3 min-h-[2.5rem] mt-5">
+
+                  <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem] mt-3">
                     {produto.descricao || "Sem descrição"}
                   </p>
 
-                  <p className="text-xs text-muted-foreground mt-5">
+                  <p className="text-sm text-muted-foreground font-bold mt-6">
                     {produto.sku} | {produto.categoria}
                   </p>
                 </div>
@@ -232,16 +255,16 @@ export default function CaixaPage() {
                   <div className="flex items-center gap-2">
                     <Package className={`w-5 h-5 ${semEstoque ? "text-red-600" : estoqueMinimo ? "text-yellow-600" : "text-green-600"}`} />
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground">Estoque</p>
+                      <p className="text-sm font-medium text-muted-foreground">Estoque</p>
                       <p className={`text-2xl font-bold ${semEstoque ? "text-red-600" : estoqueMinimo ? "text-yellow-600" : "text-green-600"}`}>
-                        {produto.quantidade}
+                        {produto.quantidade ?? 0}
                       </p>
                     </div>
                   </div>
                   {estoqueMinimo && !semEstoque && <AlertCircle className="w-5 h-5 text-yellow-600" />}
                 </div>
 
-                {/* Preço (CORRIGIDO: usando parseFloat) */}
+                {/* Preço */}
                 <div className="flex justify-between items-center pt-2 border-t mt-auto">
                   <span className="text-sm text-muted-foreground">Preço:</span>
                   <span className="text-lg font-bold text-black-600">
@@ -273,6 +296,77 @@ export default function CaixaPage() {
           );
         })}
       </div>
+      
+
+      {/* SEÇÃO: Produtos FORA DE LINHA */}
+
+<br></br>
+      <Separator></Separator>
+<br></br>
+      {produtosForaDeLinha.length > 0 && (
+        <div className="space-y-2">
+          <div>
+            <h3 className="text-3xl font-bold">Produtos Fora de Linha</h3>
+            <br></br>
+            <p className="text-lg text-muted-foreground font-semibold">Estes produtos foram desativados e não podem ser vendidos.</p>
+            <br></br>
+          </div>
+          
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {produtosForaDeLinha.map((produto) => {
+              // mesmo layout visual, mas marca FORA DE LINHA e botão desabilitado
+              return (
+                <Card key={`fora-${produto.id}`} className="rounded-2xl shadow-md transition-all flex flex-col opacity-60">
+                  <div className="relative w-full h-48 overflow-hidden rounded-t-2xl flex-shrink-0">
+                    {produto.img ? (
+                      <Image src={produto.img} alt={produto.nome} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <Package className="w-12 h-12 text-gray-300" />
+                      </div>
+                    )}
+
+                    {/* badge FORA DE LINHA no canto */}
+                    <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+                      FORA DE LINHA
+                    </div>
+                  </div>
+
+                  <CardContent className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                    <div>
+                      <h3 className="text-base font-bold line-clamp-2">{produto.nome}</h3>
+
+                     <p className="text-sm text-muted-foreground line-clamp-2 min-h-[rem] mt-3">
+                      {produto.descricao || "Sem descrição"}
+                     </p>
+
+
+              
+
+                      <p className="text-sm font-semibold text-muted-foreground mt-6">
+                        {produto.sku} | {produto.categoria}
+                      </p>
+                    </div>
+
+                
+                    <div className="flex justify-between items-center pt-2 border-t mt-auto">
+                      <span className="text-sm text-muted-foreground">Preço:</span>
+                      <span className="text-lg font-bold text-black-600">
+                        R$ {formatCurrency(produto.preco_venda)}
+                      </span>
+                    </div>
+
+                    <Button className="w-full mt-2" disabled variant="outline">
+                      FORA DE LINHA
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Carrinho */}
       {carrinho.length > 0 && (
@@ -290,14 +384,12 @@ export default function CaixaPage() {
               >
                 <div className="flex-1 text-center sm:text-left">
                   <p className="font-bold text-base sm:text-lg m-3">{item.produto.nome}</p>
-                  {/* Preço Unitário (CORRIGIDO: usando parseFloat) */}
                   <p className="text-sm text-muted-foreground">
                     R$ {formatCurrency(item.preco_unitario)} x {item.quantidade}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
-                  {/* Controle de quantidade */}
                   <div className="flex items-center gap-2 rounded-lg border px-3 py-1">
                     <Button
                       size="sm"
@@ -317,12 +409,10 @@ export default function CaixaPage() {
                     </Button>
                   </div>
 
-                  {/* Subtotal (CORRIGIDO: usando parseFloat) */}
                   <div className="text-center sm:text-right min-w-[80px]">
                     <p className="font-bold text-lg">R$ {formatCurrency(item.subtotal)}</p>
                   </div>
 
-                  {/* Botão Remover */}
                   <Button
                     variant="destructive"
                     size="lg"
@@ -336,7 +426,6 @@ export default function CaixaPage() {
             ))}
           </div>
 
-          {/* Total (CORRIGIDO: o total já é um Number, então só toFixed) */}
           <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t-2 gap-2">
             <span className="text-xl sm:text-2xl font-bold">Total:</span>
             <span className="text-2xl sm:text-3xl font-bold text-green-600">
@@ -344,12 +433,10 @@ export default function CaixaPage() {
             </span>
           </div>
 
-          {/* Botão Finalizar */}
           <Button onClick={() => router.push("/pagamento")} className="w-full font-bold text-base sm:text-lg mt-4" size="lg">
             Finalizar Venda
           </Button>
         </Card>
-
       )}
     </div>
   );

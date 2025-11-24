@@ -106,7 +106,7 @@ export function CartDropdown() {
 
             <DropdownMenuItem className="font-extrabold flex justify-between border-t mt-2 pt-2 px-4">
               <span>Total:</span>
-              <span>R$ {total.toFixed(2)}</span>
+              <span className="text-2xl">R$ {total.toFixed(2)}</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem className="px-4 py-2">

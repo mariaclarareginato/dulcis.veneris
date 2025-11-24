@@ -1,18 +1,22 @@
+
+
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
-import 'dotenv/config';
+import "dotenv/config";
 
 async function main() {
-  console.log('🧹 Limpando tabelas...');
- 
-  await prisma.$transaction([
-  prisma.estoque.deleteMany(),
-  prisma.produto.deleteMany(),
-  prisma.usuario.deleteMany(),
-  prisma.loja.deleteMany(),
-]);
+  console.log("🧹 Limpando tabelas...");
 
+  await prisma.$transaction([
+    prisma.estoque.deleteMany(),
+    prisma.produto.deleteMany(),
+    prisma.usuario.deleteMany(),
+    prisma.despesa.deleteMany(),
+    prisma.loja.deleteMany(),
+  ]);
+
+  
 
 // --- Lógica para obter a data do mês atual ---
 
@@ -39,6 +43,10 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
 
 
 
+
+  // ==========================
+  //  LOJAS
+  // ==========================
   console.log("🏪 Criando lojas...");
 
   const lojaMatriz = await prisma.loja.create({
@@ -54,7 +62,7 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
   const lojaSP = await prisma.loja.create({
     data: {
       nome: "Dulcis Veneris - São Paulo",
-      endereco: "Av. Higienópolis - Higienópolis, São Paulo - SP",
+      endereco: "Av. Higienópolis - São Paulo - SP",
       cidade: "São Paulo",
       estado: "SP",
       tipo: "FILIAL",
@@ -64,34 +72,33 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
   const lojaRJ = await prisma.loja.create({
     data: {
       nome: "Dulcis Veneris - Rio de Janeiro",
-      endereco: "Av. Epitácio Pessoa - Lagoa, Rio de Janeiro - RJ",
+      endereco: "Av. Epitácio Pessoa - Rio de Janeiro - RJ",
       cidade: "Rio de Janeiro",
       estado: "RJ",
       tipo: "FILIAL",
     },
   });
 
-   const lojaBH = await prisma.loja.create({
+  const lojaBH = await prisma.loja.create({
     data: {
       nome: "Dulcis Veneris - Belo Horizonte",
-      endereco: "Praça da Liberdade - Funcionários, Belo Horizonte - MG",
+      endereco: "Praça da Liberdade - BH - MG",
       cidade: "Belo Horizonte",
       estado: "MG",
       tipo: "FILIAL",
     },
   });
 
-
-
-  /// Usuários ///
-
-
-  console.log("Criando usuários...");
+  // ==========================
+  //  USUÁRIOS
+  // ==========================
+  console.log("👤 Criando usuários...");
 
   const senhaHash = await bcrypt.hash("senha123", 10);
 
+
   // Admin
-  const admin = await prisma.usuario.create({
+  await prisma.usuario.create({
     data: {
       nome: "Gabriel",
       cpf: "111.111.111-11",
@@ -104,45 +111,39 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
   });
 
   // Gerentes
-
-  const gerenteSP = await prisma.usuario.create({
-    data: {
-      nome: "Gustavo",
-      cpf: "222.222.222-22",
-      email: "gustavo@email.com",
-      senha_hash: senhaHash,
-      telefone: "(22)22222-2222",
-      perfil: "GERENTE",
-      loja_id: lojaSP.id,
-    },
-  });
-
-  const gerenteRJ = await prisma.usuario.create({
-    data: {
-      nome: "Henry",
-      cpf: "333.333.333-33",
-      email: "henry@email.com",
-      senha_hash: senhaHash,
-      telefone: "(33)33333-3333",
-      perfil: "GERENTE",
-      loja_id: lojaRJ.id,
-    },
-  });
-
-    const gerenteBH = await prisma.usuario.create({
-    data: {
-      nome: "Marcela",
-      cpf: "888.888.888-88",
-      email: "marcela@email.com",
-      senha_hash: senhaHash,
-      telefone: "(44)44444-4444",
-      perfil: "GERENTE",
-      loja_id: lojaBH.id,
-    },
+  await prisma.usuario.createMany({
+    data: [
+      {
+        nome: "Gustavo",
+        cpf: "222.222.222-22",
+        email: "gustavo@email.com",
+        senha_hash: senhaHash,
+        telefone: "(22)22222-2222",
+        perfil: "GERENTE",
+        loja_id: lojaSP.id,
+      },
+      {
+        nome: "Henry",
+        cpf: "333.333.333-33",
+        email: "henry@email.com",
+        senha_hash: senhaHash,
+        telefone: "(33)33333-3333",
+        perfil: "GERENTE",
+        loja_id: lojaRJ.id,
+      },
+      {
+        nome: "Marcela",
+        cpf: "888.888.888-88",
+        email: "marcela@email.com",
+        senha_hash: senhaHash,
+        telefone: "(44)44444-4444",
+        perfil: "GERENTE",
+        loja_id: lojaBH.id,
+      },
+    ],
   });
 
   // Caixas
-
   await prisma.usuario.createMany({
     data: [
       {
@@ -193,13 +194,13 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
       {
         nome: "Caixa RJ 3",
         cpf: "999.999.999-90",
-        email: "caixa3@rj.com ",
+        email: "caixa3@rj.com",
         senha_hash: senhaHash,
         telefone: "(99)99999-9999",
         perfil: "CAIXA",
         loja_id: lojaRJ.id,
       },
-           {
+      {
         nome: "Caixa BH 1",
         cpf: "333.333.333-30",
         email: "caixa1@bh.com",
@@ -220,7 +221,7 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
       {
         nome: "Caixa BH 3",
         cpf: "222.222.222-20",
-        email: "caixa3@bh.com ",
+        email: "caixa3@bh.com",
         senha_hash: senhaHash,
         telefone: "(22)22222-2222",
         perfil: "CAIXA",
@@ -229,69 +230,87 @@ const dataVencimentoSalarioStr = `${ano}-${mesFormatado}-${diaVencimentoSalario.
     ],
   });
 
-
-// (Despesas) //
+  // ==========================
+  //  DESPESAS
+  // ==========================
 
 console.log("💵 Criando despesas fixas para as filiais...");
 
 // Define o array base das despesas (inicialmente Loja 1)
 const despesasBase = [
- {
- "tipo": "FIXA",
- "descricao": `Aluguel da Loja - ${nomeMes}/${ano}`,
- "valor": 2500.00,
- "data_vencimento": dataVencimentoContasStr,
- "pago": false
- },
- {
- "tipo": "FIXA",
- "descricao": `Fatura de Internet - ${nomeMes}/${ano}`,
- "valor": 500.00,
- "data_vencimento": dataVencimentoContasStr,
- "pago": false
- },
- {
-  "tipo": "FIXA",
- "descricao": `Conta de Água - ${nomeMes}/${ano}`,
- "valor": 1000.00,
- "data_vencimento": dataVencimentoContasStr,
- "pago": false
- },
- {
- "tipo": "FIXA",
- "descricao": `Conta de Luz/Energia - ${nomeMes}/${ano}`,
- "valor": 1000.00,
- "data_vencimento": dataVencimentoContasStr,
- "pago": false
- },
- {
- "tipo": "FIXA",
- "descricao": `Salários dos Funcionários - ${nomeMes}/${ano}`,
- "valor": 5000.00,
- "data_vencimento": dataVencimentoSalarioStr, // Vencimento no dia 5
- "pago": false
- },
+  {
+    tipo: "FIXA",
+    descricao: `Aluguel da Loja - ${nomeMes}/${ano}`,
+    valor: 2500.00,
+    data_vencimento: dataVencimentoContasStr,
+    pago: false,
+  },
+  {
+    tipo: "FIXA",
+    descricao: `Fatura de Internet - ${nomeMes}/${ano}`,
+    valor: 500.00,
+    data_vencimento: dataVencimentoContasStr,
+    pago: false,
+  },
+  {
+    tipo: "FIXA",
+    descricao: `Conta de Água - ${nomeMes}/${ano}`,
+    valor: 1000.00,
+    data_vencimento: dataVencimentoContasStr,
+    pago: false,
+  },
+  {
+    tipo: "FIXA",
+    descricao: `Conta de Luz/Energia - ${nomeMes}/${ano}`,
+    valor: 1000.00,
+    data_vencimento: dataVencimentoContasStr,
+    pago: false,
+  },
+  {
+    tipo: "FIXA",
+    descricao: `Salários dos Funcionários - ${nomeMes}/${ano}`,
+    valor: 5000.00,
+    data_vencimento: dataVencimentoSalarioStr, // vencimento dia 5
+    pago: false,
+  },
 ];
 
 // Cria os dados finais, mapeando para FILIAIS
+const despesasLojabh = despesasBase.map((d) => ({
+  ...d,
+  loja_id: lojaBH.id,
+  descricao: `${d.descricao} - BH`,
+}));
 
-const despesasLojabh = despesasBase.map(d => ({ ...d,loja_id: lojaBH.id, descricao: `${d.descricao} - BH`}));
-const despesasLojarj = despesasBase.map(d => ({ ...d, loja_id: lojaRJ.id, descricao: `${d.descricao} - RJ`}));
-const despesasLojasp = despesasBase.map(d => ({ ...d, loja_id: lojaSP.id, descricao: `${d.descricao} - SP`}));
+const despesasLojarj = despesasBase.map((d) => ({
+  ...d,
+  loja_id: lojaRJ.id,
+  descricao: `${d.descricao} - RJ`,
+}));
 
+const despesasLojasp = despesasBase.map((d) => ({
+  ...d,
+  loja_id: lojaSP.id,
+  descricao: `${d.descricao} - SP`,
+}));
+
+// Insere no banco
 const despesasfixas = await prisma.despesa.createMany({
- data: [...despesasLojarj, ...despesasLojasp, ...despesasLojabh], // Combina os dados
- skipDuplicates: true,
+  data: [...despesasLojarj, ...despesasLojasp, ...despesasLojabh],
+  skipDuplicates: true,
 });
+
 console.log(`✅ ${despesasfixas.count} despesas fixas criadas para as filiais.`);
 
-
   
-  //  Criar produtos //
 
+  // ==========================
+  //  PRODUTOS
+  // ==========================
   console.log("🍫 Criando produtos...");
+
   const produtosData = [
-      {
+       {
         sku: "SKU001",
         codigo: "COD001",
         nome: "Clássicos",
@@ -523,201 +542,193 @@ console.log(`✅ ${despesasfixas.count} despesas fixas criadas para as filiais.`
         categoria: "paes-de-mel",
       },
       {
-        sku: "SKU022",
-        codigo: "COD022",
-        nome: "Embalagem 15 pães de mel, Nectar Veneris",
-        descricao:
-          "Apresentamos a nossa icônica embalagem em duas opções para atender a cada desejo. A versão menor é ideal para um momento pessoal ou como uma lembrança sofisticada e elegante. Já a versão maior é perfeita para compartilhar em ocasiões especiais ou para presentear com ainda mais grandiosidade, revelando a generosidade e o cuidado da sua escolha.",
-        img: "/catalogo/paesmelembalagem.png",
-        preco_venda: 200.0,
-        custo: 100.0,
-        categoria: "paes-de-mel",
-      },
-      {
-        sku: "SKU023",
-        codigo: "COD023",
-        nome: "Trufa tradicional",
-        descricao:
-          "Nossas Trufas Tradicionais são uma celebração da arte clássica da confeitaria, com um centro de ganache aveludado e intensamente cremoso, feito com o mais fino chocolate. Cada trufa é delicadamente polvilhada com cacau em pó, criando um acabamento sedoso que derrete na boca. É a essência do luxo em sua forma mais simples e inesquecível.",
-        img: "/catalogo/trufas.png",
-        preco_venda: 20.0,
-        custo: 10.0,
-        categoria: "Trufas",
-      },
-      {
-        sku: "SKU024",
-        codigo: "COD024",
-        nome: "Trufa de Cappuccino",
-        descricao:
-          "Experimente o abraço caloroso da nossa Trufa de Cappuccino, uma fusão perfeita de especiarias e chocolate. Por dentro, um cremoso ganache com um toque sutil e aromático de canela em pó, que aquece o paladar a cada mordida. A cobertura fina de chocolate ao leite complementa o sabor, criando uma experiência inesquecível de conforto e indulgência. Perfeita para quem busca um toque exótico e reconfortante.",
-        img: "/catalogo/trufa1.png",
-        preco_venda: 20.0,
-        custo: 10.0,
-        categoria: "Trufas",
-      },
-      {
-        sku: "SKU025",
-        codigo: "COD025",
-        nome: "Trufa de Caramelo Salgado",
-        descricao:
-          "Renda-se à sofisticação da nossa Trufa de Caramelo Salgado, uma delícia que brinca com os sentidos. O interior revela um ganache sedoso de caramelo com um toque sutil de flor de sal, criando um equilíbrio perfeito entre o doce e o salgado. A cobertura crocante de chocolate ao leite complementa essa experiência, prometendo um final de boca inesquecível e luxuoso. Uma indulgência para os paladares mais exigentes.",
-        img: "/catalogo/trufa2.png",
-        preco_venda: 20.0,
-        custo: 10.0,
-        categoria: "Trufas",
-      },
-      {
-        sku: "SKU026",
-        codigo: "COD026",
-        nome: "Trufa de Laranja e Cardamomo",
-        descricao:
-          "Desperte seus sentidos com a nossa Trufa de Laranja e Cardamomo, uma combinação exótica e surpreendente. O ganache aveludado esconde um coração cítrico de laranja, que harmoniza com a nota quente e picante do cardamomo. Coberta com chocolate amargo de alta qualidade, esta trufa é uma jornada de sabores que transporta você a terras distantes e celebra a arte da alta confeitaria.",
-        img: "/catalogo/trufa3.png",
-        preco_venda: 20.0,
-        custo: 10.0,
-        categoria: "Trufas",
-      },
-      {
-        sku: "SKU027",
-        codigo: "COD027",
-        nome: "Trufa de Limão Siciliano",
-        descricao:
-          "Deixe-se levar pela leveza e frescor da nossa Trufa de Limão Siciliano. O ganache cremoso, infundido com o vibrante suco e as raspas aromáticas do limão siciliano, proporciona uma explosão cítrica que equilibra perfeitamente com a doçura do chocolate branco que a envolve. Uma experiência refrescante e elegante, ideal para purificar o paladar e celebrar os sabores da natureza.",
-        img: "/catalogo/trufa4.png",
-        preco_venda: 20.0,
-        custo: 10.0,
-        categoria: "Trufas",
-      },
-      {
-        sku: "SKU028",
-        codigo: "COD028",
-        nome: "Trufa de Figo e Balsâmico",
-        descricao:
-          "Uma ousada e elegante combinação, nossa Trufa de Figo e Balsâmico é uma experiência para os paladares mais aventureiros. O ganache cremoso, enriquecido com a doçura do figo maduro e um toque inesperado de balsâmico envelhecido, cria um contraste sublime de sabores. Envolta em chocolate amargo e finalizada com um pedacinho de figo, esta trufa é uma jornada sensorial que celebra a inovação na confeitaria de luxo.",
-        img: "/catalogo/trufa5.png",
-        preco_venda: 20.0,
-        custo: 10.0,
-        categoria: "Trufas",
-      },
-      {
-        sku: "SKU029",
-        codigo: "COD029",
-        nome: "Cookie de Chocolate Amargo e Flor de Sal",
-        descricao:
-          "Sofisticação em cada mordida com nosso Cookie de Chocolate Amargo e Flor de Sal. Uma bolacha macia e intensamente achocolatada, repleta de gotas de chocolate amargo de alta qualidade e finalizada com cristais delicados de flor de sal. O contraste perfeito entre a doçura profunda do chocolate e o toque sutilmente salgado eleva esta experiência a um nível gourmet. Ideal para acompanhar seu café ou chá.",
-        img: "/catalogo/bolacha1.png",
-        preco_venda: 30.0,
-        custo: 18.0,
-        categoria: "Bolachas",
-      },
-      {
-        sku: "SKU030",
-        codigo: "COD030",
-        nome: "Bolacha de Framboesa e Chocolate Branco",
-        descricao:
-          "Nossa Bolacha de Framboesa e Chocolate Branco, é macia e amanteigada, pontuada com pedaços vibrantes de framboesas frescas que explodem em sabor a cada mordida. O toque doce e cremoso do chocolate branco se une perfeitamente à acidez da fruta, criando uma experiência elegante e refrescante. Uma verdadeira joia para os amantes de sabores equilibrados e sofisticados.",
-        img: "/catalogo/bolacha2.png",
-        preco_venda: 30.0,
-        custo: 18.0,
-        categoria: "Bolachas",
-      },
-      {
-        sku: "SKU031",
-        codigo: "COD031",
-        nome: "Bolacha de Café e Chocolate Amargo",
-        descricao:
-          "Desperte os seus sentidos com a nossa Bolacha de Café e Chocolate Amargo. Uma bolacha macia e aromática, infundida com o sabor marcante do café fresco e salpicada com pedaços de chocolate amargo que derretem a cada mordida. O amargor elegante do café se harmoniza com a doçura do chocolate, criando uma experiência sofisticada e viciante. Perfeita para os amantes de café que buscam um toque de luxo em seus momentos de pausa.",
-        img: "/catalogo/bolacha3.png",
-        preco_venda: 30.0,
-        custo: 18.0,
-        categoria: "Bolachas",
-      },
-      {
-        sku: "SKU032",
-        codigo: "COD032",
-        nome: "Bolacha de Gengibre e Especiarias",
-        descricao:
-          "Aqueça a alma com a nossa Bolacha de Gengibre e Especiarias. Uma bolacha crocante por fora e macia por dentro, infundida com o calor reconfortante do gengibre, canela, cravo e noz-moscada. Cada mordida é uma explosão de aromas e sabores que remetem a momentos especiais e aconchegantes. Perfeita para harmonizar com um chá ou café, esta bolacha é uma celebração das especiarias e da tradição, com um toque de elegância.",
-        img: "/catalogo/bolacha4.png",
-        preco_venda: 30.0,
-        custo: 18.0,
-        categoria: "Bolachas",
-      },
-      {
-        sku: "SKU033",
-        codigo: "COD033",
-        nome: "Bolachinhas Recheadas de Doce de Leite com Especiarias",
-        descricao:
-          "Nossas Bolachinhas Recheadas de Doce de Leite com Especiarias são uma celebração do sabor e da elegância. Cada bolachinha, feita artesanalmente, é delicadamente recheada com um doce de leite cremoso, enriquecido por um toque sutil de especiarias. Embaladas com carinho em um pote de vidro, elas são a escolha perfeita para um momento intimo ou como um presente que encanta pela sofisticação e pelo sabor inesquecível.",
-        img: "/catalogo/bolachas.png",
-        preco_venda: 150.0,
-        custo: 100.0,
-        categoria: "Bolachas",
-      },
-    ];
+  sku: "SKU022",
+  codigo: "COD022",
+  nome: "Embalagem 15 pães de mel, Nectar Veneris",
+  descricao:
+    "Apresentamos a nossa icônica embalagem em duas opções para atender a cada desejo. A versão menor é ideal para um momento pessoal ou como uma lembrança sofisticada e elegante. Já a versão maior é perfeita para compartilhar em ocasiões especiais ou para presentear com ainda mais grandiosidade, revelando a generosidade e o cuidado da sua escolha.",
+  img: "/catalogo/paesmelembalagem.png",
+  preco_venda: 200.0,
+  custo: 100.0,
+  categoria: "paes-de-mel",
+},
+{
+  sku: "SKU023",
+  codigo: "COD023",
+  nome: "Trufa tradicional",
+  descricao:
+    "Nossas Trufas Tradicionais são uma celebração da arte clássica da confeitaria, com um centro de ganache aveludado e intensamente cremoso, feito com o mais fino chocolate. Cada trufa é delicadamente polvilhada com cacau em pó, criando um acabamento sedoso que derrete na boca. É a essência do luxo em sua forma mais simples e inesquecível.",
+  img: "/catalogo/trufas.png",
+  preco_venda: 20.0,
+  custo: 10.0,
+  categoria: "Trufas",
+},
+{
+  sku: "SKU024",
+  codigo: "COD024",
+  nome: "Trufa de Cappuccino",
+  descricao:
+    "Experimente o abraço caloroso da nossa Trufa de Cappuccino, uma fusão perfeita de especiarias e chocolate. Por dentro, um cremoso ganache com um toque sutil e aromático de canela em pó, que aquece o paladar a cada mordida. A cobertura fina de chocolate ao leite complementa o sabor, criando uma experiência inesquecível de conforto e indulgência. Perfeita para quem busca um toque exótico e reconfortante.",
+  img: "/catalogo/trufa1.png",
+  preco_venda: 20.0,
+  custo: 10.0,
+  categoria: "Trufas",
+},
+{
+  sku: "SKU025",
+  codigo: "COD025",
+  nome: "Trufa de Caramelo Salgado",
+  descricao:
+    "Renda-se à sofisticação da nossa Trufa de Caramelo Salgado, uma delícia que brinca com os sentidos. O interior revela um ganache sedoso de caramelo com um toque sutil de flor de sal, criando um equilíbrio perfeito entre o doce e o salgado. A cobertura crocante de chocolate ao leite complementa essa experiência, prometendo um final de boca inesquecível e luxuoso. Uma indulgência para os paladares mais exigentes.",
+  img: "/catalogo/trufa2.png",
+  preco_venda: 20.0,
+  custo: 10.0,
+  categoria: "Trufas",
+},
+{
+  sku: "SKU026",
+  codigo: "COD026",
+  nome: "Trufa de Laranja e Cardamomo",
+  descricao:
+    "Desperte seus sentidos com a nossa Trufa de Laranja e Cardamomo, uma combinação exótica e surpreendente. O ganache aveludado esconde um coração cítrico de laranja, que harmoniza com a nota quente e picante do cardamomo. Coberta com chocolate amargo de alta qualidade, esta trufa é uma jornada de sabores que transporta você a terras distantes e celebra a arte da alta confeitaria.",
+  img: "/catalogo/trufa3.png",
+  preco_venda: 20.0,
+  custo: 10.0,
+  categoria: "Trufas",
+},
+{
+  sku: "SKU027",
+  codigo: "COD027",
+  nome: "Trufa de Limão Siciliano",
+  descricao:
+    "Deixe-se levar pela leveza e frescor da nossa Trufa de Limão Siciliano. O ganache cremoso, infundido com o vibrante suco e as raspas aromáticas do limão siciliano, proporciona uma explosão cítrica que equilibra perfeitamente com a doçura do chocolate branco que a envolve. Uma experiência refrescante e elegante, ideal para purificar o paladar e celebrar os sabores da natureza.",
+  img: "/catalogo/trufa4.png",
+  preco_venda: 20.0,
+  custo: 10.0,
+  categoria: "Trufas",
+},
+{
+  sku: "SKU028",
+  codigo: "COD028",
+  nome: "Trufa de Figo e Balsâmico",
+  descricao:
+    "Uma ousada e elegante combinação, nossa Trufa de Figo e Balsâmico é uma experiência para os paladares mais aventureiros. O ganache cremoso, enriquecido com a doçura do figo maduro e um toque inesperado de balsâmico envelhecido, cria um contraste sublime de sabores. Envolta em chocolate amargo e finalizada com um pedacinho de figo, esta trufa é uma jornada sensorial que celebra a inovação na confeitaria de luxo.",
+  img: "/catalogo/trufa5.png",
+  preco_venda: 20.0,
+  custo: 10.0,
+  categoria: "Trufas",
+},
+{
+  sku: "SKU029",
+  codigo: "COD029",
+  nome: "Cookie de Chocolate Amargo e Flor de Sal",
+  descricao:
+    "Sofisticação em cada mordida com nosso Cookie de Chocolate Amargo e Flor de Sal. Uma bolacha macia e intensamente achocolatada, repleta de gotas de chocolate amargo de alta qualidade e finalizada com cristais delicados de flor de sal. O contraste perfeito entre a doçura profunda do chocolate e o toque sutilmente salgado eleva esta experiência a um nível gourmet. Ideal para acompanhar seu café ou chá.",
+  img: "/catalogo/bolacha1.png",
+  preco_venda: 30.0,
+  custo: 18.0,
+  categoria: "Bolachas",
+},
+{
+  sku: "SKU030",
+  codigo: "COD030",
+  nome: "Bolacha de Framboesa e Chocolate Branco",
+  descricao:
+    "Nossa Bolacha de Framboesa e Chocolate Branco, é macia e amanteigada, pontuada com pedaços vibrantes de framboesas frescas que explodem em sabor a cada mordida. O toque doce e cremoso do chocolate branco se une perfeitamente à acidez da fruta, criando uma experiência elegante e refrescante. Uma verdadeira joia para os amantes de sabores equilibrados e sofisticados.",
+  img: "/catalogo/bolacha2.png",
+  preco_venda: 30.0,
+  custo: 18.0,
+  categoria: "Bolachas",
+},
+{
+  sku: "SKU031",
+  codigo: "COD031",
+  nome: "Bolacha de Café e Chocolate Amargo",
+  descricao:
+    "Desperte os seus sentidos com a nossa Bolacha de Café e Chocolate Amargo. Uma bolacha macia e aromática, infundida com o sabor marcante do café fresco e salpicada com pedaços de chocolate amargo que derretem a cada mordida. O amargor elegante do café se harmoniza com a doçura do chocolate, criando uma experiência sofisticada e viciante. Perfeita para os amantes de café que buscam um toque de luxo em seus momentos de pausa.",
+  img: "/catalogo/bolacha3.png",
+  preco_venda: 30.0,
+  custo: 18.0,
+  categoria: "Bolachas",
+},
+{
+  sku: "SKU032",
+  codigo: "COD032",
+  nome: "Bolacha de Gengibre e Especiarias",
+  descricao:
+    "Aqueça a alma com a nossa Bolacha de Gengibre e Especiarias. Uma bolacha crocante por fora e macia por dentro, infundida com o calor reconfortante do gengibre, canela, cravo e noz-moscada. Cada mordida é uma explosão de aromas e sabores que remetem a momentos especiais e aconchegantes. Perfeita para harmonizar com um chá ou café, esta bolacha é uma celebração das especiarias e da tradição, com um toque de elegância.",
+  img: "/catalogo/bolacha4.png",
+  preco_venda: 30.0,
+  custo: 18.0,
+  categoria: "Bolachas",
+},
+{
+  sku: "SKU033",
+  codigo: "COD033",
+  nome: "Bolachinhas Recheadas de Doce de Leite com Especiarias",
+  descricao:
+    "Nossas Bolachinhas Recheadas de Doce de Leite com Especiarias são uma celebração do sabor e da elegância. Cada bolachinha, feita artesanalmente, é delicadamente recheada com um doce de leite cremoso, enriquecido por um toque sutil de especiarias. Embaladas com carinho em um pote de vidro, elas são a escolha perfeita para um momento intimo ou como um presente que encanta pela sofisticação e pelo sabor inesquecível.",
+  img: "/catalogo/bolachas.png",
+  preco_venda: 150.0,
+  custo: 100.0,
+  categoria: "Bolachas",
+},
 
-
-
-    // Criar produtos para cada loja
-
-  const produtos = await prisma.$transaction(
-    produtosData.map((p) =>
-      prisma.produto.create({
-        data: p,
-      })
-    )
-  );
-
+     
  
-// === ESTOQUES === //
+  ];
 
-console.log("📦 Criando estoques aleatórios por loja...");
+  const produtos = await prisma.produto.createMany({
+    data: produtosData,
+  });
 
-// busca lojas e produtos
-const lojas = await prisma.loja.findMany();
-const todosProdutos = await prisma.produto.findMany();
+  // ==========================
+  //  ESTOQUES
+  // ==========================
 
-// pega N produtos aleatórios
-function pegarProdutosAleatorios(lista, quantidade) {
-  const copia = [...lista];
-  const selecionados = [];
+  console.log("📦 Criando estoques aleatórios por loja...");
 
-  for (let i = 0; i < quantidade && copia.length > 0; i++) {
-    const index = Math.floor(Math.random() * copia.length);
-    selecionados.push(copia.splice(index, 1)[0]);
+  const lojas = await prisma.loja.findMany();
+  const todosProdutos = await prisma.produto.findMany();
+
+  function pegarProdutosAleatorios(lista, quantidade) {
+    const copia = [...lista];
+    const selecionados = [];
+    for (let i = 0; i < quantidade && copia.length > 0; i++) {
+      const index = Math.floor(Math.random() * copia.length);
+      selecionados.push(copia.splice(index, 1)[0]);
+    }
+    return selecionados;
   }
 
-  return selecionados;
-}
+  for (const loja of lojas) {
+    console.log(`➡️ Criando estoque para ${loja.nome}...`);
 
-// cria estoque para cada loja
-for (const loja of lojas) {
-  console.log(`➡️ Criando estoque para ${loja.nome}...`);
+    const qtdProdutos = loja.tipo === "MATRIZ" ? 30 : 20;
+    const produtosAleatorios = pegarProdutosAleatorios(
+      todosProdutos,
+      qtdProdutos
+    );
 
-  const qtdProdutos = loja.tipo === "MATRIZ" ? 30 : 20;
+    for (const produto of produtosAleatorios) {
+      const quantidade = Math.floor(Math.random() * 200) + 50;
+      const estoqueMinimo = Math.floor(Math.random() * 20) + 5;
 
-  const produtosAleatorios = pegarProdutosAleatorios(
-    todosProdutos,
-    qtdProdutos
-  );
-
-  for (const produto of produtosAleatorios) {
-    const quantidade = Math.floor(Math.random() * 200) + 50; // 50–250 unidades
-    const estoqueMinimo = Math.floor(Math.random() * 20) + 5; // 5–25 unidades
-
-    await prisma.estoque.create({
-      data: {
-        loja_id: loja.id,
-        produto_id: produto.id,
-        quantidade,
-        estoque_minimo: estoqueMinimo,
-      },
-    });
+      await prisma.estoque.create({
+        data: {
+          loja_id: loja.id,
+          produto_id: produto.id,
+          quantidade,
+          estoque_minimo: estoqueMinimo,
+        },
+      });
+    }
   }
+
+  console.log("✅ Estoques criados com sucesso!");
 }
 
-console.log("✅ Estoques criados com sucesso!");
-
+// RUN
 main()
   .then(async () => {
     await prisma.$disconnect();
@@ -728,4 +739,3 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
-}
