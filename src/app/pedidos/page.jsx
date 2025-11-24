@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { getLoggedUser } from "@/lib/auth-client";
-import { AlertCircle, Plus, Send, X } from "lucide-react";
+import { AlertCircle, Plus, Send, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,24 +26,39 @@ export default function PedidosPage({ params }) {
  const [isSubmitting, setIsSubmitting] = useState(false);
  const [error, setError] = useState(null);
 
+<<<<<<< HEAD
  // --- Estados principais ---
  // O item agora armazena tanto o nome quanto o ID (para maior integridade)
  const [pedidoItems, setPedidoItems] = useState([]); 
  
  // Estado do item sendo adicionado. produtoId inicial é null.
   const [currentItem, setCurrentItem] = useState({ 
+=======
+  // --- Estados principais ---
+  const [pedidoItems, setPedidoItems] = useState([]); 
+  
+  // Item agora rastreia produtoId
+  const [currentItem, setCurrentItem] = useState({ 
+>>>>>>> 83b055a20698a4b1dd7e99351dfe1ee815e23cf1
     produtoNome: "", 
     produtoId: null, 
     quantidade: 1 
   }); 
  const [produtosDisponiveis, setProdutosDisponiveis] = useState([]);
 
+<<<<<<< HEAD
    // --- Mapeamento para buscar o ID pelo nome no Select ---
  // Isso garante que quando o Select for alterado, o ID do produto seja salvo.
  const produtoMap = useMemo(() => {
     // Cria um mapa: { "Nome do Produto": ID }
  return new Map(produtosDisponiveis.map(p => [p.nome, p.id]));
  }, [produtosDisponiveis]);
+=======
+  // --- Mapeamento para buscar o ID pelo nome no Select ---
+  const produtoMap = useMemo(() => {
+    return new Map(produtosDisponiveis.map(p => [String(p.nome), p.id]));
+  }, [produtosDisponiveis]);
+>>>>>>> 83b055a20698a4b1dd7e99351dfe1ee815e23cf1
 
  // --- Autenticação ---
  useEffect(() => {
@@ -60,6 +75,7 @@ export default function PedidosPage({ params }) {
  useEffect(() => {
  if (!userData?.loja_id) return;
 
+<<<<<<< HEAD
  const fetchProdutos = async () => {
  try {
         // Assume-se que a loja_id pode ser Int ou String dependendo do seu setup de autenticação.
@@ -73,19 +89,38 @@ export default function PedidosPage({ params }) {
  toast.error("Falha ao carregar lista de produtos da loja.");
  }
  };
+=======
+    const fetchProdutos = async () => {
+      try {
+        const res = await fetch(`/api/produtos?lojaId=${userData.loja_id}`);
+        if (!res.ok) throw new Error("Erro ao buscar produtos");
+        const data = await res.json();
+        setProdutosDisponiveis(data);
+      } catch (err) {
+        console.error("Erro ao carregar produtos:", err);
+        toast.error("Falha ao carregar lista de produtos da loja.");
+      }
+    };
+>>>>>>> 83b055a20698a4b1dd7e99351dfe1ee815e23cf1
 
  fetchProdutos();
  }, [userData]);
 
+<<<<<<< HEAD
  // --- Função de manipulação do Select ---
  const handleProdutoSelect = (produtoNomeSelecionado) => {
     // Busca o ID do produto selecionado usando o mapa
+=======
+  // --- Função de manipulação do Select ---
+  const handleProdutoSelect = (produtoNomeSelecionado) => {
+    // Busca o ID do produto selecionado
+>>>>>>> 83b055a20698a4b1dd7e99351dfe1ee815e23cf1
     const produtoId = produtoMap.get(produtoNomeSelecionado) || null;
     
     setCurrentItem({ 
         ...currentItem, 
         produtoNome: produtoNomeSelecionado, 
-        produtoId: produtoId // Salva o ID do produto
+        produtoId: produtoId
     });
  };
 
@@ -96,6 +131,7 @@ export default function PedidosPage({ params }) {
  return;
  }
 
+<<<<<<< HEAD
     // Cria o novo item com todas as propriedades, incluindo produtoId
  const novoItem = {
  ...currentItem,
@@ -106,6 +142,16 @@ export default function PedidosPage({ params }) {
  // Limpa o estado para o próximo item
  setCurrentItem({ produtoNome: "", produtoId: null, quantidade: 1 }); 
  };
+=======
+    const novoItem = {
+      ...currentItem,
+      tempId: Date.now(), 
+    };
+
+    setPedidoItems([...pedidoItems, novoItem]);
+    setCurrentItem({ produtoNome: "", produtoId: null, quantidade: 1 }); 
+  };
+>>>>>>> 83b055a20698a4b1dd7e99351dfe1ee815e23cf1
 
  // --- Remover item ---
  const handleRemoveItem = (tempId) => {
@@ -128,6 +174,7 @@ return;
  setIsSubmitting(true);
  setError(null);
 
+<<<<<<< HEAD
  // Preparação do payload para a API
  const payload = {
  loja_id: userData.loja_id,
@@ -139,6 +186,17 @@ return;
  quantidade: item.quantidade,
  })),
  };
+=======
+    const payload = {
+      loja_id: userData.loja_id,
+      usuario_id: userData.id,
+      items: pedidoItems.map((item) => ({
+        produto_nome: item.produtoNome,
+        produto_id: item.produtoId, // Inclui o ID
+        quantidade: item.quantidade,
+      })),
+    };
+>>>>>>> 83b055a20698a4b1dd7e99351dfe1ee815e23cf1
 
  try {
  const response = await fetch("/api/pedidos", {
@@ -205,6 +263,7 @@ const result = await response.json();
 <Label htmlFor="produtoNome">Produto:</Label>
 <br></br>
 
+<<<<<<< HEAD
             {/* O Select agora chama a nova função que também salva o ID */}
 <Select value={currentItem.produtoNome} onValueChange={handleProdutoSelect} >
 <SelectTrigger className="w-full">
@@ -219,6 +278,22 @@ const result = await response.json();
 </SelectContent>
  </Select>
 </div>
+=======
+      <Select value={currentItem.produtoNome} onValueChange={handleProdutoSelect} >
+       <SelectTrigger className="w-full">
+       <SelectValue placeholder="Selecione um produto..." />
+       </SelectTrigger>
+        <SelectContent>
+         {produtosDisponiveis.map((produto) => (
+         <SelectItem key={produto.id} value={String(produto.nome)}>
+          {produto.nome}
+          </SelectItem>
+          ))}
+         </SelectContent>
+          </Select>
+
+             </div>
+>>>>>>> 83b055a20698a4b1dd7e99351dfe1ee815e23cf1
 
 
 <div>
@@ -243,6 +318,7 @@ const result = await response.json();
  </CardContent>
  </Card>
 
+<<<<<<< HEAD
  {/* Lista de Itens */}
  <div className="mt-8 space-y-4">
  <h2 className="text-2xl font-semibold">Itens do Pedido ({pedidoItems.length})</h2>
@@ -272,6 +348,37 @@ const result = await response.json();
  </div>
  )}
  </div>
+=======
+      {/* Lista de Itens */}
+      <div className="mt-8 space-y-4">
+        <h2 className="text-2xl font-semibold">Itens do Pedido ({pedidoItems.length})</h2>
+        {pedidoItems.length === 0 ? (
+          <p className="font-semibold">Nenhum item adicionado ainda.</p>
+        ) : (
+          <div className="space-y-2">
+            {pedidoItems.map((item) => (
+              <div
+                key={item.tempId}
+                className="flex justify-between items-center p-3 border rounded-md shadow-sm bg-white"
+              >
+                <span className="font-medium">
+                  **{item.produtoNome}** {item.produtoId && <span className="ml-3 text-sm text-gray-500">(ID: {item.produtoId})</span>}
+                  <span className="ml-3 text-sm">(Qtd: {item.quantidade})</span>
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRemoveItem(item.tempId)}
+                  disabled={isSubmitting}
+                >
+                  <X className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+>>>>>>> 83b055a20698a4b1dd7e99351dfe1ee815e23cf1
 
  <div className="mt-8 flex justify-end">
  <Button
