@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { getLoggedUser } from "@/lib/auth-client";
-import { AlertCircle, Plus, Send, X } from "lucide-react";
+import { AlertCircle, Plus, Send, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,10 +27,9 @@ export default function PedidosPage({ params }) {
   const [error, setError] = useState(null);
 
   // --- Estados principais ---
-  // O item agora armazena tanto o nome quanto o ID (para maior integridade)
   const [pedidoItems, setPedidoItems] = useState([]); 
   
-  // Estado do item sendo adicionado. produtoId inicial é null.
+  // Item agora rastreia produtoId
   const [currentItem, setCurrentItem] = useState({ 
     produtoNome: "", 
     produtoId: null, 
@@ -39,10 +38,8 @@ export default function PedidosPage({ params }) {
   const [produtosDisponiveis, setProdutosDisponiveis] = useState([]);
 
   // --- Mapeamento para buscar o ID pelo nome no Select ---
-  // Isso garante que quando o Select for alterado, o ID do produto seja salvo.
   const produtoMap = useMemo(() => {
-    // Cria um mapa: { "Nome do Produto": ID }
-    return new Map(produtosDisponiveis.map(p => [p.nome, p.id]));
+    return new Map(produtosDisponiveis.map(p => [String(p.nome), p.id]));
   }, [produtosDisponiveis]);
 
   // --- Autenticação ---
@@ -62,8 +59,6 @@ export default function PedidosPage({ params }) {
 
     const fetchProdutos = async () => {
       try {
-        // Assume-se que a loja_id pode ser Int ou String dependendo do seu setup de autenticação.
-        // Se loja_id for Int, garanta que sua API lida com a conversão (o backend que sugeri faz isso).
         const res = await fetch(`/api/produtos?lojaId=${userData.loja_id}`);
         if (!res.ok) throw new Error("Erro ao buscar produtos");
         const data = await res.json();
@@ -79,13 +74,13 @@ export default function PedidosPage({ params }) {
 
   // --- Função de manipulação do Select ---
   const handleProdutoSelect = (produtoNomeSelecionado) => {
-    // Busca o ID do produto selecionado usando o mapa
+    // Busca o ID do produto selecionado
     const produtoId = produtoMap.get(produtoNomeSelecionado) || null;
     
     setCurrentItem({ 
         ...currentItem, 
         produtoNome: produtoNomeSelecionado, 
-        produtoId: produtoId // Salva o ID do produto
+        produtoId: produtoId
     });
   };
 
@@ -96,14 +91,12 @@ export default function PedidosPage({ params }) {
       return;
     }
 
-    // Cria o novo item com todas as propriedades, incluindo produtoId
     const novoItem = {
       ...currentItem,
-      tempId: Date.now(), // ID temporário para a lista no frontend
+      tempId: Date.now(), 
     };
 
     setPedidoItems([...pedidoItems, novoItem]);
-    // Limpa o estado para o próximo item
     setCurrentItem({ produtoNome: "", produtoId: null, quantidade: 1 }); 
   };
 
@@ -128,14 +121,12 @@ export default function PedidosPage({ params }) {
     setIsSubmitting(true);
     setError(null);
 
-    // Preparação do payload para a API
     const payload = {
       loja_id: userData.loja_id,
       usuario_id: userData.id,
       items: pedidoItems.map((item) => ({
         produto_nome: item.produtoNome,
-        // Adiciona o produto_id ao payload para que a API o salve (Int? no schema)
-        produto_id: item.produtoId, 
+        produto_id: item.produtoId, // Inclui o ID
         quantidade: item.quantidade,
       })),
     };
@@ -206,14 +197,13 @@ export default function PedidosPage({ params }) {
           <Label htmlFor="produtoNome">Produto:</Label>
           <br></br>
 
-            {/* O Select agora chama a nova função que também salva o ID */}
       <Select value={currentItem.produtoNome} onValueChange={handleProdutoSelect} >
        <SelectTrigger className="w-full">
        <SelectValue placeholder="Selecione um produto..." />
        </SelectTrigger>
         <SelectContent>
          {produtosDisponiveis.map((produto) => (
-         <SelectItem key={produto.id} value={produto.nome}>
+         <SelectItem key={produto.id} value={String(produto.nome)}>
           {produto.nome}
           </SelectItem>
           ))}
@@ -258,7 +248,7 @@ export default function PedidosPage({ params }) {
                 className="flex justify-between items-center p-3 border rounded-md shadow-sm bg-white"
               >
                 <span className="font-medium">
-                  **{item.produtoNome}** <span className="ml-3 text-sm text-gray-500">(ID: {item.produtoId})</span>
+                  **{item.produtoNome}** {item.produtoId && <span className="ml-3 text-sm text-gray-500">(ID: {item.produtoId})</span>}
                   <span className="ml-3 text-sm">(Qtd: {item.quantidade})</span>
                 </span>
                 <Button
