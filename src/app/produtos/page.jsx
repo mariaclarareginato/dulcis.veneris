@@ -83,7 +83,9 @@ async function colocarNaLinha(p) {
       </div>
 
       {loading ? (
-        <p>Carregando...</p>
+        <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-16 h-16 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
+      </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
           {produtos.map((p) => (

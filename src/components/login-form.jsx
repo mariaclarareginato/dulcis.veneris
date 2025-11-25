@@ -55,9 +55,9 @@ else if (data.user.perfil === "ADMIN") router.push("/matriz")
  </div>
 
 <CardHeader>
-<CardTitle className="text-center text-red-500 font-bold text-[30px]">Bem vindo!</CardTitle>
-<CardDescription>
-Digite suas informações para acessar nosso site gerenciador das nossas lojas e caixas:
+<CardTitle className="text-center text-red-500 font-bold text-3xl">Bem vindo!</CardTitle>
+<CardDescription className="text-lg m-4 font-semibold">
+Digite suas informações para acessar o sistema gerenciador das nossas filiais, matriz e caixas:
 </CardDescription>
  </CardHeader>
 <CardContent>
@@ -77,7 +77,7 @@ placeholder="Senha"
  required
 />
 
- <Button type="submit" className="w-full">Entrar</Button>
+ <Button type="submit" className="w-full mt-6">Entrar</Button>
  </form>
 
 

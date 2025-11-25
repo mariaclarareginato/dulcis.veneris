@@ -14,7 +14,7 @@ export default function RegisterPage() {
         <Button
           variant="ghost"
           onClick={() => router.push("/gerencia")}
-          className="rounded-full p-1 font-extrabold"
+          className="rounded-full p-1 font-bold"
         >
           ← Voltar
         </Button>

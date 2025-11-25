@@ -6,22 +6,50 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select, SelectTrigger, SelectValue,
+  SelectContent, SelectItem,
+} from "@/components/ui/select";
 
 export default function NovoProduto() {
   const router = useRouter();
 
   const [form, setForm] = useState({
+    sku: "",
     nome: "",
     codigo: "",
+    categoria: "",
+    descricao: "",
     preco_venda: "",
     custo: "",
     img: "",
   });
 
+  const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState(null);
+
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  async function handleImage(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImageFile(file);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    setForm({ ...form, img: data.url });
   }
 
   async function criarProduto() {
@@ -32,31 +60,27 @@ export default function NovoProduto() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nome: form.nome,
-          codigo: form.codigo,
+          ...form,
           preco_venda: Number(form.preco_venda),
           custo: Number(form.custo),
-          img: form.img,
           ativo: true,
         }),
       });
 
       if (!res.ok) throw new Error("Erro ao criar produto");
 
-      alert("Produto criado com sucesso!");
-      router.push("/matriz/produtos");
-
+      alert("Produto criado!");
+      router.push("/produtos");
     } catch (err) {
       console.error(err);
-      alert("Erro ao criar produto.");
-    } finally {
-      setLoading(false);
+      alert("Erro ao criar produto");
     }
+    setLoading(false);
   }
 
   return (
     <div className="p-8 flex justify-center">
-      <Card className="w-full max-w-2xl mt-50">
+      <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle className="text-3xl font-extrabold">
             Criar novo produto
@@ -64,36 +88,52 @@ export default function NovoProduto() {
         </CardHeader>
 
         <CardContent className="space-y-4">
-
           <div>
-            <Label className="m-3">Nome do produto</Label>
-            <Input
-              name="nome"
-              value={form.nome}
-              onChange={handleChange}
-              placeholder="Ex: Trufa Bombom 60g"
-            />
-          </div>
-
-          <div className="mt-3">
-            <Label className="m-3">Código</Label>
-            <Input
-              name="codigo"
-              value={form.codigo}
-              onChange={handleChange}
-              placeholder="Ex: COD060"
-            />
+            <Label className="m-3">SKU</Label>
+            <Input name="sku" value={form.sku} onChange={handleChange} />
           </div>
 
           <div>
-            <Label className="m-3">Preço de venda</Label>
+            <Label className="m-3">Código interno</Label>
+            <Input name="codigo" value={form.codigo} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label className="m-3">Nome</Label>
+            <Input name="nome" value={form.nome} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label className="m-3">Categoria</Label>
+            <Select
+              value={form.categoria}
+              onValueChange={(v) => setForm({ ...form, categoria: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Chocolates">Chocolates</SelectItem>
+                <SelectItem value="Pães-de-mel">Pães-de-mel</SelectItem>
+                <SelectItem value="Bolachas">Bolachas</SelectItem>
+                <SelectItem value="Trufas">Trufas</SelectItem>
+                <SelectItem value="Outros">Outros</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label className="m-3">Descrição</Label>
+            <Input name="descricao" value={form.descricao} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label className="m-3">Preço venda</Label>
             <Input
               name="preco_venda"
               type="number"
-              step="0.01"
               value={form.preco_venda}
               onChange={handleChange}
-              placeholder="Ex: 12.90"
             />
           </div>
 
@@ -102,32 +142,60 @@ export default function NovoProduto() {
             <Input
               name="custo"
               type="number"
-              step="0.01"
               value={form.custo}
               onChange={handleChange}
-              placeholder="Ex: 6.50"
             />
           </div>
 
+        
 
-          <div>
-            <Label className="m-3">URL da Imagem</Label>
-            <Input
-              name="img"
-              value={form.img}
-              onChange={handleChange}
-              placeholder="Link da imagem do produto"
-            />
-          </div>
+    <div className="flex flex-col gap-2">
+     <Label className="m-3">Imagem</Label>
+
+    <input
+    id="img"
+    type="file"
+    accept="image/*"
+    onChange={(e) => {
+      handleImage(e);
+
+      // cria URL temporária pra mostrar preview
+
+      const file = e.target.files[0];
+      if (file) {
+        setImageFile(file);
+        setPreview(URL.createObjectURL(file));
+      }
+    }}
+    className="hidden"
+  />
+
+  <label
+    htmlFor="img"
+    className="cursor-pointer px-4 py-2 rounded-xl font-semibold w-fit transition"
+  >
+    Selecionar imagem
+  </label>
+
+ 
+  {/* Preview img */}
+
+  {preview && (
+    <img
+      src={preview}
+      alt="Preview"
+      className="mt-2 w-32 h-32 object-cover rounded-xl border"
+    />
+  )}
+</div>
 
           <Button
-            className="w-full mt-4 font-bold"
             onClick={criarProduto}
             disabled={loading}
+            className="w-full mt-4"
           >
             {loading ? "Salvando..." : "Criar produto"}
           </Button>
-
         </CardContent>
       </Card>
     </div>

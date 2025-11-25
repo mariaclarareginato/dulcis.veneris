@@ -20,13 +20,6 @@ import { Label } from "@/components/ui/label";
 // Status do ENUM (precisa ser definido no frontend também)
 const STATUS_OPTIONS = ["PENDENTE", "EM_PROCESSAMENTO", "ENVIADO", "CANCELADO"];
 
-// Mapeamento de cores para a UI
-const STATUS_COLORS = {
-    PENDENTE: "text-yellow-600 bg-yellow-100 border-yellow-300",
-    EM_PROCESSAMENTO: "text-blue-600 bg-blue-100 border-blue-300",
-    ENVIADO: "text-green-600 bg-green-100 border-green-300",
-    CANCELADO: "text-red-600 bg-red-100 border-red-300",
-};
 
 
 export default function MatrizPedidosPage() {
@@ -128,10 +121,9 @@ export default function MatrizPedidosPage() {
     // --- Renderização de Carregamento/Erro ---
     if (loading && !pedidos.length) { 
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-                <Loader2 className="w-16 h-16 text-red-500 animate-spin" />
-                <p className="text-lg">Carregando todos os pedidos...</p>
-            </div>
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-16 h-16 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
+      </div>
         );
     }
 
@@ -145,21 +137,24 @@ export default function MatrizPedidosPage() {
         );
     }
 
-    // --- Renderização Principal ---
+    // --- Render Principal ---
+
     return (
         <div className="container mx-auto py-8 max-w-4xl">
-            <h1 className="text-3xl font-bold mt-10 flex items-center gap-3">
-                <List className="w-7 h-7" /> Painel de Pedidos da Matriz
-            </h1>
+            <div className="text-3xl font-bold mt-10 flex items-center gap-3">
+                <h1 className="w-7 h-7" /> Painel de Pedidos da Matriz
+            </div>
 
-            <small className="block font-semibold mt-1">
-                Acesso **Matriz** | Perfil: **{userData?.perfil}** | Total de Pedidos: **{pedidos.length}**
+            <div className="m-5">
+            <small className="text-muted-foreground text-lg font-semibold">
+                Acesso Matriz | Perfil: {userData?.perfil} | Total de Pedidos: {pedidos.length}
             </small>
+            </div>
 
             {pedidos.length === 0 ? (
                 <Card className="mt-8 border-dashed">
                     <CardContent className="py-10 text-center">
-                        <p className="text-lg font-medium text-gray-500">
+                        <p className="text-lg font-medium ">
                             Nenhum pedido de estoque encontrado.
                         </p>
                     </CardContent>
@@ -168,19 +163,25 @@ export default function MatrizPedidosPage() {
                 <div className="mt-8 space-y-6">
                     {pedidos.map((pedido) => (
                         <Card key={pedido.id} className="shadow-lg">
-                            <CardHeader className="flex flex-row items-start justify-between p-4 pb-2 bg-gray-50 border-b">
+                            <CardHeader className="flex flex-row items-start justify-between p-4 pb-2 border-b">
                                 <div>
-                                    <CardTitle className="text-xl">Pedido #**{pedido.id}**</CardTitle>
-                                    <p className="text-sm text-gray-700 font-medium flex items-center gap-1 mt-1">
-                                        <Clock className="w-3 h-3"/> {new Date(pedido.data_pedido).toLocaleDateString()}
+                                    <CardTitle className="text-xl">Pedido {pedido.id}</CardTitle>
+                                    <p className="text-sm font-medium flex items-center gap-1 mt-1 font-semibold">
+                                        <Clock className="w-3 h-3 font-semibold"/> {new Date(pedido.data_pedido).toLocaleDateString()}
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-bold text-red-700">
+                                    <p className="text-sm font-bold">
                                         Loja: {pedido.loja?.nome || `ID ${pedido.loja_id}`}
+                                        </p>
+                        
+                                        <p className="text-sm m-4">
+                                            Endereço para entrega: <strong>{pedido.loja.endereco}</strong>
                                     </p>
-                                    <p className="text-xs text-gray-600">
-                                        Solicitado por: {pedido.usuario?.nome || `ID ${pedido.usuario_id}`}
+                                      
+                                    <br></br>
+                                    <p className="text-sm m-4">
+                                        Solicitado por: <strong>{pedido.usuario?.nome || `ID ${pedido.usuario_id}`}</strong>
                                     </p>
                                 </div>
                             </CardHeader>
@@ -188,13 +189,14 @@ export default function MatrizPedidosPage() {
                                 
                                 {/* Coluna de Status */}
                                 <div className="col-span-1 space-y-2">
-                                    <Label>Atualizar Status</Label>
+                                    <Label>Atualizar Status -</Label>
+                                    <br></br>
                                     <Select 
                                         value={pedido.status}
                                         onValueChange={(value) => handleUpdateStatus(pedido.id, value)}
                                         disabled={updatingId === pedido.id}
                                     >
-                                        <SelectTrigger className={`w-full ${STATUS_COLORS[pedido.status]}`}>
+                                        <SelectTrigger className={`font-bold [pedido.status]`}>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -206,25 +208,28 @@ export default function MatrizPedidosPage() {
                                         </SelectContent>
                                     </Select>
                                     {updatingId === pedido.id && (
-                                        <p className="text-xs text-blue-500 flex items-center gap-1">
+                                        <p className="text-xs flex items-center gap-1">
                                             <Loader2 className="w-3 h-3 animate-spin"/> Salvando...
                                         </p>
                                     )}
                                 </div>
 
                                 {/* Coluna de Itens */}
-                                <div className="col-span-2">
-                                    <h3 className="text-md font-semibold mb-1 flex items-center gap-1">
+                                
+
+                                <div className="col-span-4 mt-4">
+                                    
+                                    <h3 className="text-md flex items-center gap-1">
                                         <List className="w-4 h-4"/> Itens ({pedido.itens_pedido.length}):
                                     </h3>
-                                    <ul className="list-none pl-0 text-sm space-y-1 max-h-24 overflow-auto border p-2 rounded-md bg-gray-50">
+                                    <ul className="list-none pl-0 text-sm space-y-1 max-h-24 overflow-auto p-2 ">
                                         {pedido.itens_pedido.map((item, index) => (
-                                            <li key={index} className="flex justify-between items-center text-gray-700 border-b last:border-b-0 py-0.5">
-                                                <span className="truncate pr-2">
+                                            <li key={index} className="flex justify-between items-center">
+                                                <span className="truncate pr-2 font-semibold">
                                                     {item.produto_nome}
                                                 </span>
-                                                <span className="text-xs font-bold text-blue-600 flex-shrink-0">
-                                                    Qtd: {item.quantidade}
+                                                <span className="text-sm flex-shrink-0">
+                                                    Quantidade: <strong>{item.quantidade}</strong>
                                                 </span>
                                             </li>
                                         ))}

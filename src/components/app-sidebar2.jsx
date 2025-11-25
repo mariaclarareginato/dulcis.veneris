@@ -28,7 +28,7 @@ const data = {
  
   linhas: [
     { name: "Produtos", url: "/produtos" },
-    { name: "Pedidios e transporte ", url: "/pedidosetransporte" },
+    { name: "Pedidios", url: "/matrizPedidos" },
     { name: "Filiais", url: "/filiais" },
  
   ],

@@ -1,7 +1,9 @@
-import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-// LISTAR TODOS OS PRODUTOS (ativos ou não)
+import { prisma } from "@/lib/prisma";
+
+//----------------
+// GET - Lista produtos
 
 export async function GET() {
   try {
@@ -19,22 +21,35 @@ export async function GET() {
   }
 }
 
-// Criar novo produto
+//----------------------
+// POST - Criar produto
 
 export async function POST(req) {
   try {
-    const dados = await req.json();
+    const form = await req.json(); // JSON
+
+    // PEGANDO DO JSON
+    const sku = form.sku;
+    const nome = form.nome;
+    const codigo = form.codigo;
+    const categoria = form.categoria;
+    const descricao = form.descricao;
+    const preco_venda = Number(form.preco_venda);
+    const custo = Number(form.custo);
+
+
+    const img = form.img || null;
 
     const novo = await prisma.produto.create({
       data: {
-        sku: dados.sku,
-        codigo: dados.codigo,
-        nome: dados.nome,
-        descricao: dados.descricao,
-        img: dados.img,
-        preco_venda: dados.preco_venda,
-        custo: dados.custo,
-        categoria: dados.categoria,
+        sku,
+        nome,
+        codigo,
+        categoria,
+        descricao,
+        preco_venda,
+        custo,
+        img,
         ativo: true,
       },
     });
