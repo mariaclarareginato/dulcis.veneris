@@ -305,7 +305,7 @@ export default function PedidosPage() {
       <div>
         <strong>! ATENÇÃO !</strong>
         
-        <h1 className="m-5 w-full max-w-70">Seus pedidos chegarão em 6 dias úteis assim que a matriz alterar os status dos mesmos para "EM_PROCESSAMENTO".</h1>
+        <h1 className="m-5 w-full text-lg">Seus pedidos chegarão em 6 dias úteis.</h1>
       </div>
 
 

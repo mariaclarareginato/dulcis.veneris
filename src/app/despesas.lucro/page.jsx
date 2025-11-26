@@ -350,9 +350,9 @@ function convertBlobToBase64(blob) {
   </CardContent>
 </Card>
 
-<div className="flex justify-center mt-10">
+<div className="flex justify-center mt-10 ">
   <Button onClick={gerarPDF}>
-    Gerar PDF
+    <p className="font-bold">Gerar PDF</p>
   </Button>
 </div>
 

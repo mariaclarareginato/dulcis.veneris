@@ -69,11 +69,11 @@ export function CartDropdown() {
         className="w-64 sm:w-80 md:w-96 p-2 overflow-auto max-h-96"
       >
         {!data ? (
-          <DropdownMenuItem disabled className="px-4 py-2">
+          <DropdownMenuItem disabled className="px-4 py-2 font-semibold text-lg">
             Carregando carrinho...
           </DropdownMenuItem>
         ) : carrinho.length === 0 ? (
-          <DropdownMenuItem disabled className="px-4 py-2">
+          <DropdownMenuItem disabled className="px-4 py-2 font-semibold text-lg">
             Seu carrinho está vazio
           </DropdownMenuItem>
         ) : (

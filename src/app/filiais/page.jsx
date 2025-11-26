@@ -377,7 +377,7 @@ export default function MatrizPage() {
                             >
                               <div>
                                 <p className="font-medium">
-                                  Pedido #{pedido.id}
+                                  Pedido {pedido.id}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
                                   {new Date(
@@ -429,7 +429,7 @@ export default function MatrizPage() {
                             className="flex justify-between items-center p-3 border rounded-lg"
                           >
                             <div>
-                              <p className="font-medium">Caixa #{caixa.id}</p>
+                              <p className="font-medium">Caixa {caixa.id}</p>
                               <p className="text-sm text-muted-foreground">
                                 Saldo Inicial: R${" "}
                                 {caixa.saldo_inicial.toFixed(2)}

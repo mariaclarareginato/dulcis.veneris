@@ -191,7 +191,7 @@ const anoAtual = new Date().getFullYear();
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totais.vendas}</div>
-            <p className="text-xs text-muted-foreground">vendas finalizadas</p>
+            <p className="text-sm text-muted-foreground">vendas finalizadas</p>
           </CardContent>
         </Card>
 
@@ -206,7 +206,7 @@ const anoAtual = new Date().getFullYear();
             <div className="text-2xl font-bold text-green-600">
               R$ {Number(totais.faturamento).toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">em vendas</p>
+            <p className="text-sm text-muted-foreground">em vendas</p>
           </CardContent>
         </Card>
 
@@ -219,7 +219,7 @@ const anoAtual = new Date().getFullYear();
             <div className="text-2xl font-bold text-blue-600">
               R$ {totais.lucro.toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">lucro líquido</p>
+            <p className="text-sm text-muted-foreground">lucro líquido</p>
           </CardContent>
         </Card>
       </div>
@@ -228,7 +228,7 @@ const anoAtual = new Date().getFullYear();
       {usuarios.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <User className="w-16 h-16 text-muted-foreground mb-4" />
+            
             <p className="text-lg font-semibold">Nenhum operador encontrado</p>
             <p className="text-muted-foreground">Registre novos usuários</p>
           </CardContent>
@@ -238,17 +238,14 @@ const anoAtual = new Date().getFullYear();
           {usuarios.map((usuario, index) => (
             <Card
               key={usuario.id}
-              className="hover:shadow-lg transition-shadow p-2"
+              className="hover:shadow-lg text-3xl transition-shadow p-4"
             >
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="bg-primary/10 p-3 rounded-full">
-                      <User className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{usuario.nome}</CardTitle>
-                      <CardDescription className="mt-1">
+                    <div> 
+                      <CardTitle className="text-xl font-bold">{usuario.nome}</CardTitle>
+                      <CardDescription className="mt-1 text-lg">
                         {usuario.email}
                       </CardDescription>
                     </div>
@@ -256,12 +253,12 @@ const anoAtual = new Date().getFullYear();
                   <Badge
                     className={
                       index === 0
-                        ? "bg-yellow-500 font-bold text-black"
+                        ? "bg-yellow-500 font-bold text-black text-lg"
                         : index === 1
-                        ? "bg-gray-400 font-bold text-black"
+                        ? "bg-gray-400 font-bold text-black text-lg"
                         : index === 2
-                        ? "bg-amber-600 text-black font-bold"
-                        : "bg-gray-200 text-black font-bold "
+                        ? "bg-amber-600 text-black font-bold text-lg"
+                        : "bg-gray-200 text-black font-bold text-lg"
                     }
                   >
                     {index === 0
@@ -324,7 +321,7 @@ const anoAtual = new Date().getFullYear();
                       }}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {(
                       (usuario.stats.totalVendas / totais.faturamento) *
                       100
@@ -340,7 +337,7 @@ const anoAtual = new Date().getFullYear();
 
       <div className="flex justify-center mt-10">
   <Button onClick={gerarPDF}>
-    <h1 className="font-semibold">Gerar PDF</h1>
+    <h1 className="font-bold">Gerar PDF</h1>
   </Button>
 </div>
 
