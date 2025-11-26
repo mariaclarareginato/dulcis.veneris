@@ -1,7 +1,7 @@
+"use client";
 
-"use client"
-
-import { IconDotsVertical, IconLogout } from "@tabler/icons-react"
+import { IconDotsVertical, IconLogout } from "@tabler/icons-react";
+import { logout } from "@/lib/auth-client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,21 +9,20 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 export function NavUser({ user }) {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
 
-  const handleLogout = () => {
-    localStorage.removeItem("user")
-    window.location.href = "/login"
-  }
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <SidebarMenu>
@@ -54,7 +53,7 @@ export function NavUser({ user }) {
               <div className="flex flex-1 flex-col gap-1 px-1 py-1.5 text-left text-sm">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="text-m font-bold text-center">
-                 Olá,  {user.nome}
+                  Olá, {user.nome}
                 </span>
               </div>
             </DropdownMenuLabel>
@@ -69,5 +68,5 @@ export function NavUser({ user }) {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

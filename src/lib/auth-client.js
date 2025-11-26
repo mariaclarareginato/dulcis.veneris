@@ -1,76 +1,85 @@
-
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 /**
  * Obtém os dados do usuário logado armazenados no sessionStorage
- * @returns {Object|null} Dados do usuário ou null se não estiver logado
  */
 export function getLoggedUser() {
- if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") return null;
 
- try {
- // Removeme a dependência do token aqui. 
- // O Middleware Global garante que, se o token for inválido, o usuário 
- // nem chega no componente.
- const userString = sessionStorage.getItem("user"); 
+  try {
+    const userString = sessionStorage.getItem("user");
+    if (!userString) return null;
 
- if (!userString) return null; // Retorna null se não houver dados no sessionStorage
-
- const user = JSON.parse(userString);
-return user;
- } catch (error) {
- console.error("Erro ao obter usuário logado (JSON inválido). Limpando sessionStorage:", error);
-    sessionStorage.removeItem("user"); // Boa prática
- return null;
- }
+    const user = JSON.parse(userString);
+    return user;
+  } catch (error) {
+    console.error("Erro ao obter usuário logado:", error);
+    sessionStorage.removeItem("user");
+    return null;
+  }
 }
 
 /**
- * Salva os dados do usuário no sessionStorage após login.
- *  O TOKEN JWT PRINCIPAL É SALVO PELO BACKEND COMO COOKIE HTTP.
- * @param {Object} user - Dados do usuário
+ * Salva os dados do usuário no sessionStorage após login
  */
 export function saveUserData(user) {
-	if (typeof window === "undefined") return;
-
-	// O token não é mais salvo aqui, apenas os dados do usuário.
-	sessionStorage.setItem("user", JSON.stringify(user));
+  if (typeof window === "undefined") return;
+  sessionStorage.setItem("user", JSON.stringify(user));
 }
 
 /**
- * Remove os dados do usuário (logout) e o token (via Cookie).
+ * Realiza o logout completo
+ */
+export async function logout() {
+  if (typeof window === "undefined") return;
+
+  try {
+    // 1. Chama a API de logout para limpar o cookie do servidor
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    // 2. Limpa o sessionStorage
+    sessionStorage.removeItem("user");
+
+    // 3. Limpa o cookie do lado do cliente (redundância)
+    Cookies.remove("token");
+
+    // 4. Redireciona para a página de login
+    window.location.href = "/login";
+  } catch (error) {
+    console.error("Erro ao fazer logout:", error);
+
+    // Mesmo com erro, limpa os dados locais e redireciona
+    sessionStorage.removeItem("user");
+    Cookies.remove("token");
+    window.location.href = "/login";
+  }
+}
+
+/**
+ * Remove os dados do usuário (versão antiga - mantida para compatibilidade)
  */
 export function clearUserData() {
-	if (typeof window === "undefined") return;
-
-	// Remove os dados do sessionStorage
-	sessionStorage.removeItem("user");
-    
-    // Remove o token do Cookie.
-    // Se o backend tiver um endpoint de logout, é melhor chamá-lo
-    // para limpar o cookie de forma mais segura.
-	Cookies.remove("token"); 
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem("user");
+  Cookies.remove("token");
 }
 
 /**
  * Verifica se o usuário está autenticado
- * @returns {boolean}
  */
 export function isAuthenticated() {
-	if (typeof window === "undefined") return false;
-
-	// A autenticação é baseada na presença do token no Cookie
-	const token = Cookies.get("token");
-	return !!token;
+  if (typeof window === "undefined") return false;
+  const token = Cookies.get("token");
+  return !!token;
 }
 
 /**
  * Obtém apenas o token
- * @returns {string|null}
  */
 export function getToken() {
-	if (typeof window === "undefined") return null;
-
-	// Obtém o token do Cookie
-	return Cookies.get("token");
-};
+  if (typeof window === "undefined") return null;
+  return Cookies.get("token");
+}
