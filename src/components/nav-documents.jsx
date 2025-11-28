@@ -16,7 +16,7 @@ export function NavDocuments({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel className="font-semibold text-base pt-5 pb-10">Nossas linhas: </SidebarGroupLabel>
+      <SidebarGroupLabel className="font-semibold text-2xl pt-5 pb-10">Nossas linhas: </SidebarGroupLabel>
      
       <SidebarMenu>
         {items.map((item) => (
@@ -24,7 +24,7 @@ export function NavDocuments({
             <SidebarMenuButton asChild>
               <a href={item.url}>
                   {item.icon && <item.icon />}
-                <span>{item.name}</span>
+                <span className="font-semibold text-xl">{item.name}</span>
               </a>
             </SidebarMenuButton>
             

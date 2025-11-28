@@ -200,8 +200,8 @@ export default function CaixaPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold">Produtos Disponíveis</h2>
-          <p className="text-muted-foreground mt-2 font-semibold text-lg">
+          <h2 className="text-4xl font-bold">Produtos Disponíveis</h2>
+          <p className="text-muted-foreground mt-4 font-semibold text-xl">
             Bem-vindo(a), {userData.nome} | Loja: {userData.loja_id}
           </p>
         </div>
@@ -226,9 +226,9 @@ export default function CaixaPage() {
               className={`rounded-2xl shadow-md hover:shadow-lg transition-all flex flex-col ${semEstoque ? "opacity-70" : ""}`}
             >
               {/* Imagem */}
-              <div className="relative w-full h-70 overflow-hidden rounded-t-2xl flex-shrink-0">
+              <div className="relative w-full aspect-[4/3] overflow-hidden rounded-3xl">
                 {produto.img ? (
-                  <Image src={produto.img} alt={produto.nome} fill className="object-cover" />
+                  <Image src={produto.img} alt={produto.nome} fill className="object-cover p-4 rounded-3xl" />
                 ) : (
                   <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                     <Package className="w-12 h-12 text-gray-300" />
@@ -239,13 +239,13 @@ export default function CaixaPage() {
               {/* Conteúdo */}
               <CardContent className="p-4 flex-1 flex flex-col justify-between space-y-3">
                 <div>
-                  <h3 className="text-base font-bold">{produto.nome}</h3>
-
-                  <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem] mt-3">
+                  <h3 className="text-2xl font-extrabold leading-tight">{produto.nome}</h3>
+                  <br></br>
+                  <p className="text-lg font-semibold text-muted-foreground line-clamp-2 min-h-[2.5rem] mt-3">
                     {produto.descricao || "Sem descrição"}
                   </p>
 
-                  <p className="text-sm text-muted-foreground font-bold mt-6">
+                  <p className="text-lg text-muted-foreground font-bold mt-6">
                     {produto.sku} | {produto.categoria}
                   </p>
                 </div>
@@ -255,7 +255,7 @@ export default function CaixaPage() {
                   <div className="flex items-center gap-2">
                     <Package className={`w-5 h-5 ${semEstoque ? "text-red-600" : estoqueMinimo ? "text-yellow-600" : "text-green-600"}`} />
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Estoque</p>
+                      <strong className="text-lg text-muted-foreground">Estoque</strong>
                       <p className={`text-2xl font-bold ${semEstoque ? "text-red-600" : estoqueMinimo ? "text-yellow-600" : "text-green-600"}`}>
                         {produto.quantidade ?? 0}
                       </p>
@@ -266,10 +266,10 @@ export default function CaixaPage() {
 
                 {/* Preço */}
                 <div className="flex justify-between items-center pt-2 border-t mt-auto">
-                  <span className="text-sm text-muted-foreground">Preço:</span>
-                  <span className="text-lg font-bold text-black-600">
+                  <strong className="text-xl">Preço: </strong>
+                  <h1 className="text-2xl font-extrabold text-black-600">
                     R$ {formatCurrency(produto.preco_venda)}
-                  </span>
+                  </h1>
                 </div>
 
                 {/* Botão */}
@@ -281,13 +281,13 @@ export default function CaixaPage() {
                 >
                   {isAdicionando ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" /> Adicionando...
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 text-xl font-bold"  /> Adicionando...
                     </>
                   ) : semEstoque ? (
                     "Sem Estoque"
                   ) : (
                     <>
-                      <ShoppingCart className="w-4 h-4 mr-2" /> Adicionar ao carrinho
+                      <ShoppingCart className="w-4 h-4 mr-2" /><p className="font-bold text-lg">Adicionar ao carrinho</p>
                     </>
                   )}
                 </Button>
@@ -306,9 +306,9 @@ export default function CaixaPage() {
       {produtosForaDeLinha.length > 0 && (
         <div className="space-y-2">
           <div>
-            <h3 className="text-3xl font-bold">Produtos Fora de Linha</h3>
+            <h3 className="text-4xl font-bold">Produtos Fora de Linha</h3>
             <br></br>
-            <p className="text-lg text-muted-foreground font-semibold">Estes produtos foram desativados e não podem ser vendidos.</p>
+            <p className="text-xl text-muted-foreground font-semibold">Estes produtos foram desativados e não podem ser vendidos.</p>
             <br></br>
           </div>
           
@@ -328,23 +328,23 @@ export default function CaixaPage() {
                     )}
 
                     {/* badge FORA DE LINHA no canto */}
-                    <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+                    <div className="absolute top-3 left-3 bg-red-600 text-white text-m font-bold px-2 py-1 rounded">
                       FORA DE LINHA
                     </div>
                   </div>
 
                   <CardContent className="p-4 flex-1 flex flex-col justify-between space-y-3">
                     <div>
-                      <h3 className="text-base font-bold line-clamp-2">{produto.nome}</h3>
+                      <h3 className="text-base font-extrabold text-2xl line-clamp-2">{produto.nome}</h3>
 
-                     <p className="text-sm text-muted-foreground line-clamp-2 min-h-[rem] mt-3">
+                     <p className="text-m text-muted-foreground line-clamp-2 min-h-[rem] mt-3">
                       {produto.descricao || "Sem descrição"}
                      </p>
 
 
               
 
-                      <p className="text-sm font-semibold text-muted-foreground mt-6">
+                      <p className="text-m font-semibold text-muted-foreground mt-6">
                         {produto.sku} | {produto.categoria}
                       </p>
                     </div>

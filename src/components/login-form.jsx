@@ -48,45 +48,65 @@ else if (data.user.perfil === "ADMIN") router.push("/matriz")
 }
 
  return (
-<div className="px-4">
- <Card className="w-full mx-auto mt-10 sm:p-8">
- <div className="justify-center flex">
- <img className="w-40 h-auto" src="logos/logo2.png" alt="Logo" />
- </div>
+<div>
+  <Card
+    className="w-full max-w-lg mx-auto mt-10 sm:p-8
+               bg-transparent border-2 border-white rounded-xl
+               backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               transition-all duration-300"
+  >
+    <div className="flex justify-center items-center">
+      <img className="w-60" src="logos/logo2.png" alt="Logo" />
+    </div>
 
-<CardHeader>
-<CardTitle className="text-center text-red-500 font-bold text-3xl">Bem vindo!</CardTitle>
-<CardDescription className="text-lg m-4 font-semibold">
-Digite suas informações para acessar o sistema gerenciador das nossas filiais, matriz e caixas:
-</CardDescription>
- </CardHeader>
-<CardContent>
- <form onSubmit={handleSubmit} className="space-y-3">
- <Input
- type="email"
-placeholder="Email"
-value={email}
-onChange={(e) => setEmail(e.target.value)}
-required
- />
- <Input
- type="password"
-placeholder="Senha"
- value={senha}
- onChange={(e) => setSenha(e.target.value)}
- required
-/>
+    <CardHeader className="text-center">
+      <CardTitle className="text-red-900 font-bold text-5xl italic m-4">
+        Bem vindo!
+      </CardTitle>
+      <CardDescription className="text-xl m-4 font-semibold">
+        Digite suas informações para acessar o sistema gerenciador das<br></br>nossas filiais, matriz e caixas:
+      </CardDescription>
+    </CardHeader>
 
- <Button type="submit" className="w-full mt-6">Entrar</Button>
- </form>
+    <CardContent>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Input
+          className="font-bold text-lg"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
+        <Input
+          className="font-bold text-lg"
+          type="password"
+          placeholder="Senha"
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+          required
+        />
 
+        <div className="flex justify-center mt-6">
+          <Button
+            type="submit"
+            className="w-full sm:w-1/2 font-bold text-lg"
+          >
+            Entrar
+          </Button>
+        </div>
+      </form>
 
-{feedback && (
- <p className="text-center mt-2 text-sm text-red-500">{feedback}</p>
-)}
- </CardContent>
-</Card>
- </div>
+      {feedback && (
+        <p className="text-center mt-3 text-lg font-semibold text-red-500">
+          {feedback}
+        </p>
+      )}
+    </CardContent>
+  </Card>
+</div>
+
  )
 }

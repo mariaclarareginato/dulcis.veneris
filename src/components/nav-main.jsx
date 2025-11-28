@@ -16,7 +16,7 @@ export function NavMain({ items }) {
           {items.map((item) => (
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton asChild tooltip={item.name}>
-                <a href={item.url} className="flex items-center gap-2">
+                <a href={item.url} className="flex items-center text-xl font-bold gap-2">
                   {item.icon && <item.icon className="size-4" />}
                   <span>{item.name}</span>
                 </a>

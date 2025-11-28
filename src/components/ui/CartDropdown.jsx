@@ -33,7 +33,7 @@ export function CartDropdown() {
       : null,
     fetcher,
     {
-      refreshInterval: 5000,
+      refreshInterval: 3000,
       revalidateOnFocus: true,
     }
   );
@@ -69,11 +69,11 @@ export function CartDropdown() {
         className="w-64 sm:w-80 md:w-96 p-2 overflow-auto max-h-96"
       >
         {!data ? (
-          <DropdownMenuItem disabled className="px-4 py-2 font-semibold text-lg">
-            Carregando carrinho...
+          <DropdownMenuItem disabled className="px-4 py-2 font-bold text-lg animate-spin">
+           
           </DropdownMenuItem>
         ) : carrinho.length === 0 ? (
-          <DropdownMenuItem disabled className="px-4 py-2 font-semibold text-lg">
+          <DropdownMenuItem disabled className="opacity-100 px-4 py-2 font-bold text-xl">
             Seu carrinho está vazio
           </DropdownMenuItem>
         ) : (
@@ -83,38 +83,48 @@ export function CartDropdown() {
                 key={item.id}
                 className="flex flex-col border-t px-4 py-2"
               >
-                <div className="flex justify-between items-center w-full">
-                   
-                  <span>
-                    {item.produto?.nome} x {item.quantidade}
-                  </span>
-                  <span className="font-bold px-4">
-                    R$ {((item.produto?.preco_venda || 0) * item.quantidade).toFixed(2)}
-                  </span>
-                       <Button
-                  variant="destructive"
-                  size="sm"
-                  className="m-5 w-5 h-5 flex"
-                  onClick={() => removerDoCarrinho(item.id)}
-                >
-                  X
-                </Button>
-                </div>
+               <div className="w-full flex items-center justify-between p-2">
+  {/* Nome + quantidade + valor */}
+  <div className="flex flex-col">
+    <strong className="text-lg leading-tight">
+      {item.produto?.nome}
+    </strong>
+
+    <span className="text-lg font-semibold text-muted-foreground">
+      x {item.quantidade}
+    </span>
+
+    <span className="font-bold text-xl mt-3">
+      R$ {((item.produto?.preco_venda || 0) * item.quantidade).toFixed(2)}
+    </span>
+  </div>
+
+  {/* Botão remover */}
+  <Button
+    variant="destructive"
+    size="icon"
+    className="w-7 h-7 m-5 rounded-full"
+    onClick={() => removerDoCarrinho(item.id)}
+  >
+    X
+  </Button>
+</div>
+
           
               </DropdownMenuItem>
             ))}
 
             <DropdownMenuItem className="font-extrabold flex justify-between border-t mt-2 pt-2 px-4">
-              <span>Total:</span>
+              <span className="text-xl">Total:</span>
               <span className="text-2xl">R$ {total.toFixed(2)}</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem className="px-4 py-2">
               <Button
                 onClick={() => router.push("/carrinho")}
-                className="w-full bg-red-800 text-white hover:bg-red-700"
+                className="w-full mt-3"
               >
-                Visualizar carrinho
+                <p className="font-bold text-lg">Visualizar carrinho</p>
               </Button>
             </DropdownMenuItem>
           </>

@@ -12,6 +12,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 
+
 export function AppSidebar({ ...props }) {
   const [user, setUser] = useState({ name: "", email: "" })
 
@@ -27,7 +28,7 @@ const data = {
 
   catalogo: [
     {
-      name: "Catálogo (produtos em estoque)",
+      name: "Catálogo",
       url: "/caixa",
     },
   ],
@@ -44,20 +45,22 @@ const data = {
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader className="hover:bg-transparent transition-none">
     <SidebarHeader>
-  <div className="flex items-center gap-4 p-5">
-    <img
-      className="h-10 w-10"
-      src="/logos/logo.png"
-      alt="Logo"
-    />
-    <h1 className="text-base font-bold">Dulci´s Veneris Inc.</h1>
+  <div className="flex items-center justify-center p-5 w-full text-center">
+    <h1 className="text-5xl font-extrabold">✧Dulcis Veneris✧</h1>
   </div>
 </SidebarHeader>
+
 
       </SidebarHeader>
 
       <SidebarContent>
          <NavMain items={data.catalogo} />
+         
+         <div className="flex items-center my-6 opacity-60">
+  <span className="flex-1 border-t border-white/800"></span>
+  <span className="flex-1 border-t border-white/800"></span>
+</div>
+
         <NavDocuments items={data.linhas} />
       </SidebarContent>
 
