@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { NavMain } from "@/components/nav-main"
 import { NavDocuments3 } from "@/components/nav-documents3"
 import { NavUser2 } from "@/components/nav-user2"
 import {
@@ -21,55 +22,39 @@ export function AppSidebar3({ ...props }) {
     }
   }, [])
 
- 
-const data = {
-
-  linhas: [
-
-    { name: "Despesas e lucro", url: "/gerencia" },
-    { name: "Caixas e usuários", url: "caixas.usuarios" },
-    { name: "Pedidos", url: "/pedidos" },
-  
-  ],
-};
-
+  const data = {
+    linhas: [
+      { name: "Caixas e usuários", url: "/caixas.usuarios" },
+      { name: "Despesas e lucro", url: "/despesas.lucro" },
+      { name: "Pedidos", url: "/pedidos" },
+    ],
+  }
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader className="hover:bg-transparent transition-none">
-    <SidebarHeader>
-  <div className="flex items-center gap-4 p-5">
-    <img
-      className="h-10 w-10"
-      src="/logos/logo.png"
-      alt="Logo"
-    />
-    <h1 className="text-base font-bold">Dulci´s Veneris Inc.</h1>
-  </div>
-</SidebarHeader>
-
+      <SidebarHeader>
+        <div className="flex items-center justify-center p-5 w-full text-center">
+          <h1 className="text-5xl font-extrabold">✧Dulcis Veneris✧</h1>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
-       
+
+
         <NavDocuments3 items={data.linhas} />
       </SidebarContent>
 
       <SidebarFooter>
-        {user.email ? <NavUser2 user={user} /> : null}
-
-         {/* Se usuário não estiver logado, mostrar link de login */}
-        {!user.email && (
+        {user.email ? (
+          <NavUser2 user={user} />
+        ) : (
           <div className="px-4 py-2 text-center text-sm">
-            <Link href="/login" className="text-lg font-semibold hover:underline decoration-dotted">
+            <Link href="/login" className="text-xl font-bold">
               Faça seu login
             </Link>
           </div>
         )}
-
       </SidebarFooter>
-
-       
     </Sidebar>
   )
 }

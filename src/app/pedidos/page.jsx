@@ -185,47 +185,61 @@ export default function PedidosPage() {
   return (
   <div className="container mx-auto py-10 max-w-3xl">
 
-  <h1 className="text-3xl font-bold">Novo Pedido de Estoque</h1>
+  <h1 className="text-4xl m-4 font-bold">Novo Pedido de Estoque</h1>
 
 <div className="m-5">
-  <p className="text-muted-foreground font-medium">
+  <p className="text-muted-foreground font-semibold text-m sm:text-xl">
     Gerente ID: {userData.id} — Loja ID: {userData.loja_id} — Perfil:{" "}
     {userData.perfil}
   </p>
   </div>
 
   {/* CARD DE ADIÇÃO */}
-  <Card>
+  <br></br>
+  <div className="m-5">
+  <Card className="w-full max-w-lg
+             bg-transparent rounded-xl
+             backdrop-blur-md
+             shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+             dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+             transition-all duration-300">
     <CardHeader>
-      <CardTitle className="text-xl">Adicionar Itens</CardTitle>
+      <br></br>
+      <CardTitle className="text-2xl text-bold ">Adicionar Itens</CardTitle>
     </CardHeader>
+    <br></br>
 
     <CardContent>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
 
         {/* Produto */}
         <div className="md:col-span-2">
-          <Label className="mb-4 block">Produto</Label>
+          <Label className="mb-4 block text-lg font-semibold">Produto</Label>
           <Select 
+          className ="w-full  text-lg font-semibold"
             value={currentItem.produtoNome}
             onValueChange={handleProdutoSelect}
           >
             <SelectTrigger>
-              <SelectValue  placeholder="Selecione o produto que deseja pedir" />
+              <SelectValue  className="font-semibold text-lg" placeholder="Selecione o produto que deseja pedir" />
             </SelectTrigger>
             <SelectContent>
               {produtosDisponiveis.map((p) => (
-                <SelectItem key={p.id} value={p.nome}>
+               
+                <SelectItem 
+                  className="font-semibold text-lg"
+                  key={p.id} value={p.nome}>
                   {p.nome}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
+        </div>
 
         {/* Quantidade */}
         <div className="md:col-span-3 mt-10">
-          <Label className="mb-4 block">Quantidade</Label>
+          <Label className="mb-4 block text-lg font-semibold">Quantidade</Label>
           <Input className="w-30"
             type="number"
             min="1"
@@ -241,30 +255,31 @@ export default function PedidosPage() {
 
         {/* Botão */}
         <div className="md:col-span-1 mt-5">
-          <Button onClick={handleAddItem} className="w-full">
-            <Plus className="w-4 h-4" />
+          <Button onClick={handleAddItem} className="p-5 w-full font-bold text-lg">
+            <Plus className="w-4 h-4 font-bold text-lg" />
             Adicionar
           </Button>
+        
         </div>
-
-      </div>
     </CardContent>
+      <br></br>
   </Card>
+   </div>
 
       {/* LISTA DE ITENS */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold">Itens do Pedido</h2>
+      <div className="mt-15">
+        <h2 className="text-2xl m-4 font-bold">Itens do Pedido</h2>
 
         {pedidoItems.length === 0 ? (
-          <p className="text-muted-foreground mt-2 text-lg font-semibold">Nenhum item adicionado.</p>
+          <p className="text-muted-foreground m-5 text-xl font-semibold">Nenhum item adicionado ao pedido.</p>
         ) : (
-          <div className="space-y-2 mt-4">
+          <div className="space-y-2 m-4">
             {pedidoItems.map((item) => (
               <div
                 key={item.tempId}
                 className="flex justify-between items-center p-3 border rounded-lg shadow"
               >
-                <p className="font-medium">
+                <p className="font-bold text-xl">
                   {item.produtoNome} — {item.quantidade} 
                 </p>
 
@@ -281,9 +296,9 @@ export default function PedidosPage() {
       </div>
 
       {/* BOTÃO ENVIAR */}
-      <div className="mt-8 flex justify-end">
+      <div className="m-8 flex justify-end">
         <Button
-          className="w-full md:w-auto"
+          className="w-full md:w-auto text-lg font-bold p-4"
           disabled={isSubmitting || pedidoItems.length === 0}
           onClick={handleSubmitPedido}
         >
@@ -302,17 +317,17 @@ export default function PedidosPage() {
 
     {/* Aviso */}
 
-      <div>
-        <strong>! ATENÇÃO !</strong>
+      <div className="m-10">
+        <strong className="text-2xl font-extrabold">! ATENÇÃO !</strong>
         
-        <h1 className="m-5 w-full text-lg">Seus pedidos chegarão em 6 dias úteis.</h1>
+        <h1 className="m-5 w-full text-xl font-semibold">Seus pedidos chegarão em 6 dias úteis.</h1>
       </div>
 
 
 
       {/* Listagem dos meus pedidos*/}
 
-      <div className="mt-14">
+      <div className="m-10">
         <h2 className="text-3xl font-bold mb-5">Meus Pedidos</h2>
 
         {meusPedidos.length === 0 ? (
@@ -322,16 +337,19 @@ export default function PedidosPage() {
             {meusPedidos.map((pedido) => (
               <Card key={pedido.id}>
                 <CardHeader>
-                  <CardTitle className="text-lg">
+                  <br></br>
+                  <CardTitle className="text-2xl font-bold">
                     Pedido {pedido.id} —{" "}
                     <span className="">{pedido.status}</span>
                   </CardTitle>
                 </CardHeader>
 
                 <CardContent>
-                  <p className="font-medium mb-2">Itens:</p>
+                  <br></br>
+                  <p className="font-lg font-semibold">Itens:</p>
 
-                  <ul className="ml-4 list-disc">
+                 
+                  <ul className="m-4 list-disc text-lg">
                     {pedido.itens_pedido.map((item) => (
                       <li key={item.id}>
                         {item.produto_nome} — {item.quantidade} 
@@ -339,9 +357,6 @@ export default function PedidosPage() {
                     ))}
                   </ul>
 
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Enviado por: {pedido.usuario.nome} — Loja: {pedido.loja.nome}
-                  </p>
                 </CardContent>
               </Card>
             ))}

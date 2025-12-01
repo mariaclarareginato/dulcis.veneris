@@ -150,8 +150,15 @@ export default function Pagamento() {
       ← 
   </Button>
 </div>
+<br></br>
 
-      <h1 className="text-4xl sm:text-4xl font-bold mb-4 text-center">
+<div className="w-full max-w-lg mx-auto m-10 sm:p-8
+             bg-transparent rounded-xl
+             backdrop-blur-md
+             shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+             dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+             transition-all duration-300">
+      <h1 className="text-4xl sm:text-4xl font-bold mb-4 mt-5 text-center">
         Selecione o método de pagamento:
       </h1>
 
@@ -159,16 +166,13 @@ export default function Pagamento() {
         Total da venda:{" "}
         <strong className="text-3xl font-extrabold">
           <br></br>
-          <br></br>
+          
           R$ {total.toFixed(2)}</strong>
       </p>
 
       {total <= 0 ? (
-        <Card className="w-full max-w-lg mx-auto mt-10 sm:p-8
-               bg-transparent rounded-xl
-               backdrop-blur-md
-               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-               transition-all duration-300">
+      <Card>
+
           <p className="text-2xl text-center font-bold mb-4">Carrinho vazio!</p>
           <Button onClick={() => router.push("/caixa")} className="mt-4 text-lg font-bold rounded-xl">
             Voltar e adicionar itens
@@ -178,21 +182,19 @@ export default function Pagamento() {
   paymentMethods.map((method) => (
     <div
       key={method.id}
-      className="w-full max-w-lg mx-auto mt-10 sm:p-8
-                 bg-transparent rounded-xl
-                 backdrop-blur-md
-                 shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-                 transition-all duration-300 flex justify-center"
-    >
+>
+     <div className="m-5">
       <Button
         onClick={() => handleSelectMethod(method.id)}
-        className="text-lg font-bold w-full px-6 py-3 my-3 rounded-xl shadow-lg hover:shadow-xl transition-all"
+        className="text-lg font-bold w-full my-3 p-5 rounded-xl shadow-lg hover:shadow-xl transition-all"
       >
         {method.label}
       </Button>
+      </div>
     </div>
   ))
 )}
+</div>
     </div>
    
   );

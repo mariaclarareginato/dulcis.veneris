@@ -111,7 +111,7 @@ export default function Carrinho() {
                 </div>
 
                 <div className="p-4 flex flex-col flex-1 justify-between space-y-3">
-                  <h3 className="text-lg font-bold line-clamp-3">{item.produto.nome}</h3>
+                  <h3 className="text-xl font-bold line-clamp-3">{item.produto.nome}</h3>
 
                   <div className="flex justify-between items-center pt-2 border-t">
                     <span className="text-lg font-bold">Preço:</span>

@@ -31,7 +31,7 @@ const data = await res.json()
 if (!res.ok) {
  setFeedback(data.message || "Erro ao fazer login")
 } else {
- //  CORREÇÃO CRUCIAL: Salvar os dados do usuário no sessionStorage
+ //  Salvar os dados do usuário no sessionStorage
         // O token é salvo via Cookie HTTP pelo backend. 
         // Salvamos 'user' aqui para que getLoggedUser() possa recuperar os dados no front.
         sessionStorage.setItem('user', JSON.stringify(data.user)); 
@@ -48,24 +48,26 @@ else if (data.user.perfil === "ADMIN") router.push("/matriz")
 }
 
  return (
-<div>
+<div className="">
   <Card
-    className="w-full max-w-lg mx-auto mt-10 sm:p-8
-               bg-transparent rounded-xl
-               backdrop-blur-md
-               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-               transition-all duration-300"
+   className="w-full max-w-lg
+             bg-transparent rounded-xl
+             backdrop-blur-md
+             shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+             dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+             transition-all duration-300"
   >
+    <br></br>
     <div className="flex justify-center items-center">
       <img className="w-60" src="logos/logo2.png" alt="Logo" />
     </div>
 
     <CardHeader className="text-center">
-      <CardTitle className="text-red-900 font-bold text-5xl italic m-4">
+      <CardTitle className="dark:text-red-700 text-red-900 font-bold text-5xl italic">
         Bem vindo!
       </CardTitle>
-      <CardDescription className="text-xl m-4 font-semibold">
-        Digite suas informações para acessar o sistema gerenciador das<br></br>nossas filiais, matriz e caixas:
+      <CardDescription className="text-xl w-full font-semibold mt-5">
+        Digite suas informações para acessar o sistema gerenciador das nossas filiais, matriz e caixas:
       </CardDescription>
     </CardHeader>
     <br></br>
@@ -93,7 +95,7 @@ else if (data.user.perfil === "ADMIN") router.push("/matriz")
         <div className="flex justify-center mt-6">
           <Button
             type="submit"
-            className="w-full sm:w-1/2 font-bold text-lg"
+            className="w-full font-bold text-lg"
           >
             Entrar
           </Button>
@@ -105,6 +107,7 @@ else if (data.user.perfil === "ADMIN") router.push("/matriz")
           {feedback}
         </p>
       )}
+      <br></br>
     </CardContent>
   </Card>
 </div>

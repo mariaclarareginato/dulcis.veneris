@@ -80,17 +80,20 @@ export default function NovoProduto() {
 
   return (
     <div className="p-8 flex justify-center">
-      <Card className="w-full max-w-lg mx-auto mt-10 sm:p-8
-               bg-transparent rounded-xl
-               backdrop-blur-md
-               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-               transition-all duration-300">
+      <Card className="w-full max-w-lg
+             bg-transparent rounded-xl
+             backdrop-blur-md
+             shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+             dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+             transition-all duration-300">
         <CardHeader>
+          <br></br>
           <CardTitle className="text-4xl font-extrabold">
             Criar novo produto
           </CardTitle>
         </CardHeader>
 
+       <br></br>
         <CardContent className="space-y-4">
           <div>
             <Label className="m-3 text-lg">SKU</Label>
@@ -110,18 +113,19 @@ export default function NovoProduto() {
           <div>
             <Label className="m-3 text-lg">Categoria</Label>
             <Select
+            className="text-lg font-semibold"
               value={form.categoria}
               onValueChange={(v) => setForm({ ...form, categoria: v })}
             >
               <SelectTrigger>
-                <SelectValue className="text-lg" placeholder="" />
+                <SelectValue className="text-lg font-semibold" placeholder="" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem className="text-lg" value="Chocolates">Chocolates</SelectItem>
-                <SelectItem className="text-lg" value="Pães-de-mel">Pães-de-mel</SelectItem>
-                <SelectItem className="text-lg" value="Bolachas">Bolachas</SelectItem>
-                <SelectItem className="text-lg" value="Trufas">Trufas</SelectItem>
-                <SelectItem className="text-lg" value="Outros">Outros</SelectItem>
+                <SelectItem className="text-lg font-semibold" value="Chocolates">Chocolates</SelectItem>
+                <SelectItem className="text-lg font-semibold" value="Pães-de-mel">Pães-de-mel</SelectItem>
+                <SelectItem className="text-lg font-semibold" value="Bolachas">Bolachas</SelectItem>
+                <SelectItem className="text-lg font-semibold" value="Trufas">Trufas</SelectItem>
+                <SelectItem className="text-lg font-semibold" value="Outros">Outros</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -173,14 +177,14 @@ export default function NovoProduto() {
     }}
     className="hidden"
   />
-
-  <Button
+<br></br>
+ <label htmlFor="img"
     variant="destructive"
-    htmlFor="img"
-    className="cursor-pointer px-4 py-2 rounded-xl font-semibold text-lg w-fit transition"
-  >
-    Selecionar imagem do produto
-  </Button>
+    className="cursor-pointer p-4 rounded-xl border font-semibold text-lg">
+  
+    Clique aqui para selecionar imagem do produto
+  
+</label>
 
  
   {/* Preview img */}
@@ -189,12 +193,11 @@ export default function NovoProduto() {
     <img
       src={preview}
       alt="Preview"
-      className="mt-2 w-32 h-32 object-cover rounded-xl border"
+      className="mt-6 w-32 h-32 object-cover rounded-xl border"
     />
   )}
 </div>
 
-<br></br>
           <Button
             onClick={criarProduto}
             disabled={loading}
@@ -202,6 +205,8 @@ export default function NovoProduto() {
           >
             {loading ? "Salvando..." : "Criar produto"}
           </Button>
+          <br></br>
+          <br></br>
         </CardContent>
       </Card>
     </div>

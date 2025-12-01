@@ -33,9 +33,9 @@ export function NavUser2({ user }) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="text-lg font-bold text-center">
+              <div className="grid flex-1 text-left text-lg leading-tight">
+                <span className="truncate font-lg">{user.name}</span>
+                <span className="text-2xl font-bold text-center">
                   {user.email}
                 </span>
               </div>
@@ -51,9 +51,9 @@ export function NavUser2({ user }) {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex flex-1 flex-col gap-1 px-1 py-1.5 text-left text-sm">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="text-m font-bold text-center">
-                  Olá, Gerente {user.nome}
+                <span className="truncate font-lg">{user.name}</span>
+                <span className="text-xl font-extrabold text-center">
+                  Olá, gerente {user.nome}
                 </span>
               </div>
             </DropdownMenuLabel>
@@ -62,7 +62,7 @@ export function NavUser2({ user }) {
 
             <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
-              Sair
+              <h1 className="text-xl font-bold">Sair</h1>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

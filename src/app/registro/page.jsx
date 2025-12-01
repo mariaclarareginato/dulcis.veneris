@@ -13,10 +13,10 @@ export default function RegisterPage() {
       <div className="absolute left-10 top-20">
         <Button
           variant="ghost"
-          onClick={() => router.push("/gerencia")}
-          className="rounded-full p-1 font-bold"
+          onClick={() => router.push("/")}
+          className="rounded-full p-3 text-lg font-extrabold mt-40"
         >
-          ← Voltar
+          ←
         </Button>
       </div>
 

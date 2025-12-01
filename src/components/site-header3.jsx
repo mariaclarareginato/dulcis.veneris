@@ -55,9 +55,9 @@ export function SiteHeader3() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTheme("light")}>Claro</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>Escuro</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>Sistema</DropdownMenuItem>
+              <DropdownMenuItem className="font-bold text-lg" onClick={() => setTheme("light")}>Tema claro</DropdownMenuItem>
+              <DropdownMenuItem className="font-bold text-lg" onClick={() => setTheme("dark")}>Tema escuro</DropdownMenuItem>
+              <DropdownMenuItem className="font-bold text-lg" onClick={() => setTheme("system")}>Tema do sistema</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 

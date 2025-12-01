@@ -243,11 +243,12 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
   // --- Render Principal ---
   return (
     <div className="flex justify-center w-full">
-      <Card className="w-full max-w-lg mx-auto mt-10 sm:p-8
-                 bg-transparent rounded-xl
-                 backdrop-blur-md
-                 shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-                 transition-all duration-300 flex justify-center">
+      <Card  className="w-full max-w-lg mx-auto m-10 sm:p-8
+             bg-transparent rounded-xl
+             backdrop-blur-md
+             shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+             dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+             transition-all duration-300">
         <CardHeader>
           <br></br>
           <CardTitle className="text-4xl font-bold text-center">{title}</CardTitle>
@@ -274,7 +275,7 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
                       value={formData[f.id] || ""}
                       onChange={(e) => setFormData({ ...formData, [e.target.id]: e.target.value })}
                       disabled={isLoading}
-                      className="text-2xl"
+                      className="text-lg"
                     />
                   </div>
                 ))}

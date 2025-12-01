@@ -108,18 +108,24 @@ export default function RegisterPage() {
     }
   }
 
-  const inputClass = "w-full border rounded-lg px-3 py-2 font-semibold";
+  const inputClass = "w-full border text-lg bg-transparent rounded-lg px-3 py-2 font-semibold";
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4">
+    <div className="flex flex-col mt-20 items-center justify-center min-h-screen px-4">
       
-      <Card className="w-full max-w-md p-6 rounded-2xl shadow-xl">
+      <Card className="w-full max-w-lg
+             bg-transparent rounded-xl
+             backdrop-blur-md
+             shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+             dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+             transition-all duration-300">
         
         <CardHeader>
+          <br></br>
           <CardTitle className="text-center text-3xl font-bold">
             Registro de Usuário
           </CardTitle>
-          <CardDescription className="text-center text-lg font-semibold mt-2">
+          <CardDescription className="text-center text-lg font-semibold m-4">
             Preencha os dados para criar um novo usuário no sistema.
           </CardDescription>
         </CardHeader>
@@ -134,7 +140,7 @@ export default function RegisterPage() {
             )}
 
             {success && (
-              <p className="p-2 text-sm text-green-500 text-center font-bold">
+              <p className="p-2 text-lg text-green-600 dark:text-green-500 text-center font-bold">
                 {success}
               </p>
             )}
@@ -213,6 +219,7 @@ export default function RegisterPage() {
                     <DropdownMenuItem
                       key={perfil}
                       onClick={() => setForm({ ...form, perfil })}
+                      className="text-lg font-semibold"
                     >
                       {perfil}
                     </DropdownMenuItem>
@@ -245,12 +252,14 @@ export default function RegisterPage() {
                   </svg>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent className="max-h-48 overflow-y-auto">
+                <DropdownMenuContent className="max-h-48 text-lg font-semibold overflow-y-auto">
                   {lojas.map((loja) => (
                     <DropdownMenuItem
                       key={loja.id}
+                      className="text-lg font-semibold"
                       onClick={() =>
                         setForm({ ...form, lojaId: Number(loja.id) })
+                  
                       }
                     >
                       {loja.nome} - {loja.cidade}/{loja.estado}
@@ -260,11 +269,12 @@ export default function RegisterPage() {
               </DropdownMenu>
             </div>
 
-            <Button type="submit" className="w-full mt-6">
+            <Button type="submit" className="w-full text-lg font-bold p-6 mt-6">
               Criar Usuário
             </Button>
           </form>
         </CardContent>
+        <br></br>
       </Card>
 
     </div>

@@ -157,13 +157,17 @@ export default function MatrizPage() {
             <TrendingUp className="h-7 w-7 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div
-  className={`text-2xl font-bold ${
-    totalfiliais < 0 ? "text-red-500" : "text-green-500"
-  }`}
->
-  R$ {totalfiliais.toFixed(2)}
-</div>
+          <p
+                     className={`text-xl font-bold ${
+                    totalfiliais < 0
+                   ? "text-red-500"
+                   : totalfiliais > 0
+                   ? "text-green-500"
+                  : ""
+                   }`}
+                   >
+                 R$ {totalfiliais.toFixed(2)}
+                   </p>
           <br></br>
           </CardContent>
         </Card>
@@ -351,13 +355,17 @@ export default function MatrizPage() {
 
                       <div className="flex justify-between items-center p-4 border rounded-lg">
                         <span className="font-bold text-lg">Lucro Líquido</span>
-                         <p
-                        className={`text-xl font-bold ${
-                        filial.stats.lucro < 0 ? "text-red-500" : "text-green-500"
-                        }`}
-                       >
-                      R$ {filial.stats.lucro.toFixed(2)}
-                      </p>
+                       <p
+                     className={`text-xl font-bold ${
+                    filial.stats.lucro < 0
+                   ? "text-red-500"
+                   : filial.stats.lucro > 0
+                   ? "text-green-500"
+                  : ""
+                   }`}
+                   >
+                 R$ {filial.stats.lucro.toFixed(2)}
+                   </p>
                       </div>
 
                       <div className="flex justify-between items-center p-4 border rounded-lg">
@@ -497,6 +505,7 @@ export default function MatrizPage() {
                           >
                             <div>
                               <p className="font-bold text-xl">Caixa {caixa.id}</p>
+                              <br></br>
                               <p className="text-m text-muted-foreground">
                                 Saldo Inicial: R${" "}
                                 {caixa.saldo_inicial.toFixed(2)}
@@ -532,9 +541,9 @@ export default function MatrizPage() {
 
         ))}
 
-            <div className="flex justify-center mt-10">
-  <Button onClick={() => router.push('/registro') }>
-   <p className="font-bold text-lg">Criar novo Usuário</p>
+            <div className="flex justify-center p-5">
+  <Button onClick={() => router.push('/registro') } className="p-6"> 
+   <p className="font-bold text-lg p-5">Criar novo Usuário</p>
   </Button>
 </div>
 
