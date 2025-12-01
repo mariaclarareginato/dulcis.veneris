@@ -3,80 +3,44 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Card, CardHeader, CardTitle, CardContent, CardDescription
+  Card
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getLoggedUser } from "@/lib/auth-client";
 
-// Função utilitária para converter Decimal (string) para float formatado
 const formatCurrency = (value) => {
-  // Garante que o valor é convertido para float antes de formatar
-  const num = parseFloat(value || 0); 
+  const num = parseFloat(value || 0);
   return num.toFixed(2);
 };
 
-export default function Carrinho({ produtos = [] }) {
+export default function Carrinho() {
   const [carrinho, setCarrinho] = useState([]);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Busca usuário logado
-  useEffect(() => {
-    const user = getLoggedUser();
-    if (user) setUserData(user);
-    setLoading(false);
-  }, []);
-
-  // Função centralizada para buscar carrinho
-  const fetchCarrinho = async (user = userData) => {
-    if (!user) return;
+  const fetchCarrinho = async (user) => {
     try {
       const res = await fetch(`/api/carrinho?usuarioId=${user.id}&lojaId=${user.loja_id}`);
       const data = await res.json();
       setCarrinho(data.itens || []);
     } catch (err) {
       console.error("Erro ao buscar carrinho:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Atualiza carrinho sempre que o usuário estiver pronto
   useEffect(() => {
-    if (userData) fetchCarrinho(userData);
-  }, [userData]);
-
-  // Adicionar produto
-  const adicionarAoCarrinho = async (produto) => {
-    if (!userData) {
-      console.log("Usuário não identificado!"); // Substituído alert()
+    const user = getLoggedUser();
+    if (!user) {
+      setLoading(false);
       return;
     }
+    setUserData(user);
+    fetchCarrinho(user);
+  }, []);
 
-    try {
-      const res = await fetch("/api/carrinho", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usuarioId: userData.id,
-          lojaId: userData.loja_id,
-          produtoId: produto.id,
-          quantidade: 1,
-        }),
-      });
-
-      const text = await res.text();
-      const data = text ? JSON.parse(text) : {};
-
-      if (!res.ok) throw new Error(data.error || "Erro ao adicionar");
-
-      await fetchCarrinho(userData); // garante atualização 
-    } catch (err) {
-      console.error(err);
-      console.log(err.message); // Substituído alert()
-    }
-  };
-
-  // Alterar quantidade
   const alterarQuantidade = async (itemId, quantidade) => {
     if (quantidade < 1) return;
     try {
@@ -85,135 +49,132 @@ export default function Carrinho({ produtos = [] }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ quantidade }),
       });
-      await fetchCarrinho(userData);
+      fetchCarrinho(userData);
     } catch (err) {
       console.error("Erro ao alterar quantidade:", err);
     }
   };
 
-  // Remover item
   const removerDoCarrinho = async (itemId) => {
     try {
       await fetch(`/api/carrinho/${itemId}`, { method: "DELETE" });
-      await fetchCarrinho(userData);
+      fetchCarrinho(userData);
     } catch (err) {
       console.error("Erro ao remover item:", err);
     }
   };
 
-  // CORRIGIDO: Converter item.subtotal para float durante a redução
   const total = carrinho.reduce((acc, item) => acc + parseFloat(item.subtotal || 0), 0);
 
-  if (loading) return <p className="p-6 text-gray-500">Carregando...</p>;
-  if (!userData) return <p className="p-6 text-red-500 font-bold">Nenhum usuário logado!</p>;
+  // LOADING UI
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-16 h-16 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // SEM LOGIN
+  if (!userData) {
+    return (
+      <p className="p-6 text-lg font-bold text-center">
+        Nenhum usuário está logado!
+      </p>
+    );
+  }
 
   return (
     <div className="p-6 w-full mx-auto">
-
-      
       <h2 className="text-2xl sm:text-4xl font-bold mb-6 text-center">
         Carrinho de: {userData.nome}
       </h2>
+      <br />
 
-
-
-
+      {/* SEM ITENS */}
       {carrinho.length === 0 ? (
-        <p className="text-red-500 font-bold text-lg text-center">Seu carrinho está vazio.</p>
+        <p className="font-bold text-xl text-center">Seu carrinho está vazio.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {carrinho.map((item) => (
-            <Card
-              key={item.id}
-              className="rounded-2xl shadow-md hover:shadow-lg transition-all flex flex-col overflow-hidden"
-            >
-              {/* Imagem */}
-              <div className="relative w-full h-full h-48 overflow-hidden">
-                {item.produto?.img ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {carrinho.map((item) => (
+              <Card
+                key={item.id}
+                className="rounded-2xl shadow-md hover:shadow-lg transition-all flex flex-col overflow-hidden"
+              >
+                <div className="relative w-full h-70 overflow-hidden">
                   <img
-                    src={item.produto.img}
-                    alt={item.produto.nome}
+                    src={item.produto?.img || ""}
+                    alt={item.produto?.nome || "Produto"}
                     className="w-full h-full object-cover"
                   />
-                ) : (
-                  <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-lg">
-                    Sem imagem
+                </div>
+
+                <div className="p-4 flex flex-col flex-1 justify-between space-y-3">
+                  <h3 className="text-lg font-bold line-clamp-3">{item.produto.nome}</h3>
+
+                  <div className="flex justify-between items-center pt-2 border-t">
+                    <span className="text-lg font-bold">Preço:</span>
+                    <span className="text-lg font-bold">
+                      R$ {formatCurrency(item.produto.preco_venda)}
+                    </span>
                   </div>
-                )}
-              </div>
 
-              {/* Conteúdo */}
-              <CardContent className="p-4 flex flex-col flex-1 justify-between space-y-3">
-                <div>
-                  <h3 className="text-lg font-bold line-clamp-1">{item.produto.nome}</h3>
-                  
-                </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="font-extrabold text-2xl w-10 h-10"
+                        onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}
+                      >
+                        -
+                      </Button>
 
-                {/* Preço (CORRIGIDO: usando formatCurrency) */}
-                <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="text-lg font-bold">Preço:</span>
-                  <span className="text-lg font-bold">
-                    R$ {formatCurrency(item.produto.preco_venda)}
-                  </span>
-                </div>
+                      <span className="text-lg font-semibold">{item.quantidade}</span>
 
-                {/* Quantidade */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-8 h-8"
-                      onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}
-                    >
-                      -
-                    </Button>
-                    <span className="text-base font-semibold">{item.quantidade}</span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-8 h-8"
-                      onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}
-                    >
-                      +
-                    </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="font-extrabold text-xl w-10 h-10"
+                        onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}
+                      >
+                        +
+                      </Button>
+                    </div>
+
+                    <p className="font-bold text-lg">
+                      R$ {formatCurrency(item.subtotal)}
+                    </p>
                   </div>
-                  {/* Subtotal (CORRIGIDO: usando formatCurrency) */}
-                  <p className="font-bold text-lg">R$ {formatCurrency(item.subtotal)}</p>
+
+                  <Button
+                    size="lg"
+                    className="mt-3 w-full text-lg font-bold"
+                    onClick={() => removerDoCarrinho(item.id)}
+                  >
+                    Remover do carrinho
+                  </Button>
                 </div>
+              </Card>
+            ))}
+          </div>
 
-                {/* Remover */}
-                <Button
-                  variant="destructive"
-                  size="lg"
-                  className="mt-3 w-full"
-                  onClick={() => removerDoCarrinho(item.id)}
-                >
-                  Remover
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+          {/* TOTAL */}
+          <div className="mt-8 flex flex-col items-end">
+            <p className="text-2xl font-bold mb-4">
+              Total: <span className="text-3xl font-extrabold">R$ {total.toFixed(2)}</span>
+            </p>
 
-      {/* Total + botão final */}
-      {carrinho.length > 0 && (
-        <div className="mt-8 flex flex-col items-end">
-          <p className="text-2xl font-bold mb-4">
-            {/* Total (CORRIGIDO: total já é number, mas usamos toFixed) */}
-            Total: <span className="text-green-600">R$ {total.toFixed(2)}</span>
-          </p>
-
-          <Button
-            onClick={() => router.push("/pagamento")}
-            className="text-xl font-bold p-10 w-full md:w-auto mt-20"
-          >
-            Ir para pagamento
-          </Button>
-        </div>
+            <Button
+              onClick={() => router.push("/pagamento")}
+              className="text-xl font-bold p-10 w-full md:w-auto mt-20"
+            >
+              Ir para pagamento
+            </Button>
+          </div>
+        </>
       )}
     </div>
-
   );
-};
+}

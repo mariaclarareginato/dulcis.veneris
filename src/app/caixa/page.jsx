@@ -188,8 +188,8 @@ export default function CaixaPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <AlertCircle className="w-16 h-16 text-red-500" />
-        <p className="text-lg text-red-500">{error}</p>
-        <Button onClick={() => window.location.reload()}>Tentar Novamente</Button>
+        <p className="text-xl font-bold text-red-500">{error}</p>
+        <Button className="font-bold text-lg" onClick={() => window.location.reload()}>Tentar Novamente</Button>
       </div>
     );
   }
@@ -201,7 +201,7 @@ export default function CaixaPage() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-4xl font-bold">Produtos Disponíveis</h2>
-          <p className="text-muted-foreground mt-4 font-semibold text-xl">
+          <p className="text-muted-foreground mt-4 font-semibold text-lg sm:text-xl">
             Bem-vindo(a), {userData.nome} | Loja: {userData.loja_id}
           </p>
         </div>
@@ -210,7 +210,7 @@ export default function CaixaPage() {
       {/* Grid de produtos ATIVOS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {produtosAtivos.length === 0 && (
-          <div className="col-span-full text-center text-muted-foreground">
+          <div className="col-span-full text-center text-lg font-bold text-muted-foreground">
             Nenhum produto ativo encontrado.
           </div>
         )}
@@ -241,7 +241,7 @@ export default function CaixaPage() {
                 <div>
                   <h3 className="text-2xl font-extrabold leading-tight">{produto.nome}</h3>
                   <br></br>
-                  <p className="text-lg font-semibold text-muted-foreground line-clamp-2 min-h-[2.5rem] mt-3">
+                  <p className="text-lg font-semibold text-muted-foreground line-clamp-3 min-h-[2.5rem] mt-3">
                     {produto.descricao || "Sem descrição"}
                   </p>
 
@@ -253,10 +253,10 @@ export default function CaixaPage() {
                 {/* Estoque */}
                 <div className={`flex items-center justify-between p-3 rounded-lg ${semEstoque ? "text-red-200" : estoqueMinimo ? "text-yellow-200" : "text-green-200"}`}>
                   <div className="flex items-center gap-2">
-                    <Package className={`w-5 h-5 ${semEstoque ? "text-red-600" : estoqueMinimo ? "text-yellow-600" : "text-green-600"}`} />
+                    <Package className={`w-5 h-5 ${semEstoque ? "dark:text-red-500 text-red-600" : estoqueMinimo ? "dark:text-yellow-500 text-yellow-600" : "dark:text-green-500 text-green-700"}`} />
                     <div>
                       <strong className="text-lg text-muted-foreground">Estoque</strong>
-                      <p className={`text-2xl font-bold ${semEstoque ? "text-red-600" : estoqueMinimo ? "text-yellow-600" : "text-green-600"}`}>
+                      <p className={`text-2xl font-bold ${semEstoque ? "dark:text-red-500 text-red-600" : estoqueMinimo ? "dark:text-yellow-500 text-yellow-600" : "dark:text-green-500 text-green-700"}`}>
                         {produto.quantidade ?? 0}
                       </p>
                     </div>
@@ -274,7 +274,7 @@ export default function CaixaPage() {
 
                 {/* Botão */}
                 <Button
-                  className="w-full mt-2"
+                  className="w-full mt-2 font-bold text-lg"
                   onClick={() => adicionarAoCarrinho(produto)}
                   disabled={semEstoque || isAdicionando}
                   variant={semEstoque ? "destructive" : "default"}
@@ -284,6 +284,7 @@ export default function CaixaPage() {
                       <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 text-xl font-bold"  /> Adicionando...
                     </>
                   ) : semEstoque ? (
+
                     "Sem Estoque"
                   ) : (
                     <>
@@ -370,9 +371,9 @@ export default function CaixaPage() {
 
       {/* Carrinho */}
       {carrinho.length > 0 && (
-        <Card className="mt-8 p-4 sm:p-6 border-2 border-primary">
-          <h3 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2 flex-wrap">
-            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
+        <Card className="mt-8 p-4 sm:p-6 border-2 border-primary bg-transparent">
+          <h3 className="text-2xl sm:text-3xl font-bold mb-4 flex items-center gap-2 flex-wrap">
+            <ShoppingCart className="w-6 h-6" />
             Carrinho ({carrinho.length} {carrinho.length === 1 ? "item" : "itens"})
           </h3>
 
@@ -380,37 +381,41 @@ export default function CaixaPage() {
             {carrinho.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border bg-card"
+                className="flex flex-col bg-transparent sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border bg-card"
               >
                 <div className="flex-1 text-center sm:text-left">
-                  <p className="font-bold text-base sm:text-lg m-3">{item.produto.nome}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="font-bold text-2xl m-3">{item.produto.nome}</p>
+                  <p className="text-lg font-semibold">
                     R$ {formatCurrency(item.preco_unitario)} x {item.quantidade}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
-                  <div className="flex items-center gap-2 rounded-lg border px-3 py-1">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}
-                      disabled={item.quantidade <= 1}
-                    >
-                      -
-                    </Button>
-                    <span className="font-bold text-lg w-8 text-center">{item.quantidade}</span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}
-                    >
-                      +
-                    </Button>
+                  <div className="flex items-center gap-2 rounded-lg border px-3 py-3">
+                 <Button
+  size="sm"
+  variant="destructive"
+  onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}
+  className="font-extrabold text-2xl w-10 h-10"
+>
+  -
+</Button>
+
+<span className="font-bold text-lg w-8 text-center">{item.quantidade}</span>
+
+<Button
+  size="sm"
+  variant="destructive"
+  onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}
+  className="font-extrabold text-xl w-10 h-10"
+>
+  +
+</Button>
+
                   </div>
 
                   <div className="text-center sm:text-right min-w-[80px]">
-                    <p className="font-bold text-lg">R$ {formatCurrency(item.subtotal)}</p>
+                    <p className="font-bold text-xl">R$ {formatCurrency(item.subtotal)}</p>
                   </div>
 
                   <Button
@@ -419,7 +424,7 @@ export default function CaixaPage() {
                     className="w-full sm:w-auto"
                     onClick={() => removerDoCarrinho(item.id)}
                   >
-                    Remover
+                   <p className="font-bold text-lg">X</p> 
                   </Button>
                 </div>
               </div>
@@ -428,12 +433,12 @@ export default function CaixaPage() {
 
           <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t-2 gap-2">
             <span className="text-xl sm:text-2xl font-bold">Total:</span>
-            <span className="text-2xl sm:text-3xl font-bold text-green-600">
+            <span className="text-2xl sm:text-3xl font-bold">
               R$ {total.toFixed(2)}
             </span>
           </div>
 
-          <Button onClick={() => router.push("/pagamento")} className="w-full font-bold text-base sm:text-lg mt-4" size="lg">
+          <Button onClick={() => router.push("/pagamento")} className="w-full font-bold text-lg mt-4" size="lg">
             Finalizar Venda
           </Button>
         </Card>

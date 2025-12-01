@@ -15,7 +15,7 @@ export default function UsuariosLayout({ children }) {
       <AppSidebar3 variant="inset" />
       <SidebarInset>
         <SiteHeader3 />
-        <div className="flex flex-1 flex-col p-6">
+        <div className="flex flex-1 flex-col">
           {children}
           <SiteFooter />
         </div>

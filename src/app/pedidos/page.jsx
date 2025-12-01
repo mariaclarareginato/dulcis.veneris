@@ -175,8 +175,8 @@ export default function PedidosPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <AlertCircle className="w-16 h-16 text-red-500" />
-        <p className="text-lg text-red-600">{error}</p>
-        <Button onClick={() => window.location.reload()}>Tentar Novamente</Button>
+        <p className="text-xl font-bold text-red-600">{error}</p>
+        <Button className="text-lg font-bold" onClick={() => window.location.reload()}>Tentar Novamente</Button>
       </div>
     );
   }

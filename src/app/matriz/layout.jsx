@@ -15,7 +15,7 @@ export default function MatrizLayout({ children }) {
       <AppSidebar2 variant="inset" />
       <SidebarInset>
         <SiteHeader3 />
-        <div className="flex flex-1 flex-col p-6">
+        <div className="flex flex-1 flex-col">
           {children}
           <SiteFooter />
         </div>

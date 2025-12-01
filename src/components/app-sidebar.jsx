@@ -5,6 +5,17 @@ import Link from "next/link"
 import { NavMain } from "@/components/nav-main"
 import { NavDocuments } from "@/components/nav-documents"
 import { NavUser } from "@/components/nav-user"
+import { Button } from "./ui/button"
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +26,7 @@ import {
 
 export function AppSidebar({ ...props }) {
   const [user, setUser] = useState({ name: "", email: "" })
+    const { theme, setTheme, systemTheme } = useTheme();
 
   useEffect(() => {
     const userData = sessionStorage.getItem("user")
@@ -64,15 +76,38 @@ const data = {
         <NavDocuments items={data.linhas} />
       </SidebarContent>
 
+                      <div className="m-5">
+                      <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button className="bg-transparent" size="icon">
+                          <Sun className="h-5 w-5 dark:hidden" />
+                          <Moon className="h-5 w-5 hidden dark:block" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem className="font-bold text-lg" onClick={() => setTheme("light")}>
+                          Tema claro
+                        </DropdownMenuItem>
+                        <DropdownMenuItem  className="font-bold text-lg" onClick={() => setTheme("dark")}>
+                          Tema escuro
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="font-bold text-lg" onClick={() => setTheme("system")}>
+                          Tema do sistema
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    </div>
+
       <SidebarFooter>
         {user.email ? <NavUser user={user} /> : null}
 
          {/* Se usuário não estiver logado, mostrar link de login */}
         {!user.email && (
           <div className="px-4 py-2 text-center text-sm">
-            <Link href="/login" className="text-lg font-semibold hover:underline decoration-dotted">
+            <Link href="/login" className="text-xl font-bold">
               Faça seu login
             </Link>
+            
           </div>
         )}
 

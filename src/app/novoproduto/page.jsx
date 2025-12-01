@@ -80,55 +80,59 @@ export default function NovoProduto() {
 
   return (
     <div className="p-8 flex justify-center">
-      <Card className="w-full max-w-2xl">
+      <Card className="w-full max-w-lg mx-auto mt-10 sm:p-8
+               bg-transparent rounded-xl
+               backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               transition-all duration-300">
         <CardHeader>
-          <CardTitle className="text-3xl font-extrabold">
+          <CardTitle className="text-4xl font-extrabold">
             Criar novo produto
           </CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
           <div>
-            <Label className="m-3">SKU</Label>
+            <Label className="m-3 text-lg">SKU</Label>
             <Input name="sku" value={form.sku} onChange={handleChange} />
           </div>
 
           <div>
-            <Label className="m-3">Código interno</Label>
+            <Label className="m-3 text-lg">Código interno</Label>
             <Input name="codigo" value={form.codigo} onChange={handleChange} />
           </div>
 
           <div>
-            <Label className="m-3">Nome</Label>
+            <Label className="m-3 text-lg">Nome</Label>
             <Input name="nome" value={form.nome} onChange={handleChange} />
           </div>
 
           <div>
-            <Label className="m-3">Categoria</Label>
+            <Label className="m-3 text-lg">Categoria</Label>
             <Select
               value={form.categoria}
               onValueChange={(v) => setForm({ ...form, categoria: v })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione a categoria" />
+                <SelectValue className="text-lg" placeholder="" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Chocolates">Chocolates</SelectItem>
-                <SelectItem value="Pães-de-mel">Pães-de-mel</SelectItem>
-                <SelectItem value="Bolachas">Bolachas</SelectItem>
-                <SelectItem value="Trufas">Trufas</SelectItem>
-                <SelectItem value="Outros">Outros</SelectItem>
+                <SelectItem className="text-lg" value="Chocolates">Chocolates</SelectItem>
+                <SelectItem className="text-lg" value="Pães-de-mel">Pães-de-mel</SelectItem>
+                <SelectItem className="text-lg" value="Bolachas">Bolachas</SelectItem>
+                <SelectItem className="text-lg" value="Trufas">Trufas</SelectItem>
+                <SelectItem className="text-lg" value="Outros">Outros</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label className="m-3">Descrição</Label>
+            <Label className="m-3 text-lg">Descrição</Label>
             <Input name="descricao" value={form.descricao} onChange={handleChange} />
           </div>
 
           <div>
-            <Label className="m-3">Preço venda</Label>
+            <Label className="m-3 text-lg">Preço venda</Label>
             <Input
               name="preco_venda"
               type="number"
@@ -138,7 +142,7 @@ export default function NovoProduto() {
           </div>
 
           <div>
-            <Label className="m-3">Custo</Label>
+            <Label className="m-3 text-lg">Custo</Label>
             <Input
               name="custo"
               type="number"
@@ -150,7 +154,7 @@ export default function NovoProduto() {
         
 
     <div className="flex flex-col gap-2">
-     <Label className="m-3">Imagem</Label>
+     
 
     <input
     id="img"
@@ -170,12 +174,13 @@ export default function NovoProduto() {
     className="hidden"
   />
 
-  <label
+  <Button
+    variant="destructive"
     htmlFor="img"
-    className="cursor-pointer px-4 py-2 rounded-xl font-semibold w-fit transition"
+    className="cursor-pointer px-4 py-2 rounded-xl font-semibold text-lg w-fit transition"
   >
-    Selecionar imagem
-  </label>
+    Selecionar imagem do produto
+  </Button>
 
  
   {/* Preview img */}
@@ -189,10 +194,11 @@ export default function NovoProduto() {
   )}
 </div>
 
+<br></br>
           <Button
             onClick={criarProduto}
             disabled={loading}
-            className="w-full mt-4"
+            className="w-50  text-xl p-6 font-bold mt-4"
           >
             {loading ? "Salvando..." : "Criar produto"}
           </Button>

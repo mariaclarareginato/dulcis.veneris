@@ -105,8 +105,8 @@ export default function Pagamento() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <AlertCircle className="w-16 h-16 text-red-500" />
-        <p className="text-lg text-red-500">{error}</p>
-        <Button onClick={() => window.location.reload()} className="rounded-xl">
+        <p className="text-xl font-bold text-red-500">{error}</p>
+        <Button onClick={() => window.location.reload()} className="font-bold text-lg rounded-xl">
           Tentar Novamente
         </Button>
       </div>
@@ -122,10 +122,10 @@ export default function Pagamento() {
         <Button
           variant="ghost"
           onClick={() => setSelectedMethod(null)}
-          className="mb-6 rounded-xl"
+          className="mb-6 text-2xl font-extrabold rounded-xl"
           disabled={isFinalizandoVenda}
         >
-          &larr; Voltar aos métodos
+          &larr;
         </Button>
         <PaymentForm
           method={selectedMethod}
@@ -141,43 +141,59 @@ export default function Pagamento() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
 
-      <div className="absolute left-10 top-20">
+      <div className="absolute left-10 top-60">
   <Button
     variant="ghost"
     onClick={() => router.push("/caixa")}
-    className="rounded-full p-1 font-extrabold"
+    className="mb-6 text-2xl font-extrabold rounded-xl"
   >
-      ← Voltar 
+      ← 
   </Button>
 </div>
 
-      <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-center">
+      <h1 className="text-4xl sm:text-4xl font-bold mb-4 text-center">
         Selecione o método de pagamento:
       </h1>
 
-      <p className="text-xl mb-10 font-medium">
-        Total da Venda:{" "}
-        <strong className="text-green-600">R$ {total.toFixed(2)}</strong>
+      <p className="text-2xl m-5 font-medium">
+        Total da venda:{" "}
+        <strong className="text-3xl font-extrabold">
+          <br></br>
+          <br></br>
+          R$ {total.toFixed(2)}</strong>
       </p>
 
       {total <= 0 ? (
-        <Card className="p-6 text-center w-full max-w-sm rounded-xl shadow-lg">
-          <p className="text-xl text-red-500 font-bold mb-4">🛒 Carrinho vazio!</p>
-          <Button onClick={() => router.push("/caixa")} className="mt-4 rounded-xl">
+        <Card className="w-full max-w-lg mx-auto mt-10 sm:p-8
+               bg-transparent rounded-xl
+               backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               transition-all duration-300">
+          <p className="text-2xl text-center font-bold mb-4">Carrinho vazio!</p>
+          <Button onClick={() => router.push("/caixa")} className="mt-4 text-lg font-bold rounded-xl">
             Voltar e adicionar itens
           </Button>
         </Card>
-      ) : (
-        paymentMethods.map((method) => (
-          <Button
-            key={method.id}
-            onClick={() => handleSelectMethod(method.id)}
-            className="text-lg font-bold w-full sm:w-80 px-6 py-3 my-3 rounded-xl shadow-lg hover:shadow-xl transition-all"
-          >
-            {method.label}
-          </Button>
-        ))
-      )}
+) : (
+  paymentMethods.map((method) => (
+    <div
+      key={method.id}
+      className="w-full max-w-lg mx-auto mt-10 sm:p-8
+                 bg-transparent rounded-xl
+                 backdrop-blur-md
+                 shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+                 transition-all duration-300 flex justify-center"
+    >
+      <Button
+        onClick={() => handleSelectMethod(method.id)}
+        className="text-lg font-bold w-full px-6 py-3 my-3 rounded-xl shadow-lg hover:shadow-xl transition-all"
+      >
+        {method.label}
+      </Button>
     </div>
+  ))
+)}
+    </div>
+   
   );
 }

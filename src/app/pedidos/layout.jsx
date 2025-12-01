@@ -15,7 +15,7 @@ export default function PedidosLayout({ children }) {
       <AppSidebar3 variant="inset" />
       <SidebarInset>
         <SiteHeader3 />
-        <div className="flex flex-1 flex-col p-6">
+        <div className="flex flex-1 flex-col">
           {children}
           <SiteFooter />
         </div>

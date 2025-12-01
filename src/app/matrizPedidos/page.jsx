@@ -131,8 +131,8 @@ export default function MatrizPedidosPage() {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
                 <AlertCircle className="w-16 h-16 text-red-500" />
-                <p className="text-lg text-red-500">Erro: {error}</p>
-                <Button onClick={fetchPedidos}>Tentar Novamente</Button>
+                <p className="text-xl font-bold text-red-500">Erro: {error}</p>
+                <Button className="font-bold text-lg" onClick={fetchPedidos}>Tentar Novamente</Button>
             </div>
         );
     }

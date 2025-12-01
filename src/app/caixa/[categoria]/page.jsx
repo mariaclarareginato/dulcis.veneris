@@ -122,8 +122,8 @@ export default function CategoriaPage({ params }) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <AlertCircle className="w-16 h-16 text-red-500" />
-        <p className="text-lg text-red-500">{error}</p>
-        <Button onClick={() => window.location.reload()}>Tentar Novamente</Button>
+        <p className="text-xl font-bold text-red-500">{error}</p>
+        <Button onClick={() => window.location.reload()}><p className="font-bold text-lg">Tentar Novamente</p></Button>
       </div>
     );
   }
@@ -153,15 +153,13 @@ export default function CategoriaPage({ params }) {
     return (
       <Card
         key={produto.id}
-        className="rounded-2xl shadow-md hover:shadow-lg transition-shadow"
+        className="rounded-2xl  shadow-md hover:shadow-lg transition-shadow flex flex-col"
       >
+        <br></br>
         <CardHeader>
-          <CardTitle className="text-2xl">{produto.nome}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold leading-tight">{produto.nome}</CardTitle>
           <CardDescription className="flex items-center justify-between">
-            <span className="mt-5">{produto.sku}</span>
-            <span className="text-sm capitalize mt-5">
-              {produto.categoria}
-            </span>
+            <span className="m-3 text-m font-semibold">{produto.sku}</span>
           </CardDescription>
         </CardHeader>
 
@@ -184,16 +182,16 @@ export default function CategoriaPage({ params }) {
           )}
 
           {/* Descrição igualada */}
-          <p className="text-sm text-muted-foreground line-clamp-2">
+          <p className="text-lg font-semibold line-clamp-3">
             {produto.descricao || "Sem descrição"}
           </p>
 
           {/* Estoque */}
           {produto.ativo !== false && (
             <>
-          <div className="flex items-center justify-center gap-2 p-3 rounded-lg">
+          <div className="flex items-center justify-center gap-2 p-4 rounded-lg">
             <div className="text-center">
-              <p className="text-xs font-medium">ESTOQUE DISPONÍVEL:</p>
+              <p className="text-m font-semibold">ESTOQUE DISPONÍVEL:</p>
 
               <p
                 className={`text-2xl font-bold ${
@@ -201,13 +199,13 @@ export default function CategoriaPage({ params }) {
                     ? "text-red-600"
                     : estoqueMinimo
                     ? "text-yellow-600"
-                    : "text-green-800"
+                    : "text-green-600"
                 }`}
               >
                 {produto.quantidade}
               </p>
 
-              <p className="text-sm">
+              <p className="text-lg font-semibold">
                 {produto.quantidade === 1 ? "unidade" : "unidades"}
               </p>
             </div>
@@ -215,7 +213,7 @@ export default function CategoriaPage({ params }) {
 
           {estoqueMinimo && (
             <Alert className="py-2 border-yellow-500 bg-yellow-50">
-              <AlertDescription className="text-xs text-yellow-700">
+              <AlertDescription className="text-lg text-yellow-700">
                 ⚠️ Estoque baixo! Restam apenas {produto.quantidade} unidades
               </AlertDescription>
             </Alert>
@@ -223,7 +221,7 @@ export default function CategoriaPage({ params }) {
 
           {semEstoque && (
             <Alert className="py-2 border-red-500 bg-red-50">
-              <AlertDescription className="text-xs text-red-700 font-bold">
+              <AlertDescription className="text-lg text-red-700 font-bold">
                 🚫 PRODUTO ESGOTADO
               </AlertDescription>
             </Alert>
@@ -234,23 +232,23 @@ export default function CategoriaPage({ params }) {
           {/* Preço */}
           <div className="space-y-2 pt-2 border-t">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Preço:</span>
-              <span className="text-xl font-bold text-green-600">
+              <span className="text-lg font-semibold">Preço:</span>
+              <span className="text-xl font-bold">
                 R$ {Number(produto.preco_venda ?? 0).toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between items-center text-xs">
-              <span className="text-muted-foreground text-sm">Custo:</span>
+              <span className="text-lg font-semibold">Custo:</span>
               <span className="text-xl font-bold">R$ {Number(produto.custo ?? 0).toFixed(2)}</span>
             </div>
           </div>
 
           {/* Botão */}
           <Button
-            className="w-full font-semibold"
+            className="w-full text-lg font-bold"
             onClick={() => handleAdicionarCarrinho(produto)}
             disabled={semEstoque || isAdicionando || produto.ativo === false}
-            variant={produto.ativo === false ? "destructive" : "default"}
+            variant={produto.ativo === false || semEstoque === true ? "destructive" : "default"}
           >
             {produto.ativo === false
               ? "Fora de linha"
@@ -258,9 +256,15 @@ export default function CategoriaPage({ params }) {
               ? "Adicionando..."
               : semEstoque
               ? "Sem estoque"
-              : "Adicionar ao carrinho"}
+              : (  <>
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Adicionar ao carrinho
+             </>
+                )}
+               
           </Button>
         </CardContent>
+         <br></br>
       </Card>
     );
   }
@@ -268,15 +272,15 @@ export default function CategoriaPage({ params }) {
   // RENDERIZAÇÃO
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold capitalize">
+      <h2 className="text-4xl m-7 font-bold capitalize">
         {decodeURIComponent(categoria)}
       </h2>
 
-      <p className="text-lg text-muted-foreground m-4 font-semibold">
-        {produtosFiltrados.length} produtos encontrados
+      <p className="text-xl text-muted-foreground m-7 font-semibold">
+        {produtosFiltrados.length} produto(s) encontrado(s)
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 m-7">
 
         {/* 1) Disponíveis */}
         {produtosFiltrados

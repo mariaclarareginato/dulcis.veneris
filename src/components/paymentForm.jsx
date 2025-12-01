@@ -179,9 +179,9 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
   // --- Renderização PIX ---
 
   const renderPix = () => {
-    let statusColor = "text-gray-500";
+    let statusColor = "text-darkgray-500";
     let statusText = "Aguardando Pagamento...";
-    let icon = <Clock className="w-12 h-12 text-gray-500" />;
+    let icon = <Clock className="w-12 h-12 text-darkgray-500" />;
 
     if (pixStatus === "Processando") {
       statusColor = "text-yellow-600";
@@ -200,8 +200,8 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
     return (
       <div className="text-center space-y-4">
 
-         <p className="text-lg">
-          Total: R$ <strong className="text-green-600 font-bold">{total.toFixed(2)}</strong>
+         <p className="text-xl m-5 font-semibold">
+          Total: <strong className="text-2xl font-extrabold"> R$ {total.toFixed(2)}</strong>
         </p>
 
         <h3 className={`text-xl font-bold ${statusColor}`}>{statusText}</h3>
@@ -210,19 +210,19 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
         {pixStatus !== "Confirmado" && pixStatus !== "Expirado" && (
           <>
             <div className="flex justify-center my-4">
-              <div className="p-3 bg-white border-4 border-yellow-500 rounded-lg shadow">
+              <div className="p-3 bg-white border-4 rounded-lg shadow">
                 <QRCodeCanvas value={pixCode} size={200} />
               </div>
             </div>
-            <Input readOnly value={pixCode} className="font-mono text-xs" />
-            <Button className="w-full mt-2" onClick={() => navigator.clipboard.writeText(pixCode)}>
+            <Input readOnly value={pixCode} className="font-mono text-lg font-semibold" />
+            <Button className="w-full text-lg font-bold mt-2" onClick={() => navigator.clipboard.writeText(pixCode)}>
               Copiar Código
             </Button>
           </>
         )}
 
         {pixStatus === "Pendente" && (
-          <Button className="w-full mt-4" onClick={handleSubmit}>
+          <Button className="w-full text-lg font-bold mt-4" onClick={handleSubmit}>
             Simular Pagamento (Iniciar)
           </Button>
         )}
@@ -232,7 +232,7 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
           </Button>
         )}
         {pixStatus === "Expirado" && (
-          <Button className="w-full mt-4" onClick={() => setPixStatus("Pendente")}>
+          <Button className="w-full text-lg font-bold mt-4" onClick={() => setPixStatus("Pendente")}>
             Tentar Novamente
           </Button>
         )}
@@ -243,23 +243,28 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
   // --- Render Principal ---
   return (
     <div className="flex justify-center w-full">
-      <Card className="w-full max-w-lg shadow-lg">
+      <Card className="w-full max-w-lg mx-auto mt-10 sm:p-8
+                 bg-transparent rounded-xl
+                 backdrop-blur-md
+                 shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+                 transition-all duration-300 flex justify-center">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">{title}</CardTitle>
+          <br></br>
+          <CardTitle className="text-4xl font-bold text-center">{title}</CardTitle>
         </CardHeader>
         <CardContent>
           {method === "PIX" ? (
             renderPix()
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
-              <p className="text-center text-lg">
-                Total: <strong className="text-green-600">R$ {total.toFixed(2)}</strong>
+              <p className="text-center font-semibold text-xl m-5">
+                Total: <strong className="text-2xl font-extrabold">R${total.toFixed(2)}</strong>
               </p>
 
               <div className="space-y-5">
                 {fields.map((f) => (
                   <div key={f.id} className="space-y-2">
-                    <Label htmlFor={f.id} className="text-sm font-semibold">
+                    <Label htmlFor={f.id} className="text-lg font-semibold">
                       {f.label}
                     </Label>
                     <Input
@@ -269,6 +274,7 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
                       value={formData[f.id] || ""}
                       onChange={(e) => setFormData({ ...formData, [e.target.id]: e.target.value })}
                       disabled={isLoading}
+                      className="text-2xl"
                     />
                   </div>
                 ))}
@@ -276,7 +282,7 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
                 {method === "DINHEIRO" && (
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="valorRecebido" className="text-sm font-semibold mb-3">
+                      <Label htmlFor="valorRecebido" className="text-lg font-bold mb-3">
                         Valor Recebido
                       </Label>
                      
@@ -285,25 +291,30 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
                         type="number"
                         step="0.01"
                         value={formData.valorRecebido}
+                        className="font-bold text-xl"
                         onChange={(e) =>
                           setFormData({ ...formData, valorRecebido: e.target.value })
+                         
                         }
                       />
                     </div>
-                    <p className="text-center text-lg">
-                      Troco: <span className="font-bold text-yellow-700">R$ {troco.toFixed(2)}</span>
+                    <p className="text-center font-semibold text-xl">
+                      Troco: <span className="font-bold text-2x1 font-extrabold">
+                        <br></br>
+                        R$ {troco.toFixed(2)}</span>
                     </p>
                   </div>
                 )}
               </div>
 
               <Button type="submit" className="w-full py-2 text-base" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Finalizar Venda
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 text-lg font-bold animate-spin" />}
+               <p className="text-lg font-bold"> Finalizar Venda </p>
               </Button>
             </form>
           )}
         </CardContent>
+        <br></br>
       </Card>
     </div>
   );

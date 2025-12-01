@@ -35,7 +35,7 @@ export function NavUser({ user }) {
             >
               <div className="grid flex-1 text-left text-lg leading-tight">
                 <span className="truncate font-lg">{user.name}</span>
-                <span className="text-xl font-bold text-center">
+                <span className="text-2xl font-bold text-center">
                   {user.email}
                 </span>
               </div>
@@ -62,7 +62,7 @@ export function NavUser({ user }) {
 
             <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
-              <h1 className="text-lg font-bold">Sair</h1>
+              <h1 className="text-xl font-bold">Sair</h1>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

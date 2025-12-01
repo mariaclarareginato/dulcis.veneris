@@ -51,7 +51,7 @@ else if (data.user.perfil === "ADMIN") router.push("/matriz")
 <div>
   <Card
     className="w-full max-w-lg mx-auto mt-10 sm:p-8
-               bg-transparent border-2 border-white rounded-xl
+               bg-transparent rounded-xl
                backdrop-blur-md
                shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
                transition-all duration-300"
@@ -68,6 +68,7 @@ else if (data.user.perfil === "ADMIN") router.push("/matriz")
         Digite suas informações para acessar o sistema gerenciador das<br></br>nossas filiais, matriz e caixas:
       </CardDescription>
     </CardHeader>
+    <br></br>
 
     <CardContent>
       <form onSubmit={handleSubmit} className="space-y-4">

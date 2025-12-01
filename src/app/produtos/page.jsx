@@ -71,12 +71,12 @@ async function colocarNaLinha(p) {
         <div>
         <h1 className="text-4xl font-extrabold">Produtos </h1>
        
-        <p className="text-muted-foreground  font-bold mt-4">Crie um novo produto, ou tire qualquer um deles do estoque.</p>
+        <p className="text-muted-foreground text-xl font-bold mt-4">Crie um novo produto, ou tire qualquer um deles do estoque.</p>
         
        
        
         <Button className="p-7 mt-5" onClick={() => window.location.href = "/novoproduto"}>
-          <p className="font-extrabold">Criar novo produto</p>
+          <p className="font-bold text-lg">Criar novo produto</p>
         </Button>
         
 </div>
@@ -91,10 +91,12 @@ async function colocarNaLinha(p) {
           {produtos.map((p) => (
             <Card key={p.id}>
               <CardHeader>
+                <br></br>
                 <CardTitle className="font-extrabold text-xl">{p.nome}</CardTitle>
                 <img src={p.img} className="mt-5 mb-10 w-full h-full object-cover"></img>
                 
               </CardHeader>
+              <br></br>
               <CardContent className="space-y-3 mt-5">
                 <p>Código: <strong>{p.codigo}</strong></p>
                 <p>Preço: <strong>R$ {Number(p.preco_venda).toFixed(2)}</strong></p>
@@ -105,23 +107,25 @@ async function colocarNaLinha(p) {
 
                 {p.ativo && (
                   <Button 
-                   
+                    className="font-bold text-lg"
                     onClick={() => tirarDeLinha(p)}
                   >
-                   <p className="font-bold"> Tirar de linha </p>
+                   Tirar de linha
                   </Button>
                 )}
 
                  {!p.ativo && (
-                  <Button
+                  <Button className="font-bold text-lg"
                     variant="destructive"
                     onClick={() => colocarNaLinha(p)}
                   >
                     Colocar na linha
                   </Button>
+                  
                 )}
 
               </CardContent>
+              <br></br>
             </Card>
           ))}
         </div>

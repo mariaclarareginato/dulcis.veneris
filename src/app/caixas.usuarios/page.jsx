@@ -145,9 +145,9 @@ const anoAtual = new Date().getFullYear();
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <AlertCircle className="w-16 h-16 text-red-500" />
-        <p className="text-lg text-red-500">{error}</p>
-        <Button onClick={() => window.location.reload()}>
+        <AlertCircle className="w-16 h-16" />
+        <p className="text-xl font-bold font-bold">{error}</p>
+        <Button className="font-bold text-lg" onClick={() => window.location.reload()}>
           Tentar Novamente
         </Button>
       </div>
