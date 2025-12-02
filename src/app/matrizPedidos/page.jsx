@@ -90,6 +90,75 @@ export default function MatrizPedidosPage() {
     }
   };
 
+  async function gerarPDFPedidos() {
+    
+    const { jsPDF } = await import("jspdf");
+    const autoTable = (await import("jspdf-autotable")).default;
+
+    const doc = new jsPDF();
+
+    
+    doc.setFontSize(22);
+    doc.text("Relatório de Pedidos da Matriz", 105, 20, { align: "center" });
+
+    doc.setFontSize(14);
+    doc.text(`Total de Pedidos: ${pedidos.length}`, 105, 30, { align: "center" });
+    
+    
+    const dataGeracao = new Date().toLocaleDateString("pt-BR", {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    doc.setFontSize(10);
+    doc.text(`Gerado em: ${dataGeracao}`, 200, 10, { align: "right" });
+
+    const pedidosParaPDF = pedidos.map((p) => [
+      p.id,
+      p.status,
+      new Date(p.data_pedido).toLocaleDateString(),
+      p.loja?.nome || `ID ${p.loja_id}`,
+      p.usuario?.nome || `ID ${p.usuario_id}`,
+      p.itens_pedido.length,
+      p.itens_pedido.map(item => `${item.produto_nome} (Qtd: ${item.quantidade})`).join('\n')
+    ]);
+
+
+    autoTable(doc, {
+      startY: 40, 
+      head: [
+        [
+          "ID",
+          "Status",
+          "Data",
+          "Loja",
+          "Solicitante",
+          "Itens",
+          "Detalhes dos Itens"
+        ],
+      ],
+      body: pedidosParaPDF,
+      headStyles: {
+        fillColor: [139, 0, 0], 
+        textColor: 255, 
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 2
+      },
+      columnStyles: {
+          6: { cellWidth: 50 } 
+      }
+    });
+
+   
+    doc.save(`relatorio_pedidos_matriz_${new Date().getTime()}.pdf`);
+  }
+
   if (loading && !pedidos.length)
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -107,6 +176,8 @@ export default function MatrizPedidosPage() {
         </Button>
       </div>
     );
+
+
 
   return (
     <div className="container mx-auto py-8 max-w-6xl">
@@ -201,7 +272,7 @@ export default function MatrizPedidosPage() {
 
                   {updatingId === pedido.id && (
                     <p className="text-lg font-semibold flex items-center gap-1">
-                      <Loader2 className="w-3 h-3 animate-spin" /> Salvando...
+                      <Loader2 className="w-6 h-6 animate-spin" /> 
                     </p>
                   )}
                 </div>
@@ -226,7 +297,13 @@ export default function MatrizPedidosPage() {
                 </div>
               </CardContent>
             </Card>
+          
           ))}
+               <div className="flex justify-center mt-10">
+  <Button  className="p-6" onClick={gerarPDFPedidos}>
+    <h1 className="font-bold text-lg">Gerar PDF dos seu pedidos</h1>
+  </Button>
+</div>
         </div>
       )}
     </div>

@@ -198,7 +198,7 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
     }
 
     return (
-      <div className="text-center space-y-4">
+      <div className="text-center">
 
          <p className="text-xl m-5 font-semibold">
           Total: <strong className="text-2xl font-extrabold"> R$ {total.toFixed(2)}</strong>

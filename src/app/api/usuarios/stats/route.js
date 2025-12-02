@@ -47,12 +47,12 @@ export async function GET(req) {
           },
         });
 
-        // ✅ CORREÇÃO: Converte Decimal para Number explicitamente
+        //  Converte Decimal para Number explicitamente
         const totalVendas = vendas.reduce((sum, venda) => {
           return sum + parseFloat(venda.total || 0);
         }, 0);
 
-        // ✅ CORREÇÃO: Calcula lucro convertendo Decimals
+        //  Calcula lucro convertendo Decimals
         const lucro = vendas.reduce((sum, venda) => {
           const totalVenda = parseFloat(venda.total || 0);
           const custoVenda = venda.vendaitem.reduce(

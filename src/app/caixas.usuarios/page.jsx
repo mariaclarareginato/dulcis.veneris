@@ -8,7 +8,7 @@ import {
   TrendingUp,
   DollarSign,
   ShoppingCart,
-  User,
+  TicketIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -170,56 +170,75 @@ const anoAtual = new Date().getFullYear();
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between gap-4 md:items-center ">
         <div>
-          <h1 className="text-3xl font-bold">Desempenho dos Caixas</h1>
-          <p className="text-muted-foreground mt-2 text-lg font-semibold">
+          <h1 className="text-4xl font-bold">Desempenho dos Caixas</h1>
+          <p className="text-muted-foreground mt-2 text-xl font-semibold">
             Acompanhe o desempenho dos seus caixas e registre novos usuários
           </p>
         </div>
-        <Button className="w-full md:w-auto" onClick={() => router.push("/registro")}>
-          <strong className="font-bold">Registrar novo usuário</strong>
+        <Button className="w-full md:w-auto p-6" onClick={() => router.push("/registro")}>
+          <strong className="font-bold text-lg">Registrar novo usuário</strong>
         </Button>
       </div>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-20">
+        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+               transition-all duration-300 p-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-xl font-semibold">
               Total de Vendas
             </CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            <ShoppingCart className="h-6 w-6 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totais.vendas}</div>
-            <p className="text-sm text-muted-foreground">vendas finalizadas</p>
+            <p className="text-lg font-semibold text-muted-foreground">vendas finalizadas</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+               transition-all duration-300 p-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-xl font-semibold">
               Faturamento Total
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-6 w-6 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold">
               R$ {Number(totais.faturamento).toFixed(2)}
             </div>
-            <p className="text-sm text-muted-foreground">em vendas</p>
+            <p className="text-lg font-semibold text-muted-foreground">em vendas</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+               transition-all duration-300 p-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Lucro Total</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xl font-semibold">Lucro Total</CardTitle>
+            <TrendingUp className="h-6 w-6 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              R$ {totais.lucro.toFixed(2)}
-            </div>
-            <p className="text-sm text-muted-foreground">lucro líquido</p>
+            
+              <p
+                     className={`text-2xl font-bold ${
+                    totais.lucro < 0
+                   ? "text-red-500"
+                   : totais.lucro > 0
+                   ? "text-green-600"
+                  : ""
+                   }`}
+                   >
+                 R$ {totais.lucro.toFixed(2)}
+                   </p>
+             <p className="text-lg font-semibold text-muted-foreground">lucro líquido</p>
           </CardContent>
         </Card>
       </div>
@@ -234,7 +253,7 @@ const anoAtual = new Date().getFullYear();
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-4 mt-20">
           {usuarios.map((usuario, index) => (
             <Card
               key={usuario.id}
@@ -244,8 +263,8 @@ const anoAtual = new Date().getFullYear();
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div> 
-                      <CardTitle className="text-xl font-bold">{usuario.nome}</CardTitle>
-                      <CardDescription className="mt-1 text-lg">
+                      <CardTitle className="text-3xl font-bold">{usuario.nome}</CardTitle>
+                      <CardDescription className="mt-2 text-xl">
                         {usuario.email}
                       </CardDescription>
                     </div>
@@ -272,10 +291,10 @@ const anoAtual = new Date().getFullYear();
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 m-5">
                   <div>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <ShoppingCart className="w-4 h-4" /> Vendas
+                    <p className="text-lg font-semibold text-muted-foreground flex items-center gap-1">
+                      <ShoppingCart className="w-6 h-6" /> Vendas
                     </p>
                     <p className="text-2xl font-bold">
                       {usuario.stats.numeroVendas}
@@ -283,28 +302,37 @@ const anoAtual = new Date().getFullYear();
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <DollarSign className="w-4 h-4" /> Faturamento
+                    <p className="text-lg font-semibold text-muted-foreground flex items-center gap-1">
+                      <DollarSign className="w-6 h-6" /> Faturamento
                     </p>
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold">
                       R$ {Number(usuario.stats.totalVendas).toFixed(2)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <TrendingUp className="w-4 h-4" /> Lucro
+                    <p className="text-lg font-semibold text-muted-foreground flex items-center gap-1">
+                      <TrendingUp className="w-6 h-6" /> Lucro
                     </p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      R$ {Number(usuario.stats.lucro).toFixed(2)}
-                    </p>
+                   
+              <p
+                     className={`text-2xl font-bold ${
+                    usuario.stats.lucro < 0
+                   ? "text-red-500"
+                   : usuario.stats.lucro > 0
+                   ? "text-green-600"
+                  : ""
+                   }`}
+                   >
+                 R$ {usuario.stats.lucro.toFixed(2)}
+                   </p>
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground">
-                      Ticket Médio
+                    <p className="text-lg font-semibold text-muted-foreground flex items-center gap-1">
+                       <TicketIcon className="w-6 h-6" /> Ticket Médio
                     </p>
-                    <p className="text-2xl font-bold text-yellow-600">
+                    <p className="text-2xl font-bold">
                       R$ {Number(usuario.stats.ticketMedio).toFixed(2)}
                     </p>
                   </div>
@@ -321,7 +349,7 @@ const anoAtual = new Date().getFullYear();
                       }}
                     />
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-lg font-bold text-muted-foreground mt-1">
                     {(
                       (usuario.stats.totalVendas / totais.faturamento) *
                       100
@@ -336,8 +364,8 @@ const anoAtual = new Date().getFullYear();
       )}
 
       <div className="flex justify-center mt-10">
-  <Button onClick={gerarPDF}>
-    <h1 className="font-bold">Gerar PDF</h1>
+  <Button  className="p-6" onClick={gerarPDF}>
+    <h1 className="font-bold text-lg">Gerar PDF</h1>
   </Button>
 </div>
 

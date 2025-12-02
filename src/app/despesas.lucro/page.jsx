@@ -57,35 +57,38 @@ export default function FinanceiroPage() {
     }
     setUpdating(null);
   }
-
-  // Função para gerar pdf 
-
-  async function gerarPDF() {
+// Função para gerar PDF
+async function gerarPDF() {
   const { jsPDF } = await import("jspdf");
   const autoTable = (await import("jspdf-autotable")).default;
 
   const doc = new jsPDF();
 
-  // Logo
-  const img = await fetch("/logos/logo2.png")
+  // =========================
+  //  LOGO
+  // =========================
+  const logo = await fetch("/logos/logo2.png")
     .then((res) => res.blob())
     .then((blob) => convertBlobToBase64(blob));
 
-  doc.addImage(img, "PNG", 70, 10, 70, 40);
+  doc.addImage(logo, "PNG", 70, 10, 70, 40);
 
-  // Título
+  // =========================
+  //  CABEÇALHO / TÍTULO
+  // =========================
+  const titulo = `Painel Financeiro — ${
+    nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)
+  } ${anoAtual}`;
+
   doc.setFontSize(18);
-  doc.text(
-    `Painel Financeiro — ${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)} ${anoAtual}`,
-    105,
-    60,
-    { align: "center" }
-  );
+  doc.text(titulo, 105, 60, { align: "center" });
 
-  doc.setFontSize(12);
+  doc.setFontSize(14);
   doc.text(`Loja: ${dados.loja}`, 105, 70, { align: "center" });
 
-  // Tabela simples com resumo financeiro
+  // =========================
+  //  TABELA: RESUMO FINANCEIRO
+  // =========================
   autoTable(doc, {
     startY: 85,
     head: [["Item", "Valor"]],
@@ -95,15 +98,26 @@ export default function FinanceiroPage() {
       ["CMV", money(dados.totalCMV)],
       ["Margem de Lucro", `${dados.margemLucro}%`],
     ],
-    headStyles: {
-      fillColor: "darkred",
-    }
+    headStyles: { fillColor: [139, 0, 0] }, // darkred
+    styles: { fontSize: 11 },
+    columnStyles: {
+      0: { cellWidth: 80 },
+      1: { cellWidth: 70 },
+    },
   });
 
-  // Tabela das despesas
+  // =========================
+  //  TÍTULO DAS DESPESAS FIXAS
+  // =========================
 
+  doc.setFontSize(14);
+  doc.text("Despesas Fixas", 105, doc.lastAutoTable.finalY + 15, { align: "center" });
+
+  // =========================
+  //  TABELA: DESPESAS
+  // =========================
   autoTable(doc, {
-    startY: doc.lastAutoTable.finalY + 15,
+    startY: doc.lastAutoTable.finalY + 20,
     head: [["Descrição", "Valor", "Vencimento", "Status"]],
     body: despesas.map((d) => [
       d.descricao,
@@ -111,13 +125,21 @@ export default function FinanceiroPage() {
       new Date(d.data_vencimento).toLocaleDateString(),
       d.pago ? "Pago" : "Pendente",
     ]),
-    headStyles: {
-      fillColor: "darkred",
-    }
+    headStyles: { fillColor: [139, 0, 0] }, // darkred
+    styles: { fontSize: 10 },
+    columnStyles: {
+      0: { cellWidth: 70 },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 30 },
+    },
   });
+
 
   doc.save(`financeiro-${nomeMes}-${anoAtual}.pdf`);
 }
+
+// Converter blob para base64 (para imagem funcionar)
 
 function convertBlobToBase64(blob) {
   return new Promise((resolve) => {
@@ -146,6 +168,7 @@ function convertBlobToBase64(blob) {
     { name: "Lucro", value: dados?.lucro || 0 },
     { name: "Despesas", value: totalDespesasPendentes || 0 },
   ];
+ 
 
   // Mês e dia atuais 
 
@@ -171,56 +194,132 @@ function convertBlobToBase64(blob) {
 
 
 
-      {/* Gráfico + Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
-                       shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-                       dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
-                       transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="text-xl m-3 font-bold">Lucro vs Despesas</CardTitle>
-          </CardHeader>
+    {/* Gráfico + Resumo */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
 
-            <CardContent>
-            {(dados.totalCMV === 0) ? (
-            <div className="flex items-center font-semibold justify-center h-[250px] text-lg">
-             Loja ainda sem vendas. 
-              </div>
-              ) : (
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    dataKey="value"
-                    label
-                  >
-                    {chartData.map((e, i) => (
-                      <Cell key={i} fill={COLORS[i]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => money(v)} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+  {/* ======= CARD DO GRÁFICO ======= */}
+  <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
+                   shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+                   dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+                   transition-all duration-300 hover:scale-[1.01]">
 
-        <Card  className="w-full bg-transparent rounded-xl backdrop-blur-md
-                       shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-                       dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
-                       transition-all duration-300">
-          <CardContent className="text-center text-lg space-y-2 py-6">
-           <b>💰 Lucro: </b><br></br> <p className="font-extrabold text-xl"> {money(dados.lucro)}</p>
-            <b>📉 Despesas Pendentes: <br></br></b> <p className="font-extrabold text-xl"> {money(totalDespesasPendentes)}</p>
-            <b>📦 CMV (Custo das Mercadorias Vendidas): <br></br></b> <p className="font-extrabold text-xl">{money(dados.totalCMV)}</p>
-            <b>📈 Margem de Lucro: <br></br></b> <p  className="font-extrabold text-xl"> {dados.margemLucro}%</p>
-          </CardContent>
-        </Card>
+    <CardHeader className="p-6">
+      <CardTitle className="text-3xl m-5 font-bold">Lucro vs Despesas</CardTitle>
+      <span className="text-xl font-semibold ml-5 text-muted-foreground">Distribuição financeira</span>
+    </CardHeader>
+
+    <CardContent className="pt-4">
+      {dados.totalCMV === 0 ? (
+        <div className="flex items-center font-semibold justify-center h-[250px] text-xl">
+          Loja ainda sem vendas.
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={400}>
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={55}
+              outerRadius={95}
+              dataKey="value"
+            >
+              {chartData.map((e, i) => (
+                <Cell key={i} fill={COLORS[i]}  />
+              ))}
+            </Pie>
+
+            <Tooltip
+              formatter={(v, n) => [money(v), n]}
+              contentStyle={{
+                borderRadius: "12px",
+                padding: "10px 16px",
+                backdropFilter: "blur(6px)",
+              }}
+            />
+
+            <Legend
+              verticalAlign="bottom"
+              height={50}
+              iconType="circle"
+              formatter={(value) => (
+                <span className="font-semibold text-xl">{value}</span>
+              )}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      )}
+    </CardContent>
+  </Card>
+
+
+
+  {/* ======= CARD DO RESUMO ======= */}
+  <Card 
+    className="w-full bg-transparent rounded-xl backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+               transition-all duration-300 hover:scale-[1.01]">
+    
+    <CardContent className="p-8">
+
+      <h2 className="text-3xl font-bold text-center mb-6">
+        Resumo Financeiro
+      </h2>
+
+      <div className="grid grid-cols-1 gap-6">
+
+        {/* LUCRO */}
+        <div className="p-4 rounded-xl bg-white/10 dark:bg-black/20 backdrop-blur-md
+                        border border-white/20 dark:border-white/10">
+          <p className="text-lg font-semibold flex items-center gap-2">
+            💰 Lucro
+          </p>
+          <p
+                     className={`text-3xl font-extrabold ${
+                    dados.lucro < 0
+                   ? "text-red-500"
+                   : dados.lucro > 0
+                   ? "text-green-600"
+                  : ""
+                   }`}
+                   >
+                 R$ {dados.lucro.toFixed(2)}
+                   </p>
+        </div>
+
+        {/* DESPESAS */}
+        <div className="p-4 rounded-xl bg-white/10 dark:bg-black/20 backdrop-blur-md
+                        border border-white/20 dark:border-white/10">
+          <p className="text-lg font-semibold flex items-center gap-2">
+            📉 Despesas Pendentes
+          </p>
+          <p className="text-3xl font-extrabold text-red-500 mt-1">{money(totalDespesasPendentes)}</p>
+        </div>
+
+        {/* CMV */}
+        <div className="p-4 rounded-xl bg-white/10 dark:bg-black/20 backdrop-blur-md
+                        border border-white/20 dark:border-white/10">
+          <p className="text-lg font-semibold flex items-center gap-2">
+            📦 CMV (Custo por mercadoria vendida)
+          </p>
+          <p className="text-3xl font-extrabold mt-1">{money(dados.totalCMV)}</p>
+        </div>
+
+        {/* MARGEM */}
+        <div className="p-4 rounded-xl bg-white/10 dark:bg-black/20 backdrop-blur-md
+                        border border-white/20 dark:border-white/10">
+          <p className="text-lg font-semibold flex items-center gap-2">
+            📈 Margem de Lucro
+          </p>
+          <p className="text-3xl font-extrabold mt-1">{dados.margemLucro}%</p>
+        </div>
+
       </div>
+    </CardContent>
+  </Card>
+
+</div>
 
       {/* Totais rápidos */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -243,33 +342,30 @@ function convertBlobToBase64(blob) {
   <CardContent>
 
     {/* Mobile: Cards */}
-    <div className="md:hidden space-y-3">
+    <div className="md:hidden space-y-3 m-5 text-lg">
       {despesas.map((d) => {
         const vencida = new Date(d.data_vencimento) < new Date() && !d.pago;
 
         return (
           <div
             key={d.id}
-            className={`border border-zinc-700 rounded-lg p-4 ${
-              vencida ? "bg-red-900/20" : "bg-zinc-900/20"
-            }`}
-          >
-            <p><b>Descrição:</b> {d.descricao}</p>
-            <p><b>Valor:</b> {money(d.valor)}</p>
-            <p><b>Vencimento:</b> {new Date(d.data_vencimento).toLocaleDateString()}</p>
+            className='border border-zinc-700 rounded-lg p-4'>
+            <p>Descrição:</p> <strong>{d.descricao}</strong>
+            <p>Valor:</p> <strong>{money(d.valor)}</strong>
+            <p>Vencimento:</p> <strong>{new Date(d.data_vencimento).toLocaleDateString()}</strong>
 
-            <p className={`font-semibold mt-1 ${
+            <p className={`font-semibold  text-lg mt-1 ${
               d.pago
-                ? "text-green-700"
-                : vencida
-                ? "text-red-700"
-                : "text-yellow-700"
-            }`}>
+                      ? "text-green-600 dark:text-green-500"
+                      : vencida
+                      ? "text-red-500 dark:text-red-500"
+                      : "text-yellow-600 dark:text-yellow-500"
+                  }`}>
               {d.pago ? "Pago" : vencida ? "Vencido" : "Pendente"}
             </p>
 
             <Button
-              className="mt-3 w-full"
+              className="mt-3 w-full text-lg font-bold"
               onClick={() => togglePagamento(d.id, d.pago)}
               disabled={updating === d.id}
             >
@@ -290,7 +386,9 @@ function convertBlobToBase64(blob) {
 
 
     {/* Desktop: Tabela normal */}
-    <div className="hidden md:block overflow-x-auto">
+    
+    <div className="hidden md:block overflow-x-auto ">
+   
       <table className="w-full text-left text-sm border-collapse">
         <thead>
           <tr className="border-b border-zinc-700 h-12">
@@ -313,18 +411,18 @@ function convertBlobToBase64(blob) {
 
               >
                 <td className="py-3 px-2 text-lg font-bold">{d.descricao}</td>
-                <td className="py-3 px-2 text-lg">{money(d.valor)}</td>
-                <td className="py-3 px-2 text-lg">
+                <td className="py-3 px-2 text-lg font-semibold">{money(d.valor)}</td>
+                <td className="py-3 px-2 text-lg font-semibold">
                   {new Date(d.data_vencimento).toLocaleDateString()}
                 </td>
 
                 <td
-                  className={`py-3 px-2 text-lg font-semibold ${
+                  className={`py-3 px-2 text-lg font-bold ${
                     d.pago
-                      ? "text-green-500"
+                      ? "text-green-600 dark:text-green-500"
                       : vencida
-                      ? "text-red-500"
-                      : "text-yellow-500"
+                      ? "text-red-500 dark:text-red-500"
+                      : "text-yellow-600 dark:text-yellow-500"
                   }`}
                 >
                   {d.pago ? "Pago" : vencida ? "Vencido" : "Pendente"}
@@ -332,7 +430,7 @@ function convertBlobToBase64(blob) {
 
                 <td className="py-3 px-2">
                   <Button
-                    className="text-xs"
+                    className="text-lg font-bold"
                     onClick={() => togglePagamento(d.id, d.pago)}
                     disabled={updating === d.id}
                   >
