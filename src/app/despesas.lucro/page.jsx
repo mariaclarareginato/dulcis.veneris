@@ -130,7 +130,7 @@ function convertBlobToBase64(blob) {
 
 
 
-  const totalPendente = useMemo(
+  const totalDespesasPendentes = useMemo(
     () => despesas.filter((d) => !d.pago).reduce((a, b) => a + Number(b.valor), 0),
     [despesas]
   );
@@ -140,11 +140,11 @@ function convertBlobToBase64(blob) {
     [despesas]
   );
 
-  const totalGeral = totalPago + totalPendente;
+  const totalGeral = totalPago + totalDespesasPendentes;
 
   const chartData = [
     { name: "Lucro", value: dados?.lucro || 0 },
-    { name: "Despesas", value: dados?.totalDespesasPendentes || 0 },
+    { name: "Despesas", value: totalDespesasPendentes || 0 },
   ];
 
   // Mês e dia atuais 
@@ -173,14 +173,17 @@ function convertBlobToBase64(blob) {
 
       {/* Gráfico + Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-        <Card>
+        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
+                       shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+                       dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+                       transition-all duration-300">
           <CardHeader>
-            <CardTitle>Lucro vs Despesas</CardTitle>
+            <CardTitle className="text-xl m-3 font-bold">Lucro vs Despesas</CardTitle>
           </CardHeader>
 
             <CardContent>
             {(dados.totalCMV === 0) ? (
-            <div className="flex items-center justify-center h-[250px] text-lg">
+            <div className="flex items-center font-semibold justify-center h-[250px] text-lg">
              Loja ainda sem vendas. 
               </div>
               ) : (
@@ -206,29 +209,32 @@ function convertBlobToBase64(blob) {
           </CardContent>
         </Card>
 
-        <Card className="flex flex-col justify-center items-center">
-          <CardContent className="text-center text-base sm:text-lg space-y-2 py-6">
-            <p><b>💰 Lucro:</b> {money(dados.lucro)}</p>
-            <p><b>📉 Despesas Pendentes:</b> {money(dados.totalDespesasPendentes)}</p>
-            <p><b>📦 CMV (Custo das Mercadorias Vendidas):</b> {money(dados.totalCMV)}</p>
-            <p><b>📈 Margem de Lucro:</b> {dados.margemLucro}%</p>
+        <Card  className="w-full bg-transparent rounded-xl backdrop-blur-md
+                       shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+                       dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+                       transition-all duration-300">
+          <CardContent className="text-center text-lg space-y-2 py-6">
+           <b>💰 Lucro: </b><br></br> <p className="font-extrabold text-xl"> {money(dados.lucro)}</p>
+            <b>📉 Despesas Pendentes: <br></br></b> <p className="font-extrabold text-xl"> {money(totalDespesasPendentes)}</p>
+            <b>📦 CMV (Custo das Mercadorias Vendidas): <br></br></b> <p className="font-extrabold text-xl">{money(dados.totalCMV)}</p>
+            <b>📈 Margem de Lucro: <br></br></b> <p  className="font-extrabold text-xl"> {dados.margemLucro}%</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Totais rápidos */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <Card className="bg-yellow-100 text-yellow-900 text-center p-4">
-          <CardTitle className="text-lg">Despesas fixas pendentes:</CardTitle>
-          <CardContent className="text-xl sm:text-2xl">{money(totalPendente)}</CardContent>
+        <Card className="border-yellow-500 bg-transparent border text-yellow-500 text-center p-4">
+          <CardTitle className="text-lg text-semibold">Despesas fixas pendentes:</CardTitle>
+          <CardContent className="font-extrabold text-2xl">{money(totalDespesasPendentes)}</CardContent>
         </Card>
-        <Card className="bg-green-100 text-green-900 text-center p-4">
-          <CardTitle className="text-lg">Despesas fixas pagas:</CardTitle>
-          <CardContent className="text-xl sm:text-2xl">{money(totalPago)}</CardContent>
+        <Card className="border-green-500 bg-tranparent border text-green-500 text-center p-4">
+          <CardTitle className="text-lg text-semibold">Despesas fixas pagas:</CardTitle>
+          <CardContent className="font-extrabold text-2xl">{money(totalPago)}</CardContent>
         </Card>
-        <Card className="bg-blue-100 text-blue-900 text-center p-4">
-          <CardTitle className="text-lg">Total geral das despesas fixas:</CardTitle>
-          <CardContent className="text-xl sm:text-2xl">{money(totalGeral)}</CardContent>
+        <Card className="border-blue-500 border bg-transparent text-blue-500 text-center p-4">
+          <CardTitle className="text-lg font-semibold">Total geral das despesas fixas:</CardTitle>
+          <CardContent className="font-extrabold text-2xl">{money(totalGeral)}</CardContent>
         </Card>
       </div>
 
@@ -288,11 +294,11 @@ function convertBlobToBase64(blob) {
       <table className="w-full text-left text-sm border-collapse">
         <thead>
           <tr className="border-b border-zinc-700 h-12">
-            <th className="py-3 px-2">Descrição</th>
-            <th className="py-3 px-2">Valor</th>
-            <th className="py-3 px-2">Vencimento</th>
-            <th className="py-3 px-2">Status</th>
-            <th className="py-3 px-2">Ações</th>
+            <th className="py-3 text-lg px-2">Descrição</th>
+            <th className="py-3 text-lg px-2">Valor</th>
+            <th className="py-3 text-lg px-2">Vencimento</th>
+            <th className="py-3 text-lg px-2">Status</th>
+            <th className="py-3 text-lg px-2">Ações</th>
           </tr>
         </thead>
 
@@ -304,21 +310,21 @@ function convertBlobToBase64(blob) {
             return (
               <tr
                 key={d.id}
-                className={`border-b border-zinc-800 h-12 ${vencida ? "bg-red-900/20" : ""}`}
+
               >
-                <td className="py-3 px-2">{d.descricao}</td>
-                <td className="py-3 px-2">{money(d.valor)}</td>
-                <td className="py-3 px-2">
+                <td className="py-3 px-2 text-lg font-bold">{d.descricao}</td>
+                <td className="py-3 px-2 text-lg">{money(d.valor)}</td>
+                <td className="py-3 px-2 text-lg">
                   {new Date(d.data_vencimento).toLocaleDateString()}
                 </td>
 
                 <td
-                  className={`py-3 px-2 font-semibold ${
+                  className={`py-3 px-2 text-lg font-semibold ${
                     d.pago
-                      ? "text-green-700"
+                      ? "text-green-500"
                       : vencida
-                      ? "text-red-700"
-                      : "text-yellow-700"
+                      ? "text-red-500"
+                      : "text-yellow-500"
                   }`}
                 >
                   {d.pago ? "Pago" : vencida ? "Vencido" : "Pendente"}
@@ -331,10 +337,10 @@ function convertBlobToBase64(blob) {
                     disabled={updating === d.id}
                   >
                     {updating === d.id ? (
-                      <Clock className="animate-spin h-4 w-4" />
+                      <Clock className="animate-spin h-4 w-4 font-bold text-lg" />
                     ) : (
                       <>
-                        <CheckCircle className="h-4 w-4 mr-2" />
+                        <CheckCircle className="h-4 w-4 text-lg font-bold mr-2" />
                         {d.pago ? "Marcar como pendente" : "Marcar como paga"}
                       </>
                     )}
@@ -350,9 +356,9 @@ function convertBlobToBase64(blob) {
   </CardContent>
 </Card>
 
-<div className="flex justify-center mt-10 ">
-  <Button onClick={gerarPDF}>
-    <p className="font-bold">Gerar PDF</p>
+<div className="flex justify-center">
+  <Button onClick={gerarPDF} className="p-7 text-lg font-bold">
+    <p>Gerar PDF</p>
   </Button>
 </div>
 

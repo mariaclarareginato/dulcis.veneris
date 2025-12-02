@@ -125,7 +125,7 @@ export default function MatrizPage() {
 
         <div variant="outline" className="text-xl font-extrabold px-4 py-2">
           <h1 className="w-5 h-5 mr-2" />
-          {filiais.length} Filiais Ativas
+          <p className="text-3xl">{filiais.length}</p> Filiais Ativas
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export default function MatrizPage() {
           <br></br>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg font-semibold">
-              Faturamento Total
+              Faturamento <br></br> Total
             </CardTitle>
             <DollarSign className="h-7 w-7 text-muted-foreground" />
           </CardHeader>
@@ -153,12 +153,12 @@ export default function MatrizPage() {
         <Card>
           <br></br>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-semibold">Lucro Total</CardTitle>
+            <CardTitle className="text-lg font-semibold">Lucro <br></br> Total</CardTitle>
             <TrendingUp className="h-7 w-7 text-muted-foreground" />
           </CardHeader>
           <CardContent>
           <p
-                     className={`text-xl font-bold ${
+                     className={`text-2xl font-bold ${
                     totalfiliais < 0
                    ? "text-red-500"
                    : totalfiliais > 0
@@ -176,7 +176,7 @@ export default function MatrizPage() {
           <br></br>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg font-medium">
-              Produtos em Falta
+              Produtos <br></br> em Falta
             </CardTitle>
             <AlertCircle className="h-7 w-7 text-muted-foreground" />
           </CardHeader>
@@ -192,7 +192,7 @@ export default function MatrizPage() {
           <br></br>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg font-medium">
-              Pedidos Pendentes
+              Pedidos <br></br> Pendentes
             </CardTitle>
             <FileText className="h-7 w-7 text-muted-foreground" />
           </CardHeader>
@@ -206,47 +206,61 @@ export default function MatrizPage() {
       </div>
 
       {/* LISTA DE FILIAIS */}
-      <div className="space-y-4">
-        {filiais.map((filial) => (
-          <Card key={filial.id} className="overflow-hidden">
-            <CardHeader
-              className="cursor-pointer transition-colors"
-              onClick={() => toggleFilialDetails(filial.id)}
-            >
-              <br></br>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className=" p-3 rounded-full">
-                    <Store className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl">{filial.nome}</CardTitle>
-                    <p className="text-lg text-muted-foreground mt-1">
-                      {filial.endereco} - {filial.cidade}/{filial.estado}
-                    </p>
-                    <br></br>
-                  </div>
-                </div>
+<div className="space-y-4">
+  {filiais.map((filial) => (
+    <Card key={filial.id} className="overflow-hidden">
+      <CardHeader
+        className="cursor-pointer transition-colors"
+        onClick={() => toggleFilialDetails(filial.id)}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          
+          {/* Nome + Endereço */}
+            <br></br>
+          <div className="flex items-start sm:items-center gap-4">
+            <div className="p-3">
+              <Store className="w-6 h-6" />
+            </div>
 
-                <div className="flex items-center gap-4">
-                  <Badge className="text-lg font-semibold" variant={filial.ativo ? "default" : "destructive"}>
-                    {filial.ativo ? "Ativo" : "Inativo"}
-                  </Badge>
-                  {expandedFilial === filial.id ? (
-                    <ChevronUp className="w-5 h-5 text-lg p-6" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </div>
-              </div>
-            </CardHeader>
+            <div>
+              <br></br>
+              <CardTitle className="text-xl sm:text-2xl font-bold">
+                {filial.nome}
+              </CardTitle>
+              <p className="text-lg sm:text-lg text-muted-foreground mt-1">
+                {filial.endereco} - {filial.cidade}/{filial.estado}
+              </p>
+            </div>
+          </div>
+
+          {/* Status + Ícone de expandir */}
+          <div className="flex items-center gap-3 sm:gap-4 self-start sm:self-center">
+            <Badge
+              className="text-lg sm:text-base font-semibold px-3 py-1"
+              variant={filial.ativo ? "default" : "destructive"}
+            >
+              {filial.ativo ? "Ativo" : "Inativo"}
+            </Badge>
+
+            {expandedFilial === filial.id ? (
+              <ChevronUp className="w-6 h-6" />
+            ) : (
+              <ChevronDown className="w-6 h-6" />
+            )}
+          </div>
+        </div>
+        <br></br>
+      </CardHeader>
+   
+
 
             {/* DETALHES EXPANDIDOS */}
        {expandedFilial === filial.id && (
   <CardContent className="pt-6">
     <Tabs value={tab} onValueChange={setTab} className="w-full">
 
-      <TabsList className="grid w-full mb-14 grid-cols-4 bg-transparent shadow-none rounded-none gap-3">
+       <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full mb-20 p-6 bg-transparent gap-3 shadow-none rounded-none">
+
         <Button
           onClick={() => setTab("resumo")}
           className={`font-bold text-lg rounded-lg border px-3 py-2 
@@ -278,129 +292,150 @@ export default function MatrizPage() {
 
 
                   {/* === TAB 1: RESUMO === */}
-                  <TabsContent value="resumo" className="space-y-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="space-y-2">
-                        <h1 className="text-sm  flex items-center gap-2">
-                          <DollarSign className="w-4 h-4" />
-                         <p className="text-lg font-semibold"> Faturamento </p>
-                        </h1>
-                        <h1
-                        className="text-2xl font-bold">
-                      R$ {filial.stats.totalVendas.toFixed(2)}
-                      </h1>
+                 <TabsContent value="resumo" className="space-y-4">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-                      </div>
+    {/* FATURAMENTO */}
+    <br></br>
+    <div className="space-y-2">
+      <div className="text-sm flex items-center gap-2">
+        <DollarSign className="w-4 h-4" />
+        <p className="font-semibold text-lg">Faturamento</p>
+      </div>
+      <h1 className="text-2xl font-bold">
+        R$ {filial.stats.totalVendas.toFixed(2)}
+      </h1>
+    </div>
 
-                      <div className="space-y-2">
-                        <h1 className="text-sm text-muted-foreground flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4" />
-                            <p className="text-lg font-bold">Lucro </p> 
-                        </h1>
-                         <p
-                        className={`text-2xl font-bold ${
-                        filial.stats.lucro < 0 ? "text-red-500" : "text-green-500"
-                        }`}
-                       >
-                      R$ {filial.stats.lucro.toFixed(2)}
-                      </p>
-                      </div>
+    {/* LUCRO */}
+    <br></br>
+    <div className="space-y-2">
+      <div className="text-sm text-muted-foreground flex items-center gap-2">
+        <TrendingUp className="w-4 h-4" />
+        <p className="font-bold text-lg">Lucro</p>
+      </div>
+      <p
+        className={`text-2xl font-bold ${
+          filial.stats.lucro < 0 ? "text-red-500" : "text-green-500"
+        }`}
+      >
+        R$ {filial.stats.lucro.toFixed(2)}
+      </p>
+    </div>
 
-                      <div className="space-y-2">
-                        <h1 className="text-sm text-muted-foreground flex items-center gap-2">
-                          <Users className="w-4 h-4 font-bold text-lg" />
-                          <p className="font-bold text-lg">Funcionários</p>
-                        </h1>
-                        <p className="text-2xl font-bold">
-                          {filial.stats.funcionarios}
-                        </p>
-                      </div>
+    {/* FUNCIONÁRIOS */}
+    <br></br>
+    <div className="space-y-2">
+      <div className="text-sm text-muted-foreground flex items-center gap-2">
+        <Users className="w-4 h-4" />
+        <p className="font-bold text-lg">Funcionários</p>
+      </div>
+      <p className="text-2xl font-bold">
+        {filial.stats.funcionarios}
+      </p>
+    </div>
 
-                      <div className="space-y-2">
-                        <h1 className="text-sm text-muted-foreground flex items-center gap-2">
-                          <ShoppingCart className="w-4 h-4 text-lg font-bold" />
-                          <p className="text-lg font-bold">Caixas Abertos</p>
-                        </h1>
-                        <p className="text-2xl font-bold">
-                          {filial.stats.caixasAbertos}
-                        </p>
-                        <br></br>
-                      </div>
-                    </div>
-                  </TabsContent>
+    {/* CAIXAS ABERTOS */}
+    <br></br>
+    <div className="space-y-2">
+      <div className="text-sm text-muted-foreground flex items-center gap-2">
+        <ShoppingCart className="w-4 h-4" />
+        <p className="font-bold text-lg">Caixas Abertos</p>
+      </div>
+      <p className="text-2xl font-bold">
+        {filial.stats.caixasAbertos}
+      </p>
+    </div>
+
+  </div>
+</TabsContent>
+
 
                   {/* === TAB 2: FINANCEIRO === */}
-                  <TabsContent value="financeiro" className="space-y-4">
-                    <div className="grid gap-4">
-                      <div className="flex justify-between items-center p-4 border rounded-lg">
-                        <span className="font-bold text-lg">Total de Vendas</span>
-                        <span className="text-xl font-bold">
-                          R$ {filial.stats.totalVendas.toFixed(2)}
-                        </span>
-                      </div>
+                <TabsContent value="financeiro" className="space-y-4">
+  <div className="grid gap-4">
 
-                      <div className="flex justify-between items-center p-4 border rounded-lg">
-                        <span className="font-bold text-lg">CMV</span>
-                        <span className="text-xl font-bold">
-                          R$ {filial.stats.totalCMV.toFixed(2)}
-                        </span>
-                      </div>
+    <div className="flex flex-col sm:flex-row items-center p-4 border rounded-lg sm:justify-between">
+      <span className="font-bold text-lg text-center sm:text-left">
+        Total de Vendas
+      </span>
+      <span className="text-xl font-bold mt-2 sm:mt-0 text-center sm:text-right">
+        R$ {filial.stats.totalVendas.toFixed(2)}
+      </span>
+    </div>
 
-                      <div className="flex justify-between items-center p-4 border rounded-lg">
-                        <span className="font-bold text-lg">Despesas Pendentes</span>
-                        <span className="text-xl font-bold text-red-500">
-                          R$ {filial.stats.totalDespesas.toFixed(2)}
-                        </span>
-                      </div>
+    <div className="flex flex-col sm:flex-row items-center p-4 border rounded-lg sm:justify-between">
+      <span className="font-bold text-lg text-center sm:text-left">
+        CMV
+      </span>
+      <span className="text-xl font-bold mt-2 sm:mt-0 text-center sm:text-right">
+        R$ {filial.stats.totalCMV.toFixed(2)}
+      </span>
+    </div>
 
-                      <div className="flex justify-between items-center p-4 border rounded-lg">
-                        <span className="font-bold text-lg">Lucro Líquido</span>
-                       <p
-                     className={`text-xl font-bold ${
-                    filial.stats.lucro < 0
-                   ? "text-red-500"
-                   : filial.stats.lucro > 0
-                   ? "text-green-500"
-                  : ""
-                   }`}
-                   >
-                 R$ {filial.stats.lucro.toFixed(2)}
-                   </p>
-                      </div>
+    <div className="flex flex-col sm:flex-row items-center p-4 border rounded-lg sm:justify-between">
+      <span className="font-bold text-lg text-center sm:text-left">
+        Despesas pendentes
+      </span>
+      <p className="text-xl font-bold text-red-500 mt-2 sm:mt-0 text-center sm:text-right">
+        R$ {filial.stats.totalDespesas.toFixed(2)}
+      </p>
+    </div>
 
-                      <div className="flex justify-between items-center p-4 border rounded-lg">
-                        <span className="font-bold text-lg">Margem de Lucro</span>
-                        <p
-                     className={`text-xl font-bold ${
-                    filial.stats.margemLucro < 0
-                   ? "text-red-500"
-                   : filial.stats.margemLucro > 0
-                   ? "text-green-500"
-                  : ""
-                   }`}
-                   >
-                  {filial.stats.margemLucro.toFixed(2)}%
-                   </p>
+    <div className="flex flex-col sm:flex-row items-center p-4 border rounded-lg sm:justify-between">
+      <span className="font-bold text-lg text-center sm:text-left">
+        Lucro Líquido
+      </span>
+      <p
+        className={`text-xl font-bold mt-2 sm:mt-0 text-center sm:text-right ${
+          filial.stats.lucro < 0
+            ? "text-red-500"
+            : filial.stats.lucro > 0
+            ? "text-green-500"
+            : ""
+        }`}
+      >
+        R$ {filial.stats.lucro.toFixed(2)}
+      </p>
+    </div>
 
-                      </div>
+        <div className="flex flex-col sm:flex-row items-center p-4 border rounded-lg sm:justify-between">
+        <span className="font-bold text-lg text-center sm:text-left">
+        Margem de Lucro
+        </span>
+        <p
+         className={`text-xl font-bold mt-2 sm:mt-0 text-center sm:text-right ${
+          filial.stats.margemLucro < 0
+            ? "text-red-500"
+            : filial.stats.margemLucro > 0
+            ? "text-green-500"
+            : ""
+        }`}
+      >
+        {filial.stats.margemLucro.toFixed(2)}%
+        </p>
+       </div>
 
-                      <div className="flex justify-between items-center p-4 border rounded-lg">
-                        <span className="font-bold text-lg">Número de Vendas</span>
-                        <span className="text-xl font-bold">
-                          {filial.stats.numeroVendas}
-                        </span> 
-                      </div>
-                      <br></br>
-                    </div>
-                  </TabsContent>
+       <div className="flex flex-col sm:flex-row items-center p-4 border rounded-lg sm:justify-between">
+      <span className="font-bold text-lg text-center sm:text-left">
+        Número de Vendas
+      </span>
+      <span className="text-xl font-bold mt-2 sm:mt-0 text-center sm:text-right">
+        {filial.stats.numeroVendas}
+        </span>
+        </div>
+
+        </div>
+       </TabsContent>
+
 
                   {/* === TAB 3: ESTOQUE === */}
                   <TabsContent value="estoque" className="space-y-4">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-xl font-bold">
-                        Produtos com Estoque Baixo
+                        Produtos com estoque baixo
                       </h3>
-                      <Badge className="text-lg" variant="destructive">
+                      <Badge className="text-lg m-3" variant="destructive">
                         {filial.stats.estoqueBaixo} itens
                       </Badge>
                     </div>
@@ -437,6 +472,7 @@ export default function MatrizPage() {
                       <h3 className="text-xl font-bold">
                         Pedidos Pendentes
                       </h3>
+                      <br></br>
 
                       {filial.detalhes.pedidosPendentes.length === 0 ? (
                         <p className="text-center text-lg font-semibold text-muted-foreground py-8">
@@ -450,7 +486,7 @@ export default function MatrizPage() {
                               className="flex justify-between items-center p-3 border rounded-lg"
                             >
                               <div>
-                                <p className="font-medium">
+                                <p className="text-xl font-bold">
                                   Pedido {pedido.id}
                                 </p>
                                 <p className="text-lg text-muted-foreground">
@@ -459,7 +495,7 @@ export default function MatrizPage() {
                                   ).toLocaleDateString("pt-BR")}
                                 </p>
                               </div>
-                              <Badge variant="outline">{pedido.status}</Badge>
+                              <Badge className="text-lg font-semibold" variant="outline">{pedido.status}</Badge>
                               <br></br>
                             </div>
                           ))}

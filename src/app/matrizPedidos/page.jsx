@@ -8,246 +8,227 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
-
-// Status do ENUM (precisa ser definido no frontend também)
+// Status do ENUM
 const STATUS_OPTIONS = ["PENDENTE", "EM_PROCESSAMENTO", "ENVIADO", "CANCELADO"];
 
-
-
 export default function MatrizPedidosPage() {
-    const router = useRouter();
+  const router = useRouter();
 
-    const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [pedidos, setPedidos] = useState([]);
-    
-    // Rastreia qual pedido está sendo atualizado no momento
-    const [updatingId, setUpdatingId] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pedidos, setPedidos] = useState([]);
+  const [updatingId, setUpdatingId] = useState(null);
 
+  const fetchPedidos = async () => {
+    setLoading(pedidos.length === 0);
+    setError(null);
 
-    // --- FUNÇÃO DE BUSCA DE PEDIDOS (Busca Todos) ---
-    const fetchPedidos = async () => {
-        setLoading(pedidos.length === 0); 
-        setError(null);
+    try {
+      const res = await fetch(`/api/pedidos`);
+      if (!res.ok) throw new Error("Erro ao buscar pedidos");
 
-        try {
-            // Chama o endpoint GET /api/pedidos sem lojaId
-            const res = await fetch(`/api/pedidos`); 
+      const data = await res.json();
+      setPedidos(data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao carregar pedidos.");
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || "Erro desconhecido ao buscar pedidos");
-            }
-            
-            const data = await res.json();
-            setPedidos(data);
-        } catch (err) {
-            console.error("Erro ao carregar pedidos:", err);
-            toast.error("Falha ao carregar lista de pedidos.");
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+  useEffect(() => {
+    const user = getLoggedUser();
+    if (!user || user.perfil !== "ADMIN") {
+      router.push("/");
+      toast.error("Acesso restrito à Administração.");
+      return;
+    }
 
+    setUserData(user);
+    fetchPedidos();
+  }, [router]);
 
-    // --- AUTENTICAÇÃO E CARREGAMENTO INICIAL ---
-    useEffect(() => {
-        const user = getLoggedUser();
-        
-        // **Verificação de Autorização**: Apenas ADMIN
-        // Se a lógica de autenticação garante que apenas a Matriz acessa, ótimo.
-        // Mas se a Matriz for identificada apenas pelo perfil 'ADMIN', a verificação é essencial.
-        if (!user || user.perfil !== 'ADMIN') { 
-            router.push("/");
-            toast.error("Acesso restrito à Administração.");
-            return;
-        }
-        
-        setUserData(user);
-        fetchPedidos(); // Inicia a busca
-    }, [router]);
+  const handleUpdateStatus = async (pedidoId, novoStatus) => {
+    if (!userData?.id) return;
 
+    setUpdatingId(pedidoId);
 
-    // --- FUNÇÃO DE ATUALIZAÇÃO DE STATUS (Chama o PATCH) ---
-    const handleUpdateStatus = async (pedidoId, novoStatus) => {
-        if (!userData?.id) return; // Precisa do ID do usuário para a verificação no backend
+    try {
+      const response = await fetch(`/api/pedidos/${pedidoId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: novoStatus,
+          usuario_id: userData.id,
+        }),
+      });
 
-        setUpdatingId(pedidoId);
-        
-        try {
-            const response = await fetch(`/api/pedidos/${pedidoId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    status: novoStatus,
-                    usuario_id: userData.id 
-                }),
-            });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
 
-            const result = await response.json();
+      toast.success(`Pedido ${pedidoId} atualizado para ${novoStatus}!`);
 
-            if (!response.ok) {
-                toast.error(`Falha ao atualizar: ${result.error || "Erro desconhecido"}`);
-                throw new Error(result.error || "Falha ao enviar o pedido.");
-            }
+      setPedidos((prev) =>
+        prev.map((p) => (p.id === pedidoId ? { ...p, status: novoStatus } : p))
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao atualizar status.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
-            toast.success(`Pedido ${pedidoId} atualizado para ${novoStatus}!`);
-            
-            // Atualiza o status na lista local
-            setPedidos(prevPedidos => 
-                prevPedidos.map(p => 
-                    p.id === pedidoId ? { ...p, status: novoStatus } : p
-                )
-            );
-
-        } catch (err) {
-            console.error("Erro na atualização:", err);
-        } finally {
-            setUpdatingId(null);
-        }
-    };
-
-
-    // --- Renderização de Carregamento/Erro ---
-    if (loading && !pedidos.length) { 
-        return (
+  if (loading && !pedidos.length)
+    return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="w-16 h-16 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
       </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-                <AlertCircle className="w-16 h-16 text-red-500" />
-                <p className="text-xl font-bold text-red-500">Erro: {error}</p>
-                <Button className="font-bold text-lg" onClick={fetchPedidos}>Tentar Novamente</Button>
-            </div>
-        );
-    }
-
-    // --- Render Principal ---
-
-    return (
-        <div className="container mx-auto py-8 max-w-4xl">
-            <div className="text-4xl font-bold m-5 flex items-center gap-3">
-                <h1 className="w-7 h-7" /> Painel de Pedidos da Matriz
-            </div>
-
-            <div className="m-5">
-            <p className="text-muted-foreground sm:text-xl text-m font-semibold">
-                Acesso Matriz | Perfil: {userData?.perfil} | Total de Pedidos: {pedidos.length}
-            </p>
-            </div>
-            <br></br>
-
-            {pedidos.length === 0 ? (
-                <Card >
-                    <CardContent className="py-10 text-center">
-                        <p className="text-lg font-medium ">
-                            Nenhum pedido de estoque encontrado.
-                        </p>
-                    </CardContent>
-                </Card>
-            ) : (
-                <div className="m-5">
-                    {pedidos.map((pedido) => (
-                        <Card key={pedido.id} className="w-full max-w-lg
-             bg-transparent rounded-xl
-             backdrop-blur-md
-             shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-             dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
-             transition-all duration-300">
-                            <CardHeader className="flex flex-row items-start justify-between p-4 pb-2 border-b">
-                                <div className="m-4 w-full">
-                                    <CardTitle className="text-2xl font-bold">Pedido {pedido.id}</CardTitle>
-                                    <p className="text-lg font-medium flex items-center gap-1 mt-1 font-semibold">
-                                        <Clock className="w-4 h-4 font-semibold"/> {new Date(pedido.data_pedido).toLocaleDateString()}
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <h1 className="text-lg font-semibold">
-                                        Loja: <strong>{pedido.loja?.nome || `ID ${pedido.loja_id}`}</strong>
-                                        </h1>
-                        <br></br>
-                                        <p className="text-lg m-4 font-semibold">
-                                            Endereço para entrega: <strong>{pedido.loja.endereco}</strong>
-                                    </p>
-                                      
-                                    <br></br>
-                                    <p className="text-lg font-semibold">
-                                        Solicitado por: <strong>{pedido.usuario?.nome || `ID ${pedido.usuario_id}`}</strong>
-                                    </p>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-4 pt-4 grid grid-cols-3 gap-4">
-                                
-                                {/* Coluna de Status */}
-                                <div className="col-span-1 space-y-2">
-                                    <Label className="text-lg font-semibold">Atualizar Status</Label>
-                                    <br></br>
-                                    <Select 
-                                        value={pedido.status}
-                                        onValueChange={(value) => handleUpdateStatus(pedido.id, value)}
-                                        disabled={updatingId === pedido.id}
-                                    >
-                                        <SelectTrigger className={`font-bold text-lg [pedido.status]`}>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {STATUS_OPTIONS.map((status) => (
-                                                <SelectItem key={status} value={status}>
-                                                    {status}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {updatingId === pedido.id && (
-                                        <p className="text-lg font-semibold flex items-center gap-1">
-                                            <Loader2 className="w-3 h-3 animate-spin"/> Salvando...
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Coluna de Itens */}
-                                
-
-                                <div className="col-span-4 mt-4">
-                                    
-                                    <h3 className="flex text-2xl font-bold items-center gap-1">
-                                        <List className="w-4 h-4"/> Itens ({pedido.itens_pedido.length}):  
-                                    </h3>
-                                    <br></br>
-                                    <ul className="list-none text-lg font-semibold overflow-auto p-2 ">
-                                        {pedido.itens_pedido.map((item, index) => (
-                                            <li key={index} className="flex justify-between items-center">
-                                                <span className="pr-2 font-semibold">
-                                                    {item.produto_nome}
-                                                </span>
-                                                <span className="text-lg flex-shrink-0">
-                                                    Quantidade: <strong>{item.quantidade}</strong>
-                                                </span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            )}
-        </div>
     );
+
+  if (error)
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <AlertCircle className="w-16 h-16 text-red-500" />
+        <p className="text-xl font-bold text-red-500">Erro: {error}</p>
+        <Button className="font-bold text-lg" onClick={fetchPedidos}>
+          Tentar Novamente
+        </Button>
+      </div>
+    );
+
+  return (
+    <div className="container mx-auto py-8 max-w-6xl">
+      <div className="text-4xl font-bold m-5 flex items-center gap-3">
+        Painel de Pedidos da Matriz
+      </div>
+
+      <p className="text-muted-foreground sm:text-xl text-m font-semibold m-5">
+        Acesso Matriz | Perfil: {userData?.perfil} | Total de Pedidos:{" "}
+        {pedidos.length}
+      </p>
+      <br></br>
+
+      {pedidos.length === 0 ? (
+        <Card>
+          <CardContent className="py-10 text-center">
+            <p className="text-lg font-medium">
+              Nenhum pedido de estoque encontrado.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        
+        <div className="flex flex-col gap-30 w-full p-5">
+          {pedidos.map((pedido) => (
+            <Card
+              key={pedido.id}
+              className="w-full bg-transparent rounded-xl backdrop-blur-md
+                       shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+                       dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+                       transition-all duration-300"
+            >
+              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b gap-4">
+                <div>
+                  <CardTitle className="text-3xl font-bold">
+                    Pedido {pedido.id}
+                  </CardTitle>
+                  <p className="gap-2 text-lg font-medium flex items-center gap-1 mt-1">
+                    <Clock className="w-4 h-4" />
+                    {new Date(pedido.data_pedido).toLocaleDateString()}
+                  </p>
+                </div>
+
+                <div className="text-right space-y-1">
+                  <p className="text-lg font-semibold">
+                    Loja:{" "}
+                    <strong>{pedido.loja?.nome || `ID ${pedido.loja_id}`}</strong>
+                  </p>
+                  <p className="text-lg font-semibold">
+                    Endereço: <strong>{pedido.loja?.endereco}</strong>
+                  </p>
+                  <p className="text-lg font-semibold">
+                    Solicitado por:{" "}
+                    <strong>
+                      {pedido.usuario?.nome || `ID ${pedido.usuario_id}`}
+                    </strong>
+                  </p>
+                </div>
+              </CardHeader>
+
+              <CardContent className="p-4 grid sm:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-base text-lg font-semibold">
+                    Atualizar Status
+                  </Label>
+
+                  <br></br>
+
+                  <Select
+                    value={pedido.status}
+                    onValueChange={(value) =>
+                      handleUpdateStatus(pedido.id, value)
+                    }
+                    disabled={updatingId === pedido.id}
+                  >
+                    <SelectTrigger className="font-bold text-lg">
+                      <SelectValue placeholder={pedido.status} />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      {STATUS_OPTIONS.map((status) => (
+                        <SelectItem
+                          key={status}
+                          value={status}
+                          className="font-bold text-lg"
+                        >
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {updatingId === pedido.id && (
+                    <p className="text-lg font-semibold flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Salvando...
+                    </p>
+                  )}
+                </div>
+
+                <div className="sm:col-span-2 space-y-2">
+                  <h3 className="text-2xl sm:text-2xl font-bold flex items-center gap-1">
+                    <List className="w-5 h-5" /> Itens (
+                    {pedido.itens_pedido.length})
+                  </h3>
+
+                  <ul className="text-lg sm:text-lg font-semibold divide-y">
+                    {pedido.itens_pedido.map((item, index) => (
+                      <li key={index} className="py-1 flex gap-5 justify-between">
+                        <span>{item.produto_nome}</span>
+
+                        <span className="m-5">
+                          Quantidade: <strong>{item.quantidade}</strong>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
