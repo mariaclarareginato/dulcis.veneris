@@ -90,74 +90,121 @@ export default function MatrizPedidosPage() {
     }
   };
 
+  // PDF
+
   async function gerarPDFPedidos() {
-    
-    const { jsPDF } = await import("jspdf");
-    const autoTable = (await import("jspdf-autotable")).default;
+  const { jsPDF } = await import("jspdf");
+  const autoTable = (await import("jspdf-autotable")).default;
 
-    const doc = new jsPDF();
+  const doc = new jsPDF();
 
-    
-    doc.setFontSize(22);
-    doc.text("Relatório de Pedidos da Matriz", 105, 20, { align: "center" });
+ 
+  // LOGO -
+  
+  const img = await fetch("/logos/logo2.png")
+    .then((res) => res.blob())
+    .then((b) => convertBlobToBase64(b));
 
-    doc.setFontSize(14);
-    doc.text(`Total de Pedidos: ${pedidos.length}`, 105, 30, { align: "center" });
-    
-    
-    const dataGeracao = new Date().toLocaleDateString("pt-BR", {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    doc.setFontSize(10);
-    doc.text(`Gerado em: ${dataGeracao}`, 200, 10, { align: "right" });
+  doc.addImage(img, "PNG", 70, 8, 70, 35);
 
-    const pedidosParaPDF = pedidos.map((p) => [
-      p.id,
-      p.status,
-      new Date(p.data_pedido).toLocaleDateString(),
-      p.loja?.nome || `ID ${p.loja_id}`,
-      p.usuario?.nome || `ID ${p.usuario_id}`,
-      p.itens_pedido.length,
-      p.itens_pedido.map(item => `${item.produto_nome} (Qtd: ${item.quantidade})`).join('\n')
-    ]);
+  
+  // TÍTULO -
+
+  doc.setFontSize(18);
+  doc.text("Relatório de Pedidos da Matriz", 105, 50, { align: "center" });
+
+  doc.setFontSize(12);
+  doc.text(`Total de Pedidos: ${pedidos.length}`, 105, 58, { align: "center" });
+
+  const dataGeracao = new Date().toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  doc.setFontSize(10);
+  doc.text(`Gerado em: ${dataGeracao}`, 200, 10, { align: "right" });
+
+  
+  // PROCESSAR DADOS DO PDF -
+  
+  const pedidosParaPDF = pedidos.map((p) => [
+    p.id,
+    p.status,
+    new Date(p.data_pedido).toLocaleDateString("pt-BR"),
+    p.loja?.nome || `ID ${p.loja_id}`,
+    p.usuario?.nome || `ID ${p.usuario_id}`,
+    p.loja?.endereco || "—",
+    p.itens_pedido.length,
+    p.itens_pedido
+      .map((item) => `${item.produto_nome} (Qtd: ${item.quantidade})`)
+      .join("\n")
+  ]);
 
 
-    autoTable(doc, {
-      startY: 40, 
-      head: [
-        [
-          "ID",
-          "Status",
-          "Data",
-          "Loja",
-          "Solicitante",
-          "Itens",
-          "Detalhes dos Itens"
-        ],
+  // TABELA -
+  
+  autoTable(doc, {
+    startY: 75,
+    head: [
+      [
+        "ID",
+        "Status",
+        "Data",
+        "Loja",
+        "Solicitante",
+        "Endereço para entrega",
+        "Quantidade de itens",
+        "Detalhes dos Itens",
       ],
-      body: pedidosParaPDF,
-      headStyles: {
-        fillColor: [139, 0, 0], 
-        textColor: 255, 
-        fontStyle: 'bold',
-        halign: 'center'
-      },
-      styles: {
-        fontSize: 10,
-        cellPadding: 2
-      },
-      columnStyles: {
-          6: { cellWidth: 50 } 
-      }
-    });
+    ],
+    body: pedidosParaPDF,
 
-   
-    doc.save(`relatorio_pedidos_matriz_${new Date().getTime()}.pdf`);
-  }
+    
+    headStyles: {
+      fillColor: [139, 0, 0],
+      textColor: 255,
+      fontStyle: "bold",
+    },
+
+    
+    styles: {
+      fontSize: 8.5,      
+      cellPadding: 2,
+      overflow: "linebreak",
+      valign: "top",
+    },
+
+    
+    tableWidth: "auto",     
+    horizontalPageBreak: true,
+
+    columnStyles: {
+      0: { cellWidth: 12 },  // ID
+      1: { cellWidth: 40 },  // Status
+      2: { cellWidth: 22 },  // Data
+      3: { cellWidth: 28 },  // Loja
+      4: { cellWidth: 28 },  // Solicitante
+      5: { cellWidth: 40 },  // Endereço
+      6: { cellWidth: 20 },  // Quantidade
+      7: { cellWidth: 60 },  // Itens (mais espaço)
+    }
+  });
+
+
+  doc.save(`relatorio_pedidos_matriz_${new Date().getTime()}.pdf`);
+}
+
+function convertBlobToBase64(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
 
   if (loading && !pedidos.length)
     return (
@@ -301,7 +348,7 @@ export default function MatrizPedidosPage() {
           ))}
                <div className="flex justify-center mt-10">
   <Button  className="p-6" onClick={gerarPDFPedidos}>
-    <h1 className="font-bold text-lg">Gerar PDF dos seu pedidos</h1>
+    <h1 className="font-bold text-lg">Gerar PDF dos seus pedidos</h1>
   </Button>
 </div>
         </div>
