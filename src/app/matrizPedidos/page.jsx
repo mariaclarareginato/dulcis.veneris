@@ -143,56 +143,67 @@ export default function MatrizPedidosPage() {
       .join("\n")
   ]);
 
+// 1. Agrupar pedidos por loja
+const pedidosPorLoja = pedidos.reduce((acc, pedido) => {
+  if (!acc[pedido.loja]) acc[pedido.loja] = [];
+  acc[pedido.loja].push(pedido);
+  return acc;
+}, {});
 
-  // TABELA -
-  
+// 2. Criar uma página por loja
+let primeiraPagina = true;
+
+for (const loja in pedidosPorLoja) {
+
+  if (!primeiraPagina) {
+    doc.addPage(); // Nova página para a próxima loja
+  }
+  primeiraPagina = false;
+
+  // TÍTULO DA LOJA
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Loja: ${loja}`, 30, 40);
+
+  // 3. Pegar só os pedidos dessa loja
+  const pedidosDaLoja = pedidosPorLoja[loja];
+
+  // 4. Gerar a tabela daquela loja
   autoTable(doc, {
-    startY: 75,
+    startY: 60,
     head: [
-      [
-        "ID",
-        "Status",
-        "Data",
-        "Loja",
-        "Solicitante",
-        "Endereço para entrega",
-        "Quantidade de itens",
-        "Detalhes dos Itens",
-      ],
+      ["ID", "Status", "Data", "Loja", "Solicitante", "Endereço", "Qtd Itens", "Detalhes"]
     ],
-    body: pedidosParaPDF,
+    body: pedidosDaLoja,
 
-    
     headStyles: {
       fillColor: [139, 0, 0],
       textColor: 255,
       fontStyle: "bold",
     },
 
-    
     styles: {
-      fontSize: 8.5,      
+      fontSize: 8.5,
       cellPadding: 2,
       overflow: "linebreak",
       valign: "top",
     },
 
-    
-    tableWidth: "auto",     
+    tableWidth: "auto",
     horizontalPageBreak: true,
 
     columnStyles: {
-      0: { cellWidth: 12 },  // ID
-      1: { cellWidth: 40 },  // Status
-      2: { cellWidth: 22 },  // Data
-      3: { cellWidth: 28 },  // Loja
-      4: { cellWidth: 28 },  // Solicitante
-      5: { cellWidth: 40 },  // Endereço
-      6: { cellWidth: 20 },  // Quantidade
-      7: { cellWidth: 60 },  // Itens (mais espaço)
+      0: { cellWidth: 12 },
+      1: { cellWidth: 40 },
+      2: { cellWidth: 22 },
+      3: { cellWidth: 28 },
+      4: { cellWidth: 28 },
+      5: { cellWidth: 40 },
+      6: { cellWidth: 20 },
+      7: { cellWidth: 60 },
     }
   });
-
+}
 
   doc.save(`relatorio_pedidos_matriz_${new Date().getTime()}.pdf`);
 }
@@ -232,16 +243,16 @@ function convertBlobToBase64(blob) {
         Painel de Pedidos da Matriz
       </div>
 
-      <p className="text-muted-foreground sm:text-xl text-m font-semibold m-5">
+      <p className="text-muted-foreground text-xl font-semibold m-5">
         Acesso Matriz | Perfil: {userData?.perfil} | Total de Pedidos:{" "}
         {pedidos.length}
       </p>
       <br></br>
 
       {pedidos.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center">
-            <p className="text-lg font-medium">
+        <Card className="m-10">
+          <CardContent className="text-center">
+            <p className="p-10 text-xl font-bold">
               Nenhum pedido de estoque encontrado.
             </p>
           </CardContent>
@@ -348,7 +359,7 @@ function convertBlobToBase64(blob) {
           ))}
                <div className="flex justify-center mt-10">
   <Button  className="p-6" onClick={gerarPDFPedidos}>
-    <h1 className="font-bold text-lg">Gerar PDF dos seus pedidos</h1>
+    <h1 className="font-bold text-lg">Gerar PDF</h1>
   </Button>
 </div>
         </div>

@@ -175,7 +175,7 @@ const anoAtual = new Date().getFullYear();
             Acompanhe o desempenho dos seus caixas e registre novos usuários
           </p>
         </div>
-        <Button className="w-full md:w-auto p-6" onClick={() => router.push("/registro")}>
+        <Button className="w-full md:w-auto mt-10 p-6" onClick={() => router.push("/registro")}>
           <strong className="font-bold text-lg">Registrar novo usuário</strong>
         </Button>
       </div>
@@ -194,6 +194,7 @@ const anoAtual = new Date().getFullYear();
             <ShoppingCart className="h-6 w-6 text-muted-foreground" />
           </CardHeader>
           <CardContent>
+            <br></br>
             <div className="text-2xl font-bold">{totais.vendas}</div>
             <p className="text-lg font-semibold text-muted-foreground">vendas finalizadas</p>
           </CardContent>
@@ -211,7 +212,7 @@ const anoAtual = new Date().getFullYear();
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              R$ {Number(totais.faturamento).toFixed(2)}
+              R$ <br></br> {Number(totais.faturamento).toFixed(2)}
             </div>
             <p className="text-lg font-semibold text-muted-foreground">em vendas</p>
           </CardContent>
@@ -236,7 +237,7 @@ const anoAtual = new Date().getFullYear();
                   : ""
                    }`}
                    >
-                 R$ {totais.lucro.toFixed(2)}
+                 R$ <br></br> {totais.lucro.toFixed(2)}
                    </p>
              <p className="text-lg font-semibold text-muted-foreground">lucro líquido</p>
           </CardContent>
@@ -248,7 +249,7 @@ const anoAtual = new Date().getFullYear();
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             
-            <p className="text-lg font-semibold">Nenhum operador encontrado</p>
+            <p className="text-xl font-semibold">Nenhum operador encontrado</p>
             <p className="text-muted-foreground">Registre novos usuários</p>
           </CardContent>
         </Card>
@@ -291,22 +292,22 @@ const anoAtual = new Date().getFullYear();
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 m-5">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 mb-10">
                   <div>
                     <p className="text-lg font-semibold text-muted-foreground flex items-center gap-1">
                       <ShoppingCart className="w-6 h-6" /> Vendas
                     </p>
-                    <p className="text-2xl font-bold">
+                    <p className="text-2xl font-bold mt-5">
                       {usuario.stats.numeroVendas}
                     </p>
                   </div>
 
-                  <div>
+                 <div>
                     <p className="text-lg font-semibold text-muted-foreground flex items-center gap-1">
-                      <DollarSign className="w-6 h-6" /> Faturamento
+                      <DollarSign className="w-6 h-6" /> Total vendas
                     </p>
                     <p className="text-2xl font-bold">
-                      R$ {Number(usuario.stats.totalVendas).toFixed(2)}
+                     R$ <br></br> {usuario.stats.totalVendas.toFixed(2)}
                     </p>
                   </div>
 
@@ -324,7 +325,7 @@ const anoAtual = new Date().getFullYear();
                   : ""
                    }`}
                    >
-                 R$ {usuario.stats.lucro.toFixed(2)}
+                 R$ <br></br> {usuario.stats.lucro.toFixed(2)}
                    </p>
                   </div>
 
@@ -333,7 +334,7 @@ const anoAtual = new Date().getFullYear();
                        <TicketIcon className="w-6 h-6" /> Ticket Médio
                     </p>
                     <p className="text-2xl font-bold">
-                      R$ {Number(usuario.stats.ticketMedio).toFixed(2)}
+                      R$ <br></br>{Number(usuario.stats.ticketMedio).toFixed(2)}
                     </p>
                   </div>
                 </div>

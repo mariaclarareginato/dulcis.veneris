@@ -76,7 +76,7 @@ const data = {
         <NavDocuments items={data.linhas} />
       </SidebarContent>
 
-                      <div className="m-5">
+                      <div className="ml-5">
                       <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button className="bg-transparent" size="icon">
@@ -103,7 +103,7 @@ const data = {
 
          {/* Se usuário não estiver logado, mostrar link de login */}
         {!user.email && (
-          <div className="px-4 py-2 text-center text-sm">
+          <div className="px-4 py-2 text-center text-xl">
             <Link href="/login" className="text-xl font-bold">
               Faça seu login
             </Link>

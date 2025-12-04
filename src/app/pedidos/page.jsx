@@ -170,12 +170,12 @@ export default function PedidosPage() {
   }
 
   return (
-    <div className="container mx-auto py-10 max-w-3xl">
+    <div className="container mx-auto m-10 max-w-3xl">
 
       <h1 className="text-4xl m-4 font-bold">Novo Pedido de Estoque</h1>
 
-      <div className="mb-20 ml-5">
-        <p className="text-muted-foreground font-semibold text-lg">
+      <div className="m-10">
+        <p className="text-muted-foreground font-semibold text-xl">
           Gerente ID: {userData.id} — Loja ID: {userData.loja_id}
         </p>
       </div>

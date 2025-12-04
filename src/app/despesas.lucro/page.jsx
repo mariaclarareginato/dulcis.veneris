@@ -64,8 +64,22 @@ async function gerarPDF() {
 
   const doc = new jsPDF();
 
+  // Função util para evitar quebra feia
+  function garantirEspaco(alturaNecessaria = 20) {
+    const pageHeight = doc.internal.pageSize.height;
+    const yAtual = doc.lastAutoTable ? doc.lastAutoTable.finalY : 60;
+
+    // Se não couber, cria nova página
+    if (yAtual + alturaNecessaria > pageHeight - 20) {
+      doc.addPage();
+      return 30; // Y inicial da nova página
+    }
+
+    return yAtual + 15; // Y apenas continua
+  }
+
   // =========================
-  //  LOGO
+  // LOGO
   // =========================
   const logo = await fetch("/logos/logo2.png")
     .then((res) => res.blob())
@@ -74,7 +88,7 @@ async function gerarPDF() {
   doc.addImage(logo, "PNG", 70, 10, 70, 40);
 
   // =========================
-  //  CABEÇALHO / TÍTULO
+  // TÍTULO PRINCIPAL
   // =========================
   const titulo = `Painel Financeiro — ${
     nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)
@@ -87,7 +101,7 @@ async function gerarPDF() {
   doc.text(`Loja: ${dados.loja}`, 105, 70, { align: "center" });
 
   // =========================
-  //  TABELA: RESUMO FINANCEIRO
+  // TABELA: RESUMO FINANCEIRO
   // =========================
   autoTable(doc, {
     startY: 85,
@@ -98,7 +112,7 @@ async function gerarPDF() {
       ["CMV", money(dados.totalCMV)],
       ["Margem de Lucro", `${dados.margemLucro}%`],
     ],
-    headStyles: { fillColor: [139, 0, 0] }, // darkred
+    headStyles: { fillColor: [139, 0, 0] },
     styles: { fontSize: 11 },
     columnStyles: {
       0: { cellWidth: 80 },
@@ -107,17 +121,18 @@ async function gerarPDF() {
   });
 
   // =========================
-  //  TÍTULO DAS DESPESAS FIXAS
+  // TÍTULO DESPESAS FIXAS (com proteção de quebra!)
   // =========================
+  let y = garantirEspaco(40);
 
   doc.setFontSize(14);
-  doc.text("Despesas Fixas", 105, doc.lastAutoTable.finalY + 15, { align: "center" });
+  doc.text("Despesas Fixas", 105, y, { align: "center" });
 
   // =========================
-  //  TABELA: DESPESAS
+  // TABELA: DESPESAS
   // =========================
   autoTable(doc, {
-    startY: doc.lastAutoTable.finalY + 20,
+    startY: y + 5,
     head: [["Descrição", "Valor", "Vencimento", "Status"]],
     body: despesas.map((d) => [
       d.descricao,
@@ -125,7 +140,7 @@ async function gerarPDF() {
       new Date(d.data_vencimento).toLocaleDateString(),
       d.pago ? "Pago" : "Pendente",
     ]),
-    headStyles: { fillColor: [139, 0, 0] }, // darkred
+    headStyles: { fillColor: [139, 0, 0] },
     styles: { fontSize: 10 },
     columnStyles: {
       0: { cellWidth: 70 },
@@ -133,14 +148,13 @@ async function gerarPDF() {
       2: { cellWidth: 30 },
       3: { cellWidth: 30 },
     },
+    pageBreak: "auto",
   });
-
 
   doc.save(`financeiro-${nomeMes}-${anoAtual}.pdf`);
 }
 
-// Converter blob para base64 (para imagem funcionar)
-
+// Converter blob para base64
 function convertBlobToBase64(blob) {
   return new Promise((resolve) => {
     const reader = new FileReader();

@@ -64,72 +64,74 @@ async function colocarNaLinha(p) {
   carregarProdutos(); // Atualiza a tabela
 }
 
-
-  return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-        <h1 className="text-4xl font-extrabold">Produtos </h1>
-       
-        <p className="text-muted-foreground text-xl font-bold mt-4">Crie um novo produto, ou tire qualquer um deles do estoque.</p>
-        
-       
-       
-        <Button className="p-7 mt-5" onClick={() => window.location.href = "/novoproduto"}>
-          <p className="font-bold text-lg">Criar novo produto</p>
-        </Button>
-        
-</div>
+return (
+  <div className="p-4 sm:p-8">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="space-y-2">
+        <h1 className="text-3xl sm:text-4xl font-extrabold">Produtos</h1>
+        <p className="text-muted-foreground text-base text-xl font-semibold">
+          Crie um novo produto, ou tire qualquer um deles do estoque.
+        </p>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center h-[60vh]">
-        <div className="w-16 h-16 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
+      <Button
+        className="p-6 text-base text-lg font-bold"
+        onClick={() => (window.location.href = "/novoproduto")}
+      >
+        Criar novo produto
+      </Button>
+    </div>
+
+    {loading ? (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-14 h-14 border-4 border-red-500 border-dashed rounded-full animate-spin"></div>
       </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {produtos.map((p) => (
-            <Card key={p.id}>
-              <CardHeader>
-                <br></br>
-                <CardTitle className="font-extrabold text-xl">{p.nome}</CardTitle>
-                <img src={p.img} className="mt-5 mb-10 w-full h-full object-cover"></img>
-                
-              </CardHeader>
-              <br></br>
-              <CardContent className="space-y-3 mt-5">
-                <p>Código: <strong>{p.codigo}</strong></p>
-                <p>Preço: <strong>R$ {Number(p.preco_venda).toFixed(2)}</strong></p>
-                <p>Custo: <strong>R$ {Number(p.custo).toFixed(2)}</strong></p>
-                <p>Status: <strong> {p.ativo ? "ATIVO" : "FORA DE LINHA"}</strong></p>
+    ) : (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-6">
+        {produtos.map((p) => (
+          <Card key={p.id} className="flex flex-col p-5">
+            <CardHeader>
+              <CardTitle className="font-extrabold text-xl text-center">
+                {p.nome}
+              </CardTitle>
+              <div className="w-full h-48 overflow-hidden rounded-lg mt-3">
+                <img
+                  src={p.img}
+                  alt={p.nome}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </CardHeader>
 
-                 <br></br>
+            <CardContent className="flex flex-col p-5 gap-2 justify-between flex-grow">
+              <p className="text-lg font-semibold">Código: <strong>{p.codigo}</strong></p>
+              <p className="text-lg font-semibold">Preço: <strong>R$ {Number(p.preco_venda).toFixed(2)}</strong></p>
+              <p className="text-lg font-semibold">Custo: <strong>R$ {Number(p.custo).toFixed(2)}</strong></p>
+              <p className="text-lg font-semibold">Status: <strong>{p.ativo ? "ATIVO" : "FORA DE LINHA"}</strong></p>
 
-                {p.ativo && (
-                  <Button 
-                    className="font-bold text-lg"
+              <div className="mt-4">
+                {p.ativo ? (
+                  <Button
+                    className="w-full text-lg font-bold"
                     onClick={() => tirarDeLinha(p)}
                   >
-                   Tirar de linha
+                    Tirar de linha
                   </Button>
-                )}
-
-                 {!p.ativo && (
-                  <Button className="font-bold text-lg"
+                ) : (
+                  <Button
+                    className="w-full text-lg font-bold"
                     variant="destructive"
                     onClick={() => colocarNaLinha(p)}
                   >
                     Colocar na linha
                   </Button>
-                  
                 )}
-
-              </CardContent>
-              <br></br>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )}
+  </div>
+);
 }

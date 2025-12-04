@@ -243,7 +243,7 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
   // --- Render Principal ---
   return (
     <div className="flex justify-center w-full">
-      <Card  className="w-full max-w-lg mx-auto m-10 sm:p-8
+      <Card  className="w-full max-w-lg mx-auto
              bg-transparent rounded-xl
              backdrop-blur-md
              shadow-[0_0_35px_10px_rgba(0,0,0,.25)]

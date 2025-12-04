@@ -258,7 +258,7 @@ export default function CategoriaPage({ params }) {
               ? "Sem estoque"
               : (  <>
             <ShoppingCart className="w-4 h-4 mr-2" />
-            Adicionar ao carrinho
+            Adicionar
              </>
                 )}
                
@@ -271,45 +271,48 @@ export default function CategoriaPage({ params }) {
 
   // RENDERIZAÇÃO
   return (
-    <div className="space-y-6">
-      <h2 className="text-4xl m-7 font-bold capitalize">
-        {decodeURIComponent(categoria)}
-      </h2>
+   <div className="space-y-6">
+  <h2 className="text-4xl m-7 font-bold capitalize">
+    {decodeURIComponent(categoria)}
+  </h2>
 
-      <p className="text-xl text-muted-foreground m-7 font-semibold">
-        {produtosFiltrados.length} produto(s) encontrado(s)
+  <p className="text-xl text-muted-foreground m-7 font-semibold">
+    {produtosFiltrados.length} produto(s) encontrado(s)
+  </p>
+
+  {/* Grade única responsiva */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 px-6">
+
+    {/* Disponíveis */}
+    {produtosFiltrados
+      .filter((p) => p.ativo !== false && p.quantidade > 0)
+      .map(renderCard)}
+
+    {/* Esgotados */}
+    {produtosFiltrados
+      .filter((p) => p.ativo !== false && p.quantidade === 0)
+      .map(renderCard)}
+
+  </div>
+
+  {/* Título sessão Fora de Linha */}
+  {produtosFiltrados.some((p) => p.ativo === false) && (
+    <div className="mt-12 px-6">
+      <h3 className="text-4xl font-bold">
+        Produtos Fora de Linha
+      </h3>
+      <p className="text-xl font-semibold text-muted-foreground mt-2">
+        Estes produtos não estão mais sendo comercializados.
       </p>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 m-7">
-
-        {/* 1) Disponíveis */}
-        {produtosFiltrados
-          .filter((p) => p.ativo !== false && p.quantidade > 0)
-          .map(renderCard)}
-
-        {/* 2) Esgotados */}
-        {produtosFiltrados
-          .filter((p) => p.ativo !== false && p.quantidade === 0)
-          .map(renderCard)}
-
-        {/* 3) Fora de Linha */}
-        {produtosFiltrados.some((p) => p.ativo === false) && (
-          <div className="col-span-full mt-10 mb-2">
-            <h3 className="text-3xl font-bold">
-              Produtos Fora de Linha
-            </h3>
-            <p className="text-lg font-semibold text-muted-foreground m-4">
-              Estes produtos não estão mais sendo comercializados.
-            </p>
-          </div>
-        )}
-        <div className="opacity-50">
-        {produtosFiltrados
-          .filter((p) => p.ativo === false)
-          .map(renderCard)}
-        </div>
-
-      </div>
     </div>
-  );
-}
+  )}
+
+  {/* Fora de linha: mesma grade! */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 px-6 opacity-60">
+    {produtosFiltrados
+      .filter((p) => p.ativo === false)
+      .map(renderCard)}
+  </div>
+  <br></br>
+</div>
+  )}

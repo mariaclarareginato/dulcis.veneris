@@ -274,24 +274,26 @@ export default function CaixaPage() {
 
                 {/* Botão */}
                 <Button
-                  className="w-full mt-2 font-bold text-lg"
-                  onClick={() => adicionarAoCarrinho(produto)}
-                  disabled={semEstoque || isAdicionando}
-                  variant={semEstoque ? "destructive" : "default"}
-                >
-                  {isAdicionando ? (
-                    <>
-                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 text-xl font-bold"  /> Adicionando...
-                    </>
-                  ) : semEstoque ? (
+  className="w-full mt-2 font-bold text-base sm:text-lg flex items-center justify-center gap-2"
+  onClick={() => adicionarAoCarrinho(produto)}
+  disabled={semEstoque || isAdicionando}
+  variant={semEstoque ? "destructive" : "default"}
+>
+  {isAdicionando ? (
+    <>
+      <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+      <span>Adicionando...</span>
+    </>
+  ) : semEstoque ? (
+    "Sem estoque"
+  ) : (
+    <>
+      <ShoppingCart className="w-5 h-5" />
+      <span className="font-bold">Adicionar</span>
+    </>
+  )}
+</Button>
 
-                    "Sem Estoque"
-                  ) : (
-                    <>
-                      <ShoppingCart className="w-4 h-4 mr-2" /><p className="font-bold text-lg">Adicionar ao carrinho</p>
-                    </>
-                  )}
-                </Button>
               </CardContent>
             </Card>
           );
@@ -336,29 +338,29 @@ export default function CaixaPage() {
 
                   <CardContent className="p-4 flex-1 flex flex-col justify-between space-y-3">
                     <div>
-                      <h3 className="text-base font-extrabold text-2xl line-clamp-2">{produto.nome}</h3>
+                      <h3 className="font-extrabold text-2xl">{produto.nome}</h3>
 
-                     <p className="text-m text-muted-foreground line-clamp-2 min-h-[rem] mt-3">
+                     <p className="text-lg text-muted-foreground line-clamp-3 min-h-[rem] mt-3">
                       {produto.descricao || "Sem descrição"}
                      </p>
 
 
               
 
-                      <p className="text-m font-semibold text-muted-foreground mt-6">
+                      <p className="text-lg font-semibold text-muted-foreground mt-6">
                         {produto.sku} | {produto.categoria}
                       </p>
                     </div>
 
                 
                     <div className="flex justify-between items-center pt-2 border-t mt-auto">
-                      <span className="text-sm text-muted-foreground">Preço:</span>
-                      <span className="text-lg font-bold text-black-600">
+                      <span className="text-xl font-bold">Preço:</span>
+                      <span className="text-2xl font-extrabold">
                         R$ {formatCurrency(produto.preco_venda)}
                       </span>
                     </div>
 
-                    <Button className="w-full mt-2" disabled variant="outline">
+                    <Button className="w-full mt-2 text-lg" disabled variant="destructive">
                       FORA DE LINHA
                     </Button>
                   </CardContent>

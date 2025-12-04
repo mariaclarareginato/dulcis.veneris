@@ -82,6 +82,183 @@ export default function MatrizPage() {
 
   const [tab, setTab] = useState("resumo")
 
+  // Função para gerar PDF
+async function gerarPDF(filiais) {
+  const { jsPDF } = await import("jspdf");
+  const autoTable = (await import("jspdf-autotable")).default;
+
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+  // DIMENSÕES
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let y = 40;
+  const margin = 30;
+
+  // =========================
+  //   LOGO
+  // =========================
+  try {
+    const logoBlob = await fetch("/logos/logo2.png").then((r) => r.blob());
+    const reader = await new Promise((resolve) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.readAsDataURL(logoBlob);
+    });
+
+    doc.addImage(reader, "PNG", margin, y, 120, 60);
+  } catch (err) {
+    console.warn("Não foi possível carregar o logo:", err);
+  }
+
+  // =========================
+  //   TÍTULO
+  // =========================
+  y += 80;
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.text("Gestão de Filiais", pageWidth / 2, y, { align: "center" });
+
+  // =========================
+  //  RESUMO GERAL
+  // =========================
+  y += 40;
+  const totalFaturamento = filiais.reduce((a, f) => a + f.stats.totalVendas, 0);
+  const totalLucro = filiais.reduce((a, f) => a + f.stats.lucro, 0);
+  const totalEstoqueBaixo = filiais.reduce(
+    (a, f) => a + f.stats.estoqueBaixo,
+    0
+  );
+
+  autoTable(doc, {
+    startY: y,
+    head: [["Indicador", "Valor"]],
+    body: [
+      ["Filiais ativas", filiais.length],
+      ["Faturamento total", `R$ ${totalFaturamento.toFixed(2)}`],
+      ["Lucro total", `R$ ${totalLucro.toFixed(2)}`],
+      ["Produtos em falta", totalEstoqueBaixo],
+    ],
+    headStyles: { fillColor: "#800000" },
+  });
+
+  // Atualiza Y ao final da tabela
+  y = doc.lastAutoTable.finalY + 30;
+
+  // =========================
+  //  LISTA DE CADA FILIAL
+  // =========================
+  for (const filial of filiais) {
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text(filial.nome, margin, y);
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `${filial.endereco} - ${filial.cidade}/${filial.estado}`,
+      margin,
+      y + 18
+    );
+
+    y += 35;
+
+    // -------------------------
+    //   TABELA: RESUMO FILIAL
+    // -------------------------
+    autoTable(doc, {
+      startY: y,
+      head: [["Indicador", "Valor"]],
+      body: [
+        ["Faturamento", `R$ ${filial.stats.totalVendas.toFixed(2)}`],
+        ["Lucro", `R$ ${filial.stats.lucro.toFixed(2)}`],
+        ["Funcionários", filial.stats.funcionarios],
+        ["Caixas abertos", filial.stats.caixasAbertos],
+        ["Pedidos pendentes", filial.stats.pedidosPendentes],
+      ],
+      headStyles: { fillColor: "#800000" },
+    });
+
+    y = doc.lastAutoTable.finalY + 20;
+
+    // -------------------------
+    //  ESTOQUE BAIXO
+    // -------------------------
+    if (filial.detalhes.estoqueBaixo.length > 0) {
+      autoTable(doc, {
+        startY: y,
+        theme: "grid",
+        head: [["Produto", "Qtd", "Mínimo"]],
+        body: filial.detalhes.estoqueBaixo.map((p) => [
+          p.produto,
+          p.quantidade,
+          p.estoque_minimo,
+        ]),
+        headStyles: { fillColor: "#b22222" },
+      });
+
+      y = doc.lastAutoTable.finalY + 20;
+    }
+
+    // -------------------------
+    //  PEDIDOS PENDENTES
+    // -------------------------
+    if (filial.detalhes.pedidosPendentes.length > 0) {
+      autoTable(doc, {
+        startY: y,
+        theme: "grid",
+        head: [["Pedido", "Data", "Status"]],
+        body: filial.detalhes.pedidosPendentes.map((p) => [
+          p.id,
+          new Date(p.data_pedido).toLocaleDateString("pt-BR"),
+          p.status,
+        ]),
+        headStyles: { fillColor: "#b22222" },
+      });
+      y = doc.lastAutoTable.finalY + 20;
+    }
+
+    // -------------------------
+    //  FUNCIONÁRIOS
+    // -------------------------
+    autoTable(doc, {
+      startY: y,
+      head: [["Nome", "Perfil"]],
+      body: filial.detalhes.funcionarios.map((f) => [f.nome, f.perfil]),
+      headStyles: { fillColor: "#8b0000" },
+    });
+    y = doc.lastAutoTable.finalY + 20;
+
+    // -------------------------
+    //  CAIXAS
+    // -------------------------
+    autoTable(doc, {
+      startY: y,
+      head: [["Caixa", "Saldo Inicial", "Abertura", "Status"]],
+      body: filial.detalhes.caixas.map((c) => [
+        `Caixa ${c.id}`,
+        `R$ ${c.saldo_inicial.toFixed(2)}`,
+        new Date(c.data_abertura).toLocaleString("pt-BR"),
+        c.status,
+      ]),
+      headStyles: { fillColor: "#8b0000" },
+    });
+
+    y = doc.lastAutoTable.finalY + 40;
+
+    // Se ultrapassar a página, abre nova
+    if (y > 700) {
+      doc.addPage();
+      y = margin;
+    }
+  }
+
+  // =========================
+  //  SALVAR PDF
+  // =========================
+  doc.save("gestao_filiais.pdf");
+}
+
+
   // LOADING AUTENTICAÇÃO
   if (authLoading || !userData) {
     return (
@@ -118,7 +295,7 @@ export default function MatrizPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-4xl font-bold">Gestão de Filiais</h1>
-          <p className="text-muted-foreground text-lg m-2 font-bold">
+          <p className="text-muted-foreground text-xl m-2 font-semibold">
             Visão completa de todas as operações das filiais
           </p>
         </div>
@@ -129,11 +306,20 @@ export default function MatrizPage() {
         </div>
       </div>
 
+               <div className="flex justify-center p-5">
+  <Button onClick={() => router.push('/registro') } className="p-6"> 
+   <p className="font-bold text-lg p-5">Criar novo Usuário</p>
+  </Button>
+</div>
+
+
       {/* CARDS DE RESUMO */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <br></br>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+               transition-all duration-300">
+          <CardHeader className="flex flex-row items-center justify-between mt-5 pb-2">
             <CardTitle className="text-lg font-semibold">
               Faturamento <br></br> Total
             </CardTitle>
@@ -150,9 +336,11 @@ export default function MatrizPage() {
           <br></br>
         </Card>
 
-        <Card>
-          <br></br>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+               transition-all duration-300">
+          <CardHeader className="flex flex-row items-center justify-between mt-5 pb-2">
             <CardTitle className="text-lg font-semibold">Lucro <br></br> Total</CardTitle>
             <TrendingUp className="h-7 w-7 text-muted-foreground" />
           </CardHeader>
@@ -172,9 +360,12 @@ export default function MatrizPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <br></br>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+               transition-all duration-300">
+        
+          <CardHeader className="flex flex-row items-center justify-between mt-5 pb-2">
             <CardTitle className="text-lg font-medium">
               Produtos <br></br> em Falta
             </CardTitle>
@@ -188,9 +379,11 @@ export default function MatrizPage() {
           <br></br>
         </Card>
 
-        <Card>
-          <br></br>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
+               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+               transition-all duration-300">
+          <CardHeader className="flex flex-row items-center justify-between mt-5 pb-2">
             <CardTitle className="text-lg font-medium">
               Pedidos <br></br> Pendentes
             </CardTitle>
@@ -206,28 +399,26 @@ export default function MatrizPage() {
       </div>
 
       {/* LISTA DE FILIAIS */}
-<div className="space-y-4">
+<div className="space-y-4 mt-20">
   {filiais.map((filial) => (
     <Card key={filial.id} className="overflow-hidden">
       <CardHeader
         className="cursor-pointer transition-colors"
         onClick={() => toggleFilialDetails(filial.id)}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between  gap-4">
           
           {/* Nome + Endereço */}
             <br></br>
-          <div className="flex items-start sm:items-center gap-4">
-            <div className="p-3">
-              <Store className="w-6 h-6" />
-            </div>
+          <div className="flex items-center gap-4">
+           
 
             <div>
               <br></br>
-              <CardTitle className="text-xl sm:text-2xl font-bold">
+              <CardTitle className="text-xl sm:text-2xl font-bold text-center">
                 {filial.nome}
               </CardTitle>
-              <p className="text-lg sm:text-lg text-muted-foreground mt-1">
+              <p className="text-lg sm:text-lg text-muted-foreground mt-4">
                 {filial.endereco} - {filial.cidade}/{filial.estado}
               </p>
             </div>
@@ -292,15 +483,15 @@ export default function MatrizPage() {
 
 
                   {/* === TAB 1: RESUMO === */}
-                 <TabsContent value="resumo" className="space-y-4">
+                 <TabsContent value="resumo" className="space-y-5 ml-6 mr-6">
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
     {/* FATURAMENTO */}
-    <br></br>
+   
     <div className="space-y-2">
-      <div className="text-sm flex items-center gap-2">
-        <DollarSign className="w-4 h-4" />
-        <p className="font-semibold text-lg">Faturamento</p>
+      <div className="text-lg flex items-center gap-2">
+        <DollarSign className="text-muted-foreground w-4 h-4" />
+        <p className="font-semibold text-muted-foreground text-lg">Faturamento</p>
       </div>
       <h1 className="text-2xl font-bold">
         R$ {filial.stats.totalVendas.toFixed(2)}
@@ -310,9 +501,9 @@ export default function MatrizPage() {
     {/* LUCRO */}
     <br></br>
     <div className="space-y-2">
-      <div className="text-sm text-muted-foreground flex items-center gap-2">
-        <TrendingUp className="w-4 h-4" />
-        <p className="font-bold text-lg">Lucro</p>
+      <div className="text-lg flex items-center gap-2">
+        <TrendingUp className="text-muted-foreground w-4 h-4" />
+        <p className="font-bold text-muted-foreground text-lg">Lucro</p>
       </div>
       <p
         className={`text-2xl font-bold ${
@@ -340,7 +531,7 @@ export default function MatrizPage() {
     <div className="space-y-2">
       <div className="text-sm text-muted-foreground flex items-center gap-2">
         <ShoppingCart className="w-4 h-4" />
-        <p className="font-bold text-lg">Caixas Abertos</p>
+        <p className="font-bold text-lg">Caixas abertos</p>
       </div>
       <p className="text-2xl font-bold">
         {filial.stats.caixasAbertos}
@@ -357,7 +548,7 @@ export default function MatrizPage() {
 
     <div className="flex flex-col sm:flex-row items-center p-4 border rounded-lg sm:justify-between">
       <span className="font-bold text-lg text-center sm:text-left">
-        Total de Vendas
+        Total de vendas
       </span>
       <span className="text-xl font-bold mt-2 sm:mt-0 text-center sm:text-right">
         R$ {filial.stats.totalVendas.toFixed(2)}
@@ -384,7 +575,7 @@ export default function MatrizPage() {
 
     <div className="flex flex-col sm:flex-row items-center p-4 border rounded-lg sm:justify-between">
       <span className="font-bold text-lg text-center sm:text-left">
-        Lucro Líquido
+        Lucro líquido
       </span>
       <p
         className={`text-xl font-bold mt-2 sm:mt-0 text-center sm:text-right ${
@@ -401,24 +592,16 @@ export default function MatrizPage() {
 
         <div className="flex flex-col sm:flex-row items-center p-4 border rounded-lg sm:justify-between">
         <span className="font-bold text-lg text-center sm:text-left">
-        Margem de Lucro
+        Margem de lucro
         </span>
-        <p
-         className={`text-xl font-bold mt-2 sm:mt-0 text-center sm:text-right ${
-          filial.stats.margemLucro < 0
-            ? "text-red-500"
-            : filial.stats.margemLucro > 0
-            ? "text-green-500"
-            : ""
-        }`}
-      >
+        <p className="text-xl font-bold mt-2 sm:mt-0 text-center sm:text-right"> 
         {filial.stats.margemLucro.toFixed(2)}%
         </p>
        </div>
 
        <div className="flex flex-col sm:flex-row items-center p-4 border rounded-lg sm:justify-between">
       <span className="font-bold text-lg text-center sm:text-left">
-        Número de Vendas
+        Número de vendas
       </span>
       <span className="text-xl font-bold mt-2 sm:mt-0 text-center sm:text-right">
         {filial.stats.numeroVendas}
@@ -470,7 +653,7 @@ export default function MatrizPage() {
                     
                     <div className="mb-6">
                       <h3 className="text-xl font-bold">
-                        Pedidos Pendentes
+                        Pedidos pendentes
                       </h3>
                       <br></br>
 
@@ -489,7 +672,7 @@ export default function MatrizPage() {
                                 <p className="text-xl font-bold">
                                   Pedido {pedido.id}
                                 </p>
-                                <p className="text-lg text-muted-foreground">
+                                <p className="text-lg font-semibold text-muted-foreground">
                                   {new Date(
                                     pedido.data_pedido
                                   ).toLocaleDateString("pt-BR")}
@@ -530,7 +713,7 @@ export default function MatrizPage() {
 
                     <div className="mt-6">
                       <h3 className="text-2xl font-bold mb-4">
-                        Status dos Caixas
+                        Status dos caixas
                       </h3>
 
                       <div className="space-y-2">
@@ -540,13 +723,13 @@ export default function MatrizPage() {
                             className="flex justify-between items-center p-3 border rounded-lg"
                           >
                             <div>
-                              <p className="font-bold text-xl">Caixa {caixa.id}</p>
+                              <p className="font-bold text-2xl">Caixa {caixa.id}</p>
                               <br></br>
-                              <p className="text-m text-muted-foreground">
+                              <p className="text-lg font-semibold text-muted-foreground">
                                 Saldo Inicial: R${" "}
                                 {caixa.saldo_inicial.toFixed(2)}
                               </p>
-                              <p className="text-m text-muted-foreground">
+                              <p className="text-lg font-semibold text-muted-foreground">
                                 Aberto em:{" "}
                                 {new Date(caixa.data_abertura).toLocaleString(
                                   "pt-BR"
@@ -554,10 +737,10 @@ export default function MatrizPage() {
                               </p>
                             </div>
                             <Badge
-                            className="text-lg font-m"
+                            className="text-lg font-lg"
                               variant={
                                 caixa.status === "ABERTO"
-                                  ? "default"
+                                  ? "destructuve"
                                   : "secondary"
                               }
                             >
@@ -577,11 +760,13 @@ export default function MatrizPage() {
 
         ))}
 
-            <div className="flex justify-center p-5">
-  <Button onClick={() => router.push('/registro') } className="p-6"> 
-   <p className="font-bold text-lg p-5">Criar novo Usuário</p>
-  </Button>
+   
+<div className="flex justify-center p-5">
+<Button onClick={() => gerarPDF(filiais)} className="p-6">
+  <p className="font-bold text-lg p-5">Gerar PDF</p>
+</Button>
 </div>
+
 
       </div>
     </div>
