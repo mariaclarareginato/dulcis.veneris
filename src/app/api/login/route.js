@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import { SignJWT } from "jose";
+import { NextResponse } from "next/server";
 
-const JWT_SECRET = process.env.JWT_SECRET || "chave-secreta";
+export const runtime = "nodejs"; // garante que roda no Node
+
+const JWT_SECRET = process.env.JWT_SECRET || "dulcis";
 
 export async function POST(req) {
   try {
@@ -11,39 +13,35 @@ export async function POST(req) {
 
     const usuario = await prisma.usuario.findUnique({ where: { email } });
 
-    if (!usuario)
-      return NextResponse.json({ message: "Usuário não encontrado" }, { status: 404 });
+    if (!usuario) return NextResponse.json({ message: "Usuário não encontrado" }, { status: 404 });
 
     const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
-    if (!senhaValida)
-      return NextResponse.json({ message: "Senha incorreta" }, { status: 401 });
+    if (!senhaValida) return NextResponse.json({ message: "Senha incorreta" }, { status: 401 });
 
-    const token = jwt.sign(
-      { id: usuario.id, loja_id: usuario.loja_id, perfil: usuario.perfil },
-      JWT_SECRET,
-      { expiresIn: "8h" }
-    );
+    const token = await new SignJWT({
+      id: usuario.id,
+      perfil: usuario.perfil,
+      loja_id: usuario.loja_id,
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setExpirationTime("8h")
+      .sign(new TextEncoder().encode(JWT_SECRET));
 
-    const response = NextResponse.json(
-      {
-        user: {
-          id: usuario.id,
-          nome: usuario.nome,
-          email: usuario.email,
-          perfil: usuario.perfil,
-          loja_id: usuario.loja_id,
-        },
-        message: "Login efetuado com sucesso!",
+    const response = NextResponse.json({
+      user: {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        perfil: usuario.perfil,
+        loja_id: usuario.loja_id,
       },
-      { status: 200 }
-    );
+      message: "Login efetuado com sucesso!",
+    });
 
-    //  grava cookie HTTP-only
-    
     response.cookies.set("token", token, {
       httpOnly: true,
       path: "/",
-      maxAge: 60 * 60 * 8, // 8h
+      maxAge: 60 * 60 * 8,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     });

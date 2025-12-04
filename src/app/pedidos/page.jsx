@@ -199,22 +199,23 @@ export default function PedidosPage() {
             <div className="md:col-span-3">
               <Label className="mb-5 block text-lg font-semibold">Produto</Label>
               <Select
+                className="text-lg"
                 value={currentItem.produtoNome}
                 onValueChange={handleProdutoSelect}
               >
-                <SelectTrigger className="font-semibold text-base w-full min-h-[90px] whitespace-normal break-words text-left">
+                <SelectTrigger className="font-semibold text-lg w-full min-h-[90px] whitespace-normal break-words text-left">
                   <SelectValue placeholder="Selecione o produto que deseja pedir" />
                 </SelectTrigger>
 
                 <SelectContent
-                  className="font-semibold text-base w-[var(--radix-select-trigger-width)] max-w-full"
+                  className="font-semibold text-lg w-[var(--radix-select-trigger-width)] max-w-full"
                   position="popper"
                 >
                   {produtosDisponiveis.map((p) => (
                     <SelectItem
                       key={p.id}
                       value={p.nome}
-                      className="whitespace-normal break-words text-left py-2"
+                      className="whitespace-normal text-lg break-words text-left py-2"
                     >
                       {p.nome}
                     </SelectItem>
