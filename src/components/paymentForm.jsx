@@ -55,66 +55,80 @@ export default function PaymentForm({ method, TOTAL_VENDA }) {
   }, []);
 
   // --- Função Finalizar Venda ---
-  const finalizarVenda = async (data, methodType) => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem("token");
-      if (!token || !userData) return alert("Usuário não autenticado");
-
-      const resCarrinho = await fetch(`/api/carrinho?usuarioId=${userData.id}&lojaId=${userData.loja_id}`);
-      const carrinhoData = await resCarrinho.json();
-      if (!resCarrinho.ok || !carrinhoData.itens?.length) return alert("Carrinho vazio");
-
-      const itensCarrinho = carrinhoData.itens.map((item) => ({
-        produto_id: item.produto.id,
-        quantidade: item.quantidade,
-        preco_unitario: item.preco_venda,
-        subtotal: item.quantidade * item.preco_venda,
-        pedidos: item.pedidos || "",
-      }));
-
-      const payload = {
-        usuarioId: userData.id,
-        lojaId: userData.loja_id,
-        caixaId: 1,
-        itensCarrinho,
-        tipoPagamento: methodType,
-        detalhesPagamento: {
-          ...data,
-          valorRecebido: parseFloat(formData.valorRecebido) || 0,
-          troco: troco,
-        },
-      };
-
-      const res = await fetch("/api/venda/finalizar", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.message || "Erro ao finalizar venda");
-
-      alert("✅ Venda concluída com sucesso!");
-      router.push("/caixa");
-    } catch (err) {
-  console.error("Erro ao finalizar venda:", err);
   
-  // Verifica se o método de pagamento é PIX e ajusta a mensagem
-  const errorMessage = 
-    methodType === "PIX" 
-      ? "⏰ Tempo esgotado! Tente novamente." 
-      : "❌ Falha ao finalizar venda.";
-      
-  alert(errorMessage);
-  
-} finally {
-  setIsLoading(false);
-}
+const API_URL = typeof window !== "undefined" ? window.location.origin : "";
+
+
+const finalizarVenda = async (data, methodType) => {
+
+
+  try {
+    setIsLoading(true);
+
+    // Agora userData vem do estado, não do sessionStorage
+    if (!userData) {
+      alert("Usuário não autenticado");
+      return;
+    }
+
+
+    // BUSCAR CARRINHO
+    const resCarrinho = await fetch(
+      `${API_URL}/api/carrinho?usuarioId=${userData.id}&lojaId=${userData.loja_id}`,
+      { credentials: "include" }
+    );
+
+    const carrinhoData = await resCarrinho.json();
+
+    if (!resCarrinho.ok || !carrinhoData.itens?.length) {
+      alert("Carrinho vazio");
+      return;
+    }
+
+    const itensCarrinho = carrinhoData.itens.map((item) => ({
+      produto_id: item.produto.id,
+      quantidade: item.quantidade,
+      preco_unitario: item.preco_venda,
+      subtotal: item.quantidade * item.preco_venda,
+      pedidos: item.pedidos || "",
+    }));
+
+    const payload = {
+      usuarioId: userData.id,
+      lojaId: userData.loja_id,
+      itensCarrinho,
+      tipoPagamento: methodType,
+      detalhesPagamento: {
+        ...data,
+        valorRecebido: parseFloat(formData.valorRecebido) || 0,
+        troco: troco,
+      },
+    };
+
+    // FINALIZAR VENDA
+    const res = await fetch(`${API_URL}/api/venda/finalizar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) throw new Error(json.message);
+
+    alert("Venda concluída!");
+    router.push("/caixa");
+
+  } catch (err) {
+    console.error("❌ ERRO:", err);
+    alert("Erro ao finalizar venda");
+  } finally {
+    setIsLoading(false);
+  }
 };
+
+
 
   // --- Código PIX ---
 

@@ -4,13 +4,23 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { usuarioId, lojaId, tipoPagamento, detalhesPagamento, caixaId } = body;
+    const { usuarioId, lojaId, tipoPagamento, detalhesPagamento } = body;
 
+    // 1) BUSCA O CAIXA ABERTO CORRETO
+    const caixaAberto = await prisma.caixa.findFirst({
+      where: { loja_id: lojaId, status: "ABERTO" }
+    });
+
+    if (!caixaAberto) {
+      return NextResponse.json({ message: "Nenhum caixa aberto encontrado." }, { status: 404 });
+    }
+
+    // 2) BUSCA A VENDA ABERTA USANDO O CAIXA CORRETO
     const vendaAberta = await prisma.venda.findFirst({
       where: {
         usuario_id: usuarioId,
         loja_id: lojaId,
-        caixa_id: caixaId,
+        caixa_id: caixaAberto.id,
         status: "ABERTA",
       },
       include: {
@@ -18,7 +28,7 @@ export async function POST(req) {
           include: {
             produto: {
               include: {
-                estoque: { 
+                estoque: {
                   where: { loja_id: lojaId },
                 },
               },
@@ -29,9 +39,13 @@ export async function POST(req) {
     });
 
     if (!vendaAberta) {
-      return NextResponse.json({ message: "Nenhuma venda aberta encontrada." }, { status: 404 });
+      return NextResponse.json(
+        { message: "Nenhuma venda aberta encontrada." },
+        { status: 404 }
+      );
     }
 
+    // 3) CALCULA TOTAL E CMV
     let totalCalc = 0;
     let cmvCalc = 0;
 
@@ -48,6 +62,7 @@ export async function POST(req) {
     const totalFinalNumber = parseFloat(totalCalc);
     const cmvFinalNumber = parseFloat(cmvCalc);
 
+    // 4) FINALIZA A VENDA
     const vendaFinalizada = await prisma.venda.update({
       where: { id: vendaAberta.id },
       data: {
@@ -68,9 +83,7 @@ export async function POST(req) {
           include: {
             produto: {
               include: {
-                estoque: {
-                  where: { loja_id: lojaId },
-                },
+                estoque: { where: { loja_id: lojaId } },
               },
             },
           },
@@ -79,16 +92,13 @@ export async function POST(req) {
       },
     });
 
-    // Atualiza o estoque
+    // 5) ATUALIZA O ESTOQUE
     for (const item of vendaFinalizada.vendaitem) {
-      const produto = item.produto;
-      const estoque = produto.estoque?.[0]; 
-
+      const estoque = item.produto.estoque?.[0];
       if (estoque) {
-        const novaQuantidade = Math.max(0, estoque.quantidade - item.quantidade);
         await prisma.estoque.update({
           where: { id: estoque.id },
-          data: { quantidade: novaQuantidade },
+          data: { quantidade: Math.max(0, estoque.quantidade - item.quantidade) },
         });
       }
     }
@@ -101,6 +111,9 @@ export async function POST(req) {
 
   } catch (err) {
     console.error("❌ Erro ao finalizar venda:", err);
-    return NextResponse.json({ message: "Erro interno", details: err.message }, { status: 500 });
+    return NextResponse.json(
+      { message: "Erro interno", details: err.message },
+      { status: 500 }
+    );
   }
 }

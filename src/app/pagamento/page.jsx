@@ -171,10 +171,10 @@ export default function Pagamento() {
       </p>
 
       {total <= 0 ? (
-      <Card>
+      <Card className="m-5">
 
-          <p className="text-2xl text-center font-bold mb-4">Carrinho vazio!</p>
-          <Button onClick={() => router.push("/caixa")} className="mt-4 text-lg font-bold rounded-xl">
+          <p className="text-2xl text-center font-bold m-4">Carrinho vazio!</p>
+          <Button onClick={() => router.push("/caixa")} className="m-4 text-lg p-7 font-bold rounded-xl">
             Voltar e adicionar itens
           </Button>
         </Card>

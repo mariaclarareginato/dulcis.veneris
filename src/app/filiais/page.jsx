@@ -10,8 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
-  Store,
-  Package,
+
   TrendingUp,
   AlertCircle,
   Users,
@@ -141,116 +140,133 @@ async function gerarPDF(filiais) {
     headStyles: { fillColor: "#800000" },
   });
 
+
+
+
+
   // Atualiza Y ao final da tabela
   y = doc.lastAutoTable.finalY + 30;
 
-  // =========================
-  //  LISTA DE CADA FILIAL
-  // =========================
-  for (const filial of filiais) {
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.text(filial.nome, margin, y);
+// =========================
+//  LISTA DE CADA FILIAL
+// =========================
+for (const [index, filial] of filiais.entries()) {
 
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text(
-      `${filial.endereco} - ${filial.cidade}/${filial.estado}`,
-      margin,
-      y + 18
-    );
+  // Se não for a primeira filial, inicia nova página
 
-    y += 35;
+  
 
-    // -------------------------
-    //   TABELA: RESUMO FILIAL
-    // -------------------------
-    autoTable(doc, {
-      startY: y,
-      head: [["Indicador", "Valor"]],
-      body: [
-        ["Faturamento", `R$ ${filial.stats.totalVendas.toFixed(2)}`],
-        ["Lucro", `R$ ${filial.stats.lucro.toFixed(2)}`],
-        ["Funcionários", filial.stats.funcionarios],
-        ["Caixas abertos", filial.stats.caixasAbertos],
-        ["Pedidos pendentes", filial.stats.pedidosPendentes],
-      ],
-      headStyles: { fillColor: "#800000" },
-    });
-
-    y = doc.lastAutoTable.finalY + 20;
-
-    // -------------------------
-    //  ESTOQUE BAIXO
-    // -------------------------
-    if (filial.detalhes.estoqueBaixo.length > 0) {
-      autoTable(doc, {
-        startY: y,
-        theme: "grid",
-        head: [["Produto", "Qtd", "Mínimo"]],
-        body: filial.detalhes.estoqueBaixo.map((p) => [
-          p.produto,
-          p.quantidade,
-          p.estoque_minimo,
-        ]),
-        headStyles: { fillColor: "#b22222" },
-      });
-
-      y = doc.lastAutoTable.finalY + 20;
-    }
-
-    // -------------------------
-    //  PEDIDOS PENDENTES
-    // -------------------------
-    if (filial.detalhes.pedidosPendentes.length > 0) {
-      autoTable(doc, {
-        startY: y,
-        theme: "grid",
-        head: [["Pedido", "Data", "Status"]],
-        body: filial.detalhes.pedidosPendentes.map((p) => [
-          p.id,
-          new Date(p.data_pedido).toLocaleDateString("pt-BR"),
-          p.status,
-        ]),
-        headStyles: { fillColor: "#b22222" },
-      });
-      y = doc.lastAutoTable.finalY + 20;
-    }
-
-    // -------------------------
-    //  FUNCIONÁRIOS
-    // -------------------------
-    autoTable(doc, {
-      startY: y,
-      head: [["Nome", "Perfil"]],
-      body: filial.detalhes.funcionarios.map((f) => [f.nome, f.perfil]),
-      headStyles: { fillColor: "#8b0000" },
-    });
-    y = doc.lastAutoTable.finalY + 20;
-
-    // -------------------------
-    //  CAIXAS
-    // -------------------------
-    autoTable(doc, {
-      startY: y,
-      head: [["Caixa", "Saldo Inicial", "Abertura", "Status"]],
-      body: filial.detalhes.caixas.map((c) => [
-        `Caixa ${c.id}`,
-        `R$ ${c.saldo_inicial.toFixed(2)}`,
-        new Date(c.data_abertura).toLocaleString("pt-BR"),
-        c.status,
-      ]),
-      headStyles: { fillColor: "#8b0000" },
-    });
-
-    y = doc.lastAutoTable.finalY + 40;
-
-    // Se ultrapassar a página, abre nova
-    if (y > 700) {
-      doc.addPage();
-      y = margin;
-    }
+  if (index > 0) {
+    doc.addPage();
+    y = margin;
   }
+  // Separador antes de começar as filiais
+doc.setDrawColor(150, 0, 0); // vermelho escuro elegante
+doc.setLineWidth(2);
+doc.line(margin, y, pageWidth - margin, y);
+   y += 25
+
+  // TÍTULO DA FILIAL
+  doc.setFontSize(18);
+  doc.setFont("helvetica", "bold");
+  doc.text(filial.nome, margin, y);
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    `${filial.endereco} - ${filial.cidade}/${filial.estado}`,
+    margin,
+    y + 18
+  );
+
+  y += 35;
+
+  // -------------------------
+  //   TABELA: RESUMO FILIAL
+  // -------------------------
+  autoTable(doc, {
+    startY: y,
+    head: [["Indicador", "Valor"]],
+    body: [
+      ["Faturamento", `R$ ${filial.stats.totalVendas.toFixed(2)}`],
+      ["Lucro", `R$ ${filial.stats.lucro.toFixed(2)}`],
+      ["Funcionários", filial.stats.funcionarios],
+      ["Caixas abertos", filial.stats.caixasAbertos],
+      ["Pedidos pendentes", filial.stats.pedidosPendentes],
+    ],
+    headStyles: { fillColor: "#800000" },
+  });
+
+  y = doc.lastAutoTable.finalY + 20;
+
+  // -------------------------
+  //  ESTOQUE BAIXO
+  // -------------------------
+  if (filial.detalhes.estoqueBaixo.length > 0) {
+    autoTable(doc, {
+      startY: y,
+      theme: "grid",
+      head: [["Produto", "Qtd", "Mínimo"]],
+      body: filial.detalhes.estoqueBaixo.map((p) => [
+        p.produto,
+        p.quantidade,
+        p.estoque_minimo,
+      ]),
+      headStyles: { fillColor: "#b22222" },
+    });
+
+    y = doc.lastAutoTable.finalY + 20;
+  }
+
+  // -------------------------
+  //  PEDIDOS PENDENTES
+  // -------------------------
+  if (filial.detalhes.pedidosPendentes.length > 0) {
+    autoTable(doc, {
+      startY: y,
+      theme: "grid",
+      head: [["Pedido", "Data", "Status"]],
+      body: filial.detalhes.pedidosPendentes.map((p) => [
+        p.id,
+        new Date(p.data_pedido).toLocaleDateString("pt-BR"),
+        p.status,
+      ]),
+      headStyles: { fillColor: "#b22222" },
+    });
+
+    y = doc.lastAutoTable.finalY + 20;
+  }
+
+  // -------------------------
+  //  FUNCIONÁRIOS
+  // -------------------------
+  autoTable(doc, {
+    startY: y,
+    head: [["Nome", "Perfil"]],
+    body: filial.detalhes.funcionarios.map((f) => [f.nome, f.perfil]),
+    headStyles: { fillColor: "#8b0000" },
+  });
+
+  y = doc.lastAutoTable.finalY + 20;
+
+  // -------------------------
+  //  CAIXAS
+  // -------------------------
+  autoTable(doc, {
+    startY: y,
+    head: [["Caixa", "Saldo Inicial", "Abertura", "Status"]],
+    body: filial.detalhes.caixas.map((c) => [
+      `Caixa ${c.id}`,
+      `R$ ${c.saldo_inicial.toFixed(2)}`,
+      new Date(c.data_abertura).toLocaleString("pt-BR"),
+      c.status,
+    ]),
+    headStyles: { fillColor: "#8b0000" },
+  });
+
+  y = doc.lastAutoTable.finalY + 40;
+}
+
 
   // =========================
   //  SALVAR PDF

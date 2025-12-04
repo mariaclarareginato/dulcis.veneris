@@ -3,8 +3,16 @@ import { NextResponse } from "next/server";
 
 // POST: Adicionar ou incrementar produto ao carrinho
 export async function POST(req) {
-  try {
-    const { usuarioId, lojaId, produtoId, quantidade } = await req.json();
+      try {
+     const { usuarioId, produtoId, quantidade } = await req.json();
+
+     const usuario = await prisma.usuario.findUnique({
+        where: { id: usuarioId },
+     select: { loja_id: true }
+       });
+
+       const lojaId = usuario?.loja_id;
+
 
     if (!usuarioId || !lojaId || !produtoId || !quantidade || quantidade < 1) {
       return NextResponse.json(

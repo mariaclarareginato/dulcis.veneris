@@ -110,25 +110,30 @@ export default function NovoProduto() {
             <Input name="nome" value={form.nome} onChange={handleChange} />
           </div>
 
-          <div>
-            <Label className="m-3 text-lg">Categoria</Label>
-            <Select
-            className="text-lg font-semibold"
-              value={form.categoria}
-              onValueChange={(v) => setForm({ ...form, categoria: v })}
-            >
-              <SelectTrigger>
-                <SelectValue className="text-lg font-semibold" placeholder="" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem className="text-lg font-semibold" value="Chocolates">Chocolates</SelectItem>
-                <SelectItem className="text-lg font-semibold" value="Pães-de-mel">Pães-de-mel</SelectItem>
-                <SelectItem className="text-lg font-semibold" value="Bolachas">Bolachas</SelectItem>
-                <SelectItem className="text-lg font-semibold" value="Trufas">Trufas</SelectItem>
-                <SelectItem className="text-lg font-semibold" value="Outros">Outros</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+           <div>
+  <Label className="m-3 text-lg">Categoria</Label>
+
+  <Select
+    className="text-lg h-70 font-semibold"
+    value={form.categoria}
+    onValueChange={(v) => setForm({ ...form, categoria: v })}
+  >
+    <SelectTrigger
+      className="sm:min-h-[50px] font-semibold text-base w-full text-lg min-h-[90px] whitespace-normal break-words text-left"
+    >
+      <SelectValue placeholder="Clique aqui para selecionar o tipo do produto" />
+    </SelectTrigger>
+
+    <SelectContent className="text-lg font-semibold">
+      <SelectItem className="text-lg font-semibold" value="Chocolates">Chocolates</SelectItem>
+      <SelectItem className="text-lg font-semibold" value="Pães-de-mel">Pães-de-mel</SelectItem>
+      <SelectItem className="text-lg font-semibold" value="Bolachas">Bolachas</SelectItem>
+      <SelectItem className="text-lg font-semibold" value="Trufas">Trufas</SelectItem>
+      <SelectItem className="text-lg font-semibold" value="Outros">Outros</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
+
 
           <div>
             <Label className="m-3 text-lg">Descrição</Label>
@@ -182,7 +187,7 @@ export default function NovoProduto() {
     variant="destructive"
     className="cursor-pointer p-4 rounded-xl border font-semibold text-lg">
   
-    Clique aqui para selecionar imagem do produto
+    Clique aqui para selecionar a imagem do produto
   
 </label>
 
