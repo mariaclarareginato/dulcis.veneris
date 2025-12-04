@@ -99,12 +99,23 @@ cd dulcis-veneris
 ```
 
 
-2️⃣ Configurar variáveis de ambiente
+2️⃣ Configurar variáveis de ambiente e criar o banco de dados
+
+Abra o seu MySQL e crie o banco de dados dulcis_veneris:
+
+```bash
+
+CREATE DATABASE IF NOT EXISTS dulcis_veneris;
+
+```
+
+
 Crie o arquivo .env na raiz do projeto com as credenciais do banco MySQL:
 
 ```bash
 
-DATABASE_URL="mysql://usuario:senha@localhost:3306/dulce_venere"
+DATABASE_URL="mysql://root@localhost:3306/dulcis_veneris"
+JWT_SECRET=dulcis
 
 ```
 
