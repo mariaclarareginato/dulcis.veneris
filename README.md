@@ -21,7 +21,9 @@ Este manual orienta a comunicação visual da marca e a arquitetura de nosso sis
 - **Prisma ORM** → Mapeamento objeto-relacional e migrações do banco  
 - **MySQL** → Banco de dados relacional para persistência  
 - **TailwindCSS** → Estilização rápida e responsiva (design clean e moderno)  
-- **Shadcn/UI** → Componentes de interface reutilizáveis e acessíveis  
+- **Shadcn/UI** → Componentes de interface reutilizáveis e acessíveis
+- **Recharts.js"" →- Para o gráfico
+
 
 
 ## Resumo Executivo:
