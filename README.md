@@ -22,7 +22,7 @@ Este manual orienta a comunicação visual da marca e a arquitetura de nosso sis
 - **MySQL** → Banco de dados relacional para persistência  
 - **TailwindCSS** → Estilização rápida e responsiva (design clean e moderno)  
 - **Shadcn/UI** → Componentes de interface reutilizáveis e acessíveis
-- **Recharts.js"" →- Para o gráfico
+- **Recharts.js** → Para o gráfico
 
 
 
