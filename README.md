@@ -23,7 +23,7 @@ Este manual orienta a comunicação visual da marca e a arquitetura de nosso sis
 - **TailwindCSS** → Estilização rápida e responsiva (design clean e moderno)  
 - **Shadcn/UI** → Componentes de interface reutilizáveis e acessíveis
 - **Recharts.js** → Para o gráfico
-- - **Jspdf** → Para geração dos PDFS
+- **Jspdf** → Para geração dos PDFS
 
 
 
