@@ -90,26 +90,20 @@ export default function MatrizPedidosPage() {
     }
   };
 
-  // PDF
 
-  async function gerarPDFPedidos() {
+async function gerarPDFPedidos() {
   const { jsPDF } = await import("jspdf");
-  const autoTable = (await import("jspdf-autotable")).default;
 
   const doc = new jsPDF();
 
- 
-  // LOGO -
-  
+  // LOGO (se quiser manter)
   const img = await fetch("/logos/logo2.png")
     .then((res) => res.blob())
     .then((b) => convertBlobToBase64(b));
 
   doc.addImage(img, "PNG", 70, 8, 70, 35);
 
-  
-  // TÍTULO -
-
+  // TÍTULO PRINCIPAL
   doc.setFontSize(18);
   doc.text("Relatório de Pedidos da Matriz", 105, 50, { align: "center" });
 
@@ -127,85 +121,70 @@ export default function MatrizPedidosPage() {
   doc.setFontSize(10);
   doc.text(`Gerado em: ${dataGeracao}`, 200, 10, { align: "right" });
 
-  
-  // PROCESSAR DADOS DO PDF -
-  
-  const pedidosParaPDF = pedidos.map((p) => [
-    p.id,
-    p.status,
-    new Date(p.data_pedido).toLocaleDateString("pt-BR"),
-    p.loja?.nome || `ID ${p.loja_id}`,
-    p.usuario?.nome || `ID ${p.usuario_id}`,
-    p.loja?.endereco || "—",
-    p.itens_pedido.length,
-    p.itens_pedido
-      .map((item) => `${item.produto_nome} (Qtd: ${item.quantidade})`)
-      .join("\n")
-  ]);
+  // AGRUPAR PEDIDOS POR LOJA
+  const pedidosPorLoja = pedidos.reduce((acc, p) => {
+    const nomeLoja = p.loja?.nome || `Loja ID ${p.loja_id}`;
+    if (!acc[nomeLoja]) acc[nomeLoja] = [];
+    acc[nomeLoja].push(p);
+    return acc;
+  }, {});
 
-// 1. Agrupar pedidos por loja
-const pedidosPorLoja = pedidos.reduce((acc, pedido) => {
-  if (!acc[pedido.loja]) acc[pedido.loja] = [];
-  acc[pedido.loja].push(pedido);
-  return acc;
-}, {});
+  let y = 70;
+  let primeiraPagina = true;
 
-// 2. Criar uma página por loja
-let primeiraPagina = true;
-
-for (const loja in pedidosPorLoja) {
-
-  if (!primeiraPagina) {
-    doc.addPage(); // Nova página para a próxima loja
-  }
-  primeiraPagina = false;
-
-  // TÍTULO DA LOJA
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text(`Loja: ${loja}`, 30, 40);
-
-  // 3. Pegar só os pedidos dessa loja
-  const pedidosDaLoja = pedidosPorLoja[loja];
-
-  // 4. Gerar a tabela daquela loja
-  autoTable(doc, {
-    startY: 60,
-    head: [
-      ["ID", "Status", "Data", "Loja", "Solicitante", "Endereço", "Qtd Itens", "Detalhes"]
-    ],
-    body: pedidosDaLoja,
-
-    headStyles: {
-      fillColor: [139, 0, 0],
-      textColor: 255,
-      fontStyle: "bold",
-    },
-
-    styles: {
-      fontSize: 8.5,
-      cellPadding: 2,
-      overflow: "linebreak",
-      valign: "top",
-    },
-
-    tableWidth: "auto",
-    horizontalPageBreak: true,
-
-    columnStyles: {
-      0: { cellWidth: 12 },
-      1: { cellWidth: 40 },
-      2: { cellWidth: 22 },
-      3: { cellWidth: 28 },
-      4: { cellWidth: 28 },
-      5: { cellWidth: 40 },
-      6: { cellWidth: 20 },
-      7: { cellWidth: 60 },
+  for (const loja in pedidosPorLoja) {
+    if (!primeiraPagina) {
+      doc.addPage();
+      y = 20;
     }
-  });
-}
+    primeiraPagina = false;
 
-  doc.save(`relatorio_pedidos_matriz_${new Date().getTime()}.pdf`);
+    // Nome da loja
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Loja: ${loja}`, 20, y);
+    y += 10;
+
+    // BLOCOS DOS PEDIDOS
+    pedidosPorLoja[loja].forEach((p, index) => {
+      const detalhes = p.itens_pedido
+        .map((item) => `- ${item.produto_nome} (Qtd: ${item.quantidade})`)
+        .join("\n");
+
+      const texto = `
+ID: ${p.id}
+Status: ${p.status}
+Data: ${new Date(p.data_pedido).toLocaleDateString("pt-BR")}
+Solicitante: ${p.usuario?.nome || `ID ${p.usuario_id}`}
+Endereço: ${p.loja?.endereco || "—"}
+Quantidade de Itens: ${p.itens_pedido.length}
+Detalhes:
+${detalhes}
+      `.trim();
+
+      const split = doc.splitTextToSize(texto, 170);
+      const altura = split.length * 6 + 4;
+
+      // quebra de página automática
+      if (y + altura > 280) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(split, 20, y);
+
+      y += altura + 6;
+
+      // linha separadora
+      doc.setDrawColor(150);
+      doc.line(20, y, 190, y);
+      y += 10;
+    });
+  }
+
+  doc.save(`relatorio_pedidos_matriz_${Date.now()}.pdf`);
 }
 
 function convertBlobToBase64(blob) {
@@ -215,6 +194,7 @@ function convertBlobToBase64(blob) {
     reader.readAsDataURL(blob);
   });
 }
+
 
 
   if (loading && !pedidos.length)
@@ -346,8 +326,8 @@ function convertBlobToBase64(blob) {
                       <li key={index} className="py-1 flex gap-5 justify-between">
                         <span>{item.produto_nome}</span>
 
-                        <span className="m-5">
-                          Quantidade: <strong>{item.quantidade}</strong>
+                        <span className="m-3">
+                         <p> Quantidade: </p><strong>{item.quantidade}</strong>
                         </span>
                       </li>
                     ))}

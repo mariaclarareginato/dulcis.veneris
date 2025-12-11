@@ -334,11 +334,15 @@ export default function PedidosPage() {
                 <CardContent>
                   <br></br>
                   <p className="text-xl font-semibold">Itens:</p>
-                  <ul className="m-4 list-disc font-semibold text-lg">
+                  <ul className="m-7 list-disc font-semibold text-lg">
                     {pedido.itens_pedido.map((item) => (
-                      <li key={item.id}>
+                       
+                      <li className="m-7" key={item.id}>
+                        
                         {item.produto_nome} — {item.quantidade}
+                        
                       </li>
+                     
                     ))}
                   </ul>
                 </CardContent>

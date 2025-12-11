@@ -24,9 +24,10 @@ export function AppSidebar2({ ...props }) {
 
   const data = {
     linhas: [
-      { name: "Produtos", url: "/produtos" },
-      { name: "Pedidos", url: "/matrizPedidos" },
       { name: "Filiais", url: "/filiais" },
+      { name: "Pedidos", url: "/matrizPedidos" },
+      { name: "Produtos", url: "/produtos" },
+    
     ],
   }
 
