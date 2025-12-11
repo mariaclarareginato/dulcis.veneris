@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-export default function UsuariosPage() {
+export default function CaixasPage() {
   const router = useRouter();
   const [userData, setUserData] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
@@ -44,12 +44,14 @@ export default function UsuariosPage() {
     const fetchUsuarios = async () => {
       try {
         setLoading(true);
-        const res = await fetch(
-          `/api/usuarios/stats?lojaId=${userData.loja_id}`
-        );
+
+        const res = await fetch(`/api/usuarios/caixas?lojaId=${userData.loja_id}`);
         if (!res.ok) throw new Error("Erro ao buscar usuários");
+
         const data = await res.json();
-        setUsuarios(data);
+
+
+        setUsuarios(Array.isArray(data) ? data : data.usuarios || []);
       } catch {
         setError("Erro ao carregar dados dos usuários");
       } finally {
@@ -60,80 +62,72 @@ export default function UsuariosPage() {
     fetchUsuarios();
   }, [userData]);
 
-
-  // Função para gerar pdf
-
+  // Função para gerar PDF
   async function gerarPDF() {
-  const { jsPDF } = await import("jspdf");
-  const autoTable = (await import("jspdf-autotable")).default;
+    const { jsPDF } = await import("jspdf");
+    const autoTable = (await import("jspdf-autotable")).default;
 
-  const doc = new jsPDF();
+    const doc = new jsPDF();
 
-  // Logo
-  const img = await fetch("/logos/logo2.png")
-    .then((res) => res.blob())
-    .then((b) => convertBlobToBase64(b));
+    // Logo
+    const img = await fetch("/logos/logo2.png")
+      .then((res) => res.blob())
+      .then((b) => convertBlobToBase64(b));
 
-  doc.addImage(img, "PNG", 70, 10, 70, 40);
+    doc.addImage(img, "PNG", 70, 10, 70, 40);
 
-  // Título
-  doc.setFontSize(18);
-  doc.text(
-    `Desempenho dos Caixas — ${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)} ${anoAtual}`,
-    105,
-    60,
-    { align: "center" }
-  );
+    // Título
+    doc.setFontSize(18);
+    doc.text(
+      `Desempenho dos Caixas — ${
+        nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)
+      } ${anoAtual}`,
+      105,
+      60,
+      { align: "center" }
+    );
 
-  // Totais
-  autoTable(doc, {
-    startY: 80,
-    head: [["Indicador", "Valor"]],
-    body: [
-      ["Total de Vendas", totais.vendas],
-      ["Faturamento Total", `R$ ${totais.faturamento.toFixed(2)}`],
-      ["Lucro Total", `R$ ${totais.lucro.toFixed(2)}`],
-    ],
-    headStyles: {
-      fillColor: "darkred",
-  
-    }
-  });
+    // Totais
+    autoTable(doc, {
+      startY: 80,
+      head: [["Indicador", "Valor"]],
+      body: [
+        ["Total de Vendas", totais.vendas],
+        ["Faturamento Total", `R$ ${totais.faturamento.toFixed(2)}`],
+        ["Lucro Total", `R$ ${totais.lucro.toFixed(2)}`],
+      ],
+      headStyles: { fillColor: "darkred" },
+    });
 
-  // Tabela usuários
-  autoTable(doc, {
-    startY: doc.lastAutoTable.finalY + 15,
-    head: [["Nome", "Email", "Vendas", "Faturamento", "Lucro"]],
-    body: usuarios.map((u) => [
-      u.nome,
-      u.email,
-      u.stats.numeroVendas,
-      `R$ ${u.stats.totalVendas.toFixed(2)}`,
-      `R$ ${u.stats.lucro.toFixed(2)}`,
-    ]),
-    headStyles: {
-      fillColor: "darkred",
-    }
-  });
+    // Tabela usuários
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 15,
+      head: [["Nome", "Email", "Vendas", "Faturamento", "Lucro"]],
+      body: usuarios.map((u) => [
+        u.nome,
+        u.email,
+        u.stats.numeroVendas,
+        `R$ ${u.stats.totalVendas.toFixed(2)}`,
+        `R$ ${u.stats.lucro.toFixed(2)}`,
+      ]),
+      headStyles: { fillColor: "darkred" },
+    });
 
-  doc.save(`desempenhocaixas-${nomeMes}-${anoAtual}.pdf`);
-}
+    doc.save(`desempenhocaixas-${nomeMes}-${anoAtual}.pdf`);
+  }
 
-function convertBlobToBase64(blob) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.readAsDataURL(blob);
-  });
-}
+  function convertBlobToBase64(blob) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  }
 
-// Mês e ano atuais
+  const nomeMes = new Date().toLocaleString("pt-BR", { month: "long" });
+  const anoAtual = new Date().getFullYear();
 
-const nomeMes = new Date().toLocaleString("pt-BR", { month: "long" });
-const anoAtual = new Date().getFullYear();
-
-
-  // Estados de carregamento e erro
+  // Loader
   if (!userData || loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -146,7 +140,7 @@ const anoAtual = new Date().getFullYear();
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <AlertCircle className="w-16 h-16" />
-        <p className="text-xl font-bold font-bold">{error}</p>
+        <p className="text-xl font-bold">{error}</p>
         <Button className="font-bold text-lg" onClick={() => window.location.reload()}>
           Tentar Novamente
         </Button>
@@ -154,7 +148,7 @@ const anoAtual = new Date().getFullYear();
     );
   }
 
-  // Cálculos totais
+  // Cálculo dos totais
   const totais = usuarios.reduce(
     (acc, usuario) => ({
       vendas: acc.vendas + usuario.stats.numeroVendas,
@@ -164,7 +158,7 @@ const anoAtual = new Date().getFullYear();
     { vendas: 0, faturamento: 0, lucro: 0 }
   );
 
-  // Render principal
+  // Página
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -175,80 +169,90 @@ const anoAtual = new Date().getFullYear();
             Acompanhe o desempenho dos seus caixas e registre novos usuários
           </p>
         </div>
-        <Button className="w-full md:w-auto mt-10 p-6" onClick={() => router.push("/registro")}>
-          <strong className="font-bold text-lg">Registrar novo usuário</strong>
+        <Button
+          className="w-full md:w-auto mt-10 p-6"
+          onClick={() => router.push("/registro")}
+        >
+          <strong className="font-bold text-lg">Gerenciar caixas</strong>
         </Button>
       </div>
 
       {/* Cards de Resumo */}
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-20">
-        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
-               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
-               transition-all duration-300 p-5">
+        {/* Total de vendas */}
+        <Card className="w-full max-w-lg
+             bg-transparent rounded-xl
+             backdrop-blur-md
+             shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+             dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+             transition-all duration-300">
+              <br></br>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xl font-semibold">
-              Total de Vendas
-            </CardTitle>
+            <CardTitle className="text-xl font-semibold">Total de Vendas</CardTitle>
             <ShoppingCart className="h-6 w-6 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <br></br>
-            <div className="text-2xl font-bold">{totais.vendas}</div>
+            <div className="text-2xl font-bold mt-4">{totais.vendas}</div>
             <p className="text-lg font-semibold text-muted-foreground">vendas finalizadas</p>
           </CardContent>
+          <br></br>
         </Card>
 
-        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
-               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
-               transition-all duration-300 p-5">
+        {/* Faturamento */}
+        <Card className="w-full max-w-lg
+             bg-transparent rounded-xl
+             backdrop-blur-md
+             shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+             dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+             transition-all duration-300">
+              <br></br>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xl font-semibold">
-              Faturamento Total
-            </CardTitle>
+            <CardTitle className="text-xl font-semibold">Faturamento Total</CardTitle>
             <DollarSign className="h-6 w-6 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              R$ <br></br> {Number(totais.faturamento).toFixed(2)}
+            <div className="text-2xl font-bold mt-4">
+              R$ {Number(totais.faturamento).toFixed(2)}
             </div>
             <p className="text-lg font-semibold text-muted-foreground">em vendas</p>
           </CardContent>
+          <br></br>
         </Card>
 
-        <Card className="w-full bg-transparent rounded-xl backdrop-blur-md
-               shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
-               dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
-               transition-all duration-300 p-5">
+        {/* Lucro */}
+        <Card className="w-full max-w-lg
+             bg-transparent rounded-xl
+             backdrop-blur-md
+             shadow-[0_0_35px_10px_rgba(0,0,0,.25)]
+             dark:shadow-[0_0_35px_10px_rgba(255,0,0,.25)]
+             transition-all duration-300">
+              <br></br>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xl font-semibold">Lucro Total</CardTitle>
             <TrendingUp className="h-6 w-6 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            
-              <p
-                     className={`text-2xl font-bold ${
-                    totais.lucro < 0
-                   ? "text-red-500"
-                   : totais.lucro > 0
-                   ? "text-green-600"
+            <p
+              className={`text-2xl font-bold mt-4 ${
+                totais.lucro < 0
+                  ? "text-red-500"
+                  : totais.lucro > 0
+                  ? "text-green-600"
                   : ""
-                   }`}
-                   >
-                 R$ <br></br> {totais.lucro.toFixed(2)}
-                   </p>
-             <p className="text-lg font-semibold text-muted-foreground">lucro líquido</p>
+              }`}
+            >
+              R$ {totais.lucro.toFixed(2)}
+            </p>
+            <p className="text-lg font-semibold text-muted-foreground">lucro líquido</p>
           </CardContent>
+          <br></br>
         </Card>
       </div>
 
-      {/* Lista de Usuários */}
+      {/* Lista de usuários */}
       {usuarios.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            
             <p className="text-xl font-semibold">Nenhum operador encontrado</p>
             <p className="text-muted-foreground">Registre novos usuários</p>
           </CardContent>
@@ -256,20 +260,17 @@ const anoAtual = new Date().getFullYear();
       ) : (
         <div className="grid grid-cols-1 gap-4 mt-20">
           {usuarios.map((usuario, index) => (
-            <Card
-              key={usuario.id}
-              className="hover:shadow-lg text-3xl transition-shadow p-4"
-            >
+            <Card key={usuario.id} className="hover:shadow-lg text-3xl transition-shadow p-4">
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div> 
+                    <div>
                       <CardTitle className="text-3xl font-bold">{usuario.nome}</CardTitle>
-                      <CardDescription className="mt-2 text-xl">
-                        {usuario.email}
-                      </CardDescription>
+                      <CardDescription className="mt-2 text-xl">{usuario.email}</CardDescription>
                     </div>
                   </div>
+
+                  {/* Medalhas */}
                   <Badge
                     className={
                       index === 0
@@ -291,54 +292,58 @@ const anoAtual = new Date().getFullYear();
                   </Badge>
                 </div>
               </CardHeader>
+
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 mb-10">
+                  {/* vendas */}
                   <div>
                     <p className="text-lg font-semibold text-muted-foreground flex items-center gap-1">
                       <ShoppingCart className="w-6 h-6" /> Vendas
                     </p>
-                    <p className="text-2xl font-bold mt-5">
-                      {usuario.stats.numeroVendas}
-                    </p>
+                    <p className="text-2xl font-bold mt-5">{usuario.stats.numeroVendas}</p>
                   </div>
 
-                 <div>
+                  {/* total vendas */}
+                  <div>
                     <p className="text-lg font-semibold text-muted-foreground flex items-center gap-1">
                       <DollarSign className="w-6 h-6" /> Total vendas
                     </p>
                     <p className="text-2xl font-bold">
-                     R$ <br></br> {usuario.stats.totalVendas.toFixed(2)}
+                      R$ {usuario.stats.totalVendas.toFixed(2)}
                     </p>
                   </div>
 
+                  {/* lucro */}
                   <div>
                     <p className="text-lg font-semibold text-muted-foreground flex items-center gap-1">
                       <TrendingUp className="w-6 h-6" /> Lucro
                     </p>
-                   
-              <p
-                     className={`text-2xl font-bold ${
-                    usuario.stats.lucro < 0
-                   ? "text-red-500"
-                   : usuario.stats.lucro > 0
-                   ? "text-green-600"
-                  : ""
-                   }`}
-                   >
-                 R$ <br></br> {usuario.stats.lucro.toFixed(2)}
-                   </p>
+
+                    <p
+                      className={`text-2xl font-bold ${
+                        usuario.stats.lucro < 0
+                          ? "text-red-500"
+                          : usuario.stats.lucro > 0
+                          ? "text-green-600"
+                          : ""
+                      }`}
+                    >
+                      R$ {usuario.stats.lucro.toFixed(2)}
+                    </p>
                   </div>
 
+                  {/* ticket medio */}
                   <div>
                     <p className="text-lg font-semibold text-muted-foreground flex items-center gap-1">
-                       <TicketIcon className="w-6 h-6" /> Ticket Médio
+                      <TicketIcon className="w-6 h-6" /> Ticket Médio
                     </p>
                     <p className="text-2xl font-bold">
-                      R$ <br></br>{Number(usuario.stats.ticketMedio).toFixed(2)}
+                      R$ {Number(usuario.stats.ticketMedio).toFixed(2)}
                     </p>
                   </div>
                 </div>
 
+                {/* Barra de progresso */}
                 <div className="mt-4">
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
@@ -365,11 +370,10 @@ const anoAtual = new Date().getFullYear();
       )}
 
       <div className="flex justify-center mt-10">
-  <Button  className="p-6" onClick={gerarPDF}>
-    <h1 className="font-bold text-lg">Gerar PDF</h1>
-  </Button>
-</div>
-
+        <Button className="p-6" onClick={gerarPDF}>
+          <h1 className="font-bold text-lg">Gerar PDF</h1>
+        </Button>
+      </div>
     </div>
   );
 }

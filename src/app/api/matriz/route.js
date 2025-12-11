@@ -1,13 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+// ==========================
+//        GET 
+// ==========================
 export async function GET(req) {
   try {
-    // Busca todas as lojas do tipo FILIAL
     const filiais = await prisma.loja.findMany({
-      where: {
-        tipo: "FILIAL",
-      },
+      where: { tipo: "FILIAL" },
       include: {
         caixa: {
           select: {
@@ -31,9 +31,7 @@ export async function GET(req) {
             quantidade: true,
             estoque_minimo: true,
             produto: {
-              select: {
-                nome: true,
-              },
+              select: { nome: true },
             },
           },
         },
@@ -45,9 +43,7 @@ export async function GET(req) {
           },
         },
         venda: {
-          where: {
-            status: "FINALIZADA",
-          },
+          where: { status: "FINALIZADA" },
           select: {
             id: true,
             total: true,
@@ -65,47 +61,35 @@ export async function GET(req) {
       },
     });
 
-    // Processa os dados de cada filial
     const filiaisComStats = filiais.map((filial) => {
-      // Calcula total de vendas
       const totalVendas = filial.venda.reduce(
-        (acc, venda) => acc + parseFloat(venda.total || 0),
-        0
+        (acc, v) => acc + parseFloat(v.total || 0), 0
       );
 
-      // Calcula CMV total
       const totalCMV = filial.venda.reduce(
-        (acc, venda) => acc + parseFloat(venda.cmv || 0),
-        0
+        (acc, v) => acc + parseFloat(v.cmv || 0), 0
       );
 
-      // Calcula total de despesas pendentes
       const totalDespesas = filial.despesa
         .filter((d) => !d.pago)
         .reduce((acc, despesa) => acc + parseFloat(despesa.valor || 0), 0);
 
-      // Calcula lucro (Vendas - CMV - Despesas)
       const lucro = totalVendas - totalCMV - totalDespesas;
 
-      // Conta produtos com estoque baixo
       const estoqueBaixo = filial.estoque.filter(
         (e) => e.quantidade <= e.estoque_minimo
       ).length;
 
-      // Conta pedidos pendentes
       const pedidosPendentes = filial.pedido.filter(
         (p) => p.status === "PENDENTE"
       ).length;
 
-      // Conta funcionários
       const funcionarios = filial.usuario.length;
 
-      // Conta caixas abertos
       const caixasAbertos = filial.caixa.filter(
         (c) => c.status === "ABERTO"
       ).length;
 
-      // Calcula margem de lucro
       const margemLucro =
         totalVendas > 0 ? ((lucro / totalVendas) * 100).toFixed(2) : "0.00";
 
@@ -172,6 +156,42 @@ export async function GET(req) {
     console.error("Erro ao buscar dados das filiais:", error);
     return NextResponse.json(
       { error: "Erro ao buscar dados das filiais", details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+// ======================================================
+//  POST — Criar nova filial (SEM alterar sua rota GET)
+// ======================================================
+export async function POST(req) {
+  try {
+    const body = await req.json();
+
+    const { nome, endereco, cidade, estado } = body;
+
+    if (!nome || !endereco)
+      return NextResponse.json(
+        { error: "Nome e endereço são obrigatórios" },
+        { status: 400 }
+      );
+
+    const novaFilial = await prisma.loja.create({
+      data: {
+        nome,
+        endereco,
+        cidade: cidade || "",
+        estado: estado || "",
+        tipo: "FILIAL",
+        ativo: true,
+      },
+    });
+
+    return NextResponse.json(novaFilial, { status: 201 });
+  } catch (error) {
+    console.error("Erro ao criar filial:", error);
+    return NextResponse.json(
+      { error: "Erro ao criar filial", details: error.message },
       { status: 500 }
     );
   }

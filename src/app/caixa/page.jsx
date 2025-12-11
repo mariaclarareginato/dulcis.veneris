@@ -330,10 +330,7 @@ export default function CaixaPage() {
                       </div>
                     )}
 
-                    {/* badge FORA DE LINHA no canto */}
-                    <div className="absolute top-3 left-3 bg-red-600 text-white text-m font-bold px-2 py-1 rounded">
-                      FORA DE LINHA
-                    </div>
+                
                   </div>
 
                   <CardContent className="p-4 flex-1 flex flex-col justify-between space-y-3">

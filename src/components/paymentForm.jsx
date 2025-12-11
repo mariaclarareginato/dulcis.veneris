@@ -105,20 +105,28 @@ const finalizarVenda = async (data, methodType) => {
       },
     };
 
-    // FINALIZAR VENDA
-    const res = await fetch(`${API_URL}/api/venda/finalizar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
+// FINALIZAR VENDA
+const res = await fetch(`${API_URL}/api/venda/finalizar`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify(payload),
+});
 
-    const json = await res.json();
+if (!res.ok) throw new Error("Erro ao finalizar venda");
 
-    if (!res.ok) throw new Error(json.message);
+const blob = await res.blob();
+const url = window.URL.createObjectURL(blob);
+const a = document.createElement("a");
 
-    alert("Venda concluída!");
-    router.push("/caixa");
+a.href = url;
+a.download = `nota_fiscal.pdf`;
+a.click();
+
+alert("Venda concluída!");
+router.push("/caixa");
+
+
 
   } catch (err) {
     console.error("❌ ERRO:", err);

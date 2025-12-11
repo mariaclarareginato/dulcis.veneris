@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -134,7 +133,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
 
             {error && (
-              <p className="p-2 text-sm text-red-500 text-center font-bold">
+              <p className="p-2 text-lg text-red-500 text-center font-bold">
                 {error}
               </p>
             )}
@@ -145,7 +144,7 @@ export default function RegisterPage() {
               </p>
             )}
 
-            <Input
+            <input
               type="text"
               name="nome"
               placeholder="Nome completo"
@@ -154,7 +153,7 @@ export default function RegisterPage() {
               className={inputClass}
             />
 
-            <Input
+            <input
               type="text"
               name="cpf"
               placeholder="CPF"
@@ -163,7 +162,7 @@ export default function RegisterPage() {
               className={inputClass}
             />
 
-            <Input
+            <input
               type="text"
               name="telefone"
               placeholder="Telefone"
@@ -172,7 +171,7 @@ export default function RegisterPage() {
               className={inputClass}
             />
 
-            <Input
+            <input
               type="email"
               name="email"
               placeholder="E-mail"
@@ -181,7 +180,7 @@ export default function RegisterPage() {
               className={inputClass}
             />
 
-            <Input
+            <input
               type="password"
               name="senha"
               placeholder="Senha"

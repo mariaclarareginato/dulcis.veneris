@@ -5,17 +5,16 @@ import { useRouter } from "next/navigation";
 import { getLoggedUser } from "@/lib/auth-client";
 import { Plus, Send, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from "@/components/ui/dropdown-menu";
+
 
 export default function PedidosPage() {
   const router = useRouter();
@@ -194,54 +193,52 @@ export default function PedidosPage() {
 
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+{/* Produto */}
+<div className="md:col-span-3">
+  <Label className="mb-3 block text-lg font-semibold">Produto</Label>
 
-            {/* Produto */}
-            <div className="md:col-span-3">
-              <Label className="mb-5 block text-lg font-semibold">Produto</Label>
-              <Select
-                className="text-lg"
-                value={currentItem.produtoNome}
-                onValueChange={handleProdutoSelect}
-              >
-                <SelectTrigger className="font-semibold text-lg w-full min-h-[90px] whitespace-normal break-words text-left">
-                  <SelectValue placeholder="Selecione o produto que deseja pedir" />
-                </SelectTrigger>
+  <DropdownMenu>
+    <DropdownMenuTrigger
+      className="sm:min-h-[50px] font-semibold text-base w-full text-lg min-h-[90px] whitespace-normal break-words text-left px-4 border rounded-xl opacity-70 flex justify-between items-center"
+    >
+      {currentItem.produtoNome || "Selecione o produto que deseja pedir"}
+    </DropdownMenuTrigger>
 
-                <SelectContent
-                  className="font-semibold text-lg w-[var(--radix-select-trigger-width)] max-w-full"
-                  position="popper"
-                >
-                  {produtosDisponiveis.map((p) => (
-                    <SelectItem
-                      key={p.id}
-                      value={p.nome}
-                      className="whitespace-normal text-lg break-words text-left py-2"
-                    >
-                      {p.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+    <DropdownMenuContent className="max-h-48 text-lg font-semibold overflow-y-auto w-90">
+      {produtosDisponiveis.map((p) => (
+        <DropdownMenuItem
+          key={p.id}
+          className="text-lg font-semibold whitespace-normal break-words py-2"
+          onClick={() => handleProdutoSelect(p.nome)}
+        >
+          {p.nome}
+        </DropdownMenuItem>
+      ))}
+    </DropdownMenuContent>
+  </DropdownMenu>
+</div>
 
             {/* Quantidade */}
-            <div className="md:col-span-1">
-              <Label className="mb-5 block text-lg font-semibold">Quantidade</Label>
-              <Input
-                type="number"
-                min="1"
-                className="text-lg font-semibold"
-                value={currentItem.quantidade}
-                onChange={(e) =>
-                  setCurrentItem({
-                    ...currentItem,
-                    quantidade: Number(e.target.value),
-                  })
-                }
-              />
-            </div>
+  <div className="md:col-span-1">
+    <Label className="mb-3 block text-lg font-semibold">
+      Quantidade
+    </Label>
+    <input
+      type="number"
+      min="1"
+      className="w-full h-12 px-4 text-lg font-medium rounded-lg border"
+      value={currentItem.quantidade}
+      onChange={(e) =>
+        setCurrentItem({
+          ...currentItem,
+          quantidade: Number(e.target.value),
+        })
+      }
+    />
+  </div>
 
-          </div>
+</div>
+
 
           <Button
             onClick={handleAddItem}

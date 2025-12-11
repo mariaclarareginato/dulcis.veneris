@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { jsPDF } from "jspdf";
 
 export async function POST(req) {
   try {
@@ -103,10 +104,45 @@ export async function POST(req) {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Venda finalizada com sucesso!",
-      venda: vendaFinalizada,
+    // --- 6) GERAR PDF DA NOTA FISCAL ---
+   
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text("DULCIS VENERIS - NOTA FISCAL", 10, 15);
+
+    doc.setFontSize(12);
+    doc.text(`Venda Nº: ${vendaFinalizada.id}`, 10, 30);
+    doc.text(`Data: ${new Date().toLocaleString("pt-BR")}`, 10, 40);
+    doc.text(`Pagamento: ${tipoPagamento}`, 10, 50);
+
+    let y = 65;
+    doc.text("-------------------------------------", 10, y);
+    y += 10;
+
+    vendaFinalizada.vendaitem.forEach((item) => {
+      doc.text(
+        `${item.produto.nome}  x${item.quantidade}  = R$ ${item.subtotal}`,
+        10,
+        y
+      );
+      y += 10;
+    });
+
+    doc.text("-------------------------------------", 10, y);
+    y += 10;
+
+    doc.text(`TOTAL: R$ ${vendaFinalizada.total.toFixed(2)}`, 10, y);
+
+    // BUFFER DO PDF
+    const pdfBuffer = Buffer.from(doc.output("arraybuffer"));
+
+    return new NextResponse(pdfBuffer, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename=nota_fiscal_${vendaFinalizada.id}.pdf`,
+      },
     });
 
   } catch (err) {

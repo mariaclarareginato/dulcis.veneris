@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select, SelectTrigger, SelectValue,
-  SelectContent, SelectItem,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from "@/components/ui/dropdown-menu";
 
 export default function NovoProduto() {
   const router = useRouter();
@@ -78,6 +79,8 @@ export default function NovoProduto() {
     setLoading(false);
   }
 
+   const inputClass = "w-full border text-lg bg-transparent rounded-lg px-3 py-2 font-semibold";
+
   return (
     <div className="p-8 flex justify-center">
       <Card className="w-full max-w-lg
@@ -97,66 +100,76 @@ export default function NovoProduto() {
         <CardContent className="space-y-4">
           <div>
             <Label className="m-3 text-lg">SKU</Label>
-            <Input name="sku" value={form.sku} onChange={handleChange} />
+            <input className={inputClass} name="sku" value={form.sku} onChange={handleChange} />
           </div>
 
           <div>
             <Label className="m-3 text-lg">Código interno</Label>
-            <Input name="codigo" value={form.codigo} onChange={handleChange} />
+            <input className={inputClass} name="codigo" value={form.codigo} onChange={handleChange} />
           </div>
 
           <div>
             <Label className="m-3 text-lg">Nome</Label>
-            <Input name="nome" value={form.nome} onChange={handleChange} />
+            <input className={inputClass} name="nome" value={form.nome} onChange={handleChange} />
           </div>
 
            <div>
   <Label className="m-3 text-lg">Categoria</Label>
 
-  <Select
-    className="text-lg h-70 font-semibold"
-    value={form.categoria}
-    onValueChange={(v) => setForm({ ...form, categoria: v })}
+  {/* CATEGORIA */}
+<DropdownMenu>
+  <DropdownMenuTrigger
+    className="sm:min-h-[50px] font-semibold text-base w-full text-lg min-h-[90px] whitespace-normal break-words text-left px-4 border rounded-xl opacity-70 flex justify-between items-center"
   >
-    <SelectTrigger
-      className="sm:min-h-[50px] font-semibold text-base w-full text-lg min-h-[90px] whitespace-normal break-words text-left"
-    >
-      <SelectValue placeholder="Clique aqui para selecionar o tipo do produto" />
-    </SelectTrigger>
+    {form.categoria || ""}
+  
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6 9l6 6 6-6" 
+      />
+   
+  </DropdownMenuTrigger>
 
-    <SelectContent className="text-lg font-semibold">
-      <SelectItem className="text-lg font-semibold" value="Chocolates">Chocolates</SelectItem>
-      <SelectItem className="text-lg font-semibold" value="Pães-de-mel">Pães-de-mel</SelectItem>
-      <SelectItem className="text-lg font-semibold" value="Bolachas">Bolachas</SelectItem>
-      <SelectItem className="text-lg font-semibold" value="Trufas">Trufas</SelectItem>
-      <SelectItem className="text-lg font-semibold" value="Outros">Outros</SelectItem>
-    </SelectContent>
-  </Select>
+  <DropdownMenuContent className="max-h-48 text-lg font-semibold overflow-y-auto">
+    {["Chocolates", "Pães-de-mel", "Bolachas", "Trufas", "Outros"].map((cat) => (
+      <DropdownMenuItem
+        key={cat}
+        className="text-lg font-semibold"
+        onClick={() => setForm({ ...form, categoria: cat })}
+      >
+        {cat}
+      </DropdownMenuItem>
+    ))}
+  </DropdownMenuContent>
+</DropdownMenu>
 </div>
 
 
           <div>
             <Label className="m-3 text-lg">Descrição</Label>
-            <Input name="descricao" value={form.descricao} onChange={handleChange} />
+            <input className={inputClass} name="descricao" value={form.descricao} onChange={handleChange} />
           </div>
 
           <div>
             <Label className="m-3 text-lg">Preço venda</Label>
-            <Input
+            <input
               name="preco_venda"
               type="number"
               value={form.preco_venda}
               onChange={handleChange}
+              className={inputClass}
             />
           </div>
 
           <div>
             <Label className="m-3 text-lg">Custo</Label>
-            <Input
+            <input
               name="custo"
               type="number"
               value={form.custo}
               onChange={handleChange}
+              className={inputClass}
             />
           </div>
 

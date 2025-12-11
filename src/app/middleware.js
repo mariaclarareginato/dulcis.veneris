@@ -10,7 +10,7 @@ export async function middleware(request) {
     
     // Rotas estritamente públicas (não exigem login)
    
-    const rotasPublicas = ["/login", "/registro", "/"]; 
+    const rotasPublicas = ["/login", "/"]; 
     const isPublicRoute = rotasPublicas.includes(pathname);
     
     const token = request.cookies.get("token")?.value; 
@@ -62,8 +62,8 @@ export async function middleware(request) {
     // 2. Prevenção de Loop: Usuário AUTENTICADO
     // ----------------------------------------------------------------------
     
-    // Se estiver logado e tentar acessar /login, /registro, ou a raiz (se ela não for o destino)
-    if (isAuthenticated && (pathname === "/login" || pathname === "/registro")) {
+    // Se estiver logado e tentar acessar /login ou a raiz (se ela não for o destino)
+    if (isAuthenticated && (pathname === "/login")) {
         
         //  Redireciona para a página principal do perfil
         let redirectPath = '/caixa'; 

@@ -24,7 +24,7 @@ export function AppSidebar3({ ...props }) {
 
   const data = {
     linhas: [
-      { name: "Caixas e usuários", url: "/caixas.usuarios" },
+      { name: "Caixas e usuários", url: "/caixas" },
       { name: "Despesas e lucro", url: "/despesas.lucro" },
       { name: "Pedidos", url: "/pedidos" },
     ],

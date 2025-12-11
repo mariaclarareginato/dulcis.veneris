@@ -148,7 +148,7 @@ export default function Carrinho() {
           </div>
           <br></br>
 
-          <p className="font-bold text-base text-lg whitespace-nowrap">
+          <p className="font-bold text-2xl whitespace-nowrap">
             R$ {formatCurrency(item.subtotal)}
           </p>
         </div>
@@ -166,16 +166,16 @@ export default function Carrinho() {
 <div className="mt-8 flex flex-col items-center md:items-end">
   <p className="text-2xl font-bold mb-4">
     Total:{" "}
-    <span className="text-3xl font-extrabold">
+    <span className="text-4xl font-extrabold">
       R$ {total.toFixed(2)}
     </span>
   </p>
 
   <Button
     onClick={() => router.push("/pagamento")}
-    className="text-xl font-bold p-6 w-full sm:w-auto"
+    className="text-xl font-bold p-8 w-full sm:w-auto"
   >
-    Ir para pagamento
+    Ir para pagamento 
   </Button>
 </div>
 

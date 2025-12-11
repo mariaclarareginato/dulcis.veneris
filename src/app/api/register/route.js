@@ -22,7 +22,7 @@ async function handler(req) {
     // Validação básica
     if (!nome || !email || !senha || !perfil || !cpf || !telefone || !loja_id) {
       return NextResponse.json(
-        { message: "Todos os campos são obrigatórios" },
+        { message: "Todos os campos são obrigatórios!" },
         { status: 400 }
       );
     }
@@ -30,14 +30,14 @@ async function handler(req) {
     // Regras de permissão
     if (criador.perfil === "GERENTE" && perfil !== "CAIXA") {
       return NextResponse.json(
-        { message: "Gerentes só podem criar caixas" },
+        { message: "Gerentes só podem criar caixas." },
         { status: 403 }
       );
     }
 
     if (criador.perfil === "CAIXA") {
       return NextResponse.json(
-        { message: "Caixas não podem criar usuários" },
+        { message: "Caixas não podem criar usuários." },
         { status: 403 }
       );
     }

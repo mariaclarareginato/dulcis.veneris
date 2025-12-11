@@ -74,8 +74,9 @@ else if (data.user.perfil === "ADMIN") router.push("/matriz")
 
     <CardContent>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          className="font-bold text-lg"
+
+        <input
+          className="w-full border text-lg bg-transparent rounded-lg px-3 py-2 font-semibold"
           type="email"
           placeholder="Email"
           value={email}
@@ -83,8 +84,8 @@ else if (data.user.perfil === "ADMIN") router.push("/matriz")
           required
         />
 
-        <Input
-          className="font-bold text-lg"
+        <input
+          className="w-full border text-lg bg-transparent rounded-lg px-3 py-2 font-semibold"
           type="password"
           placeholder="Senha"
           value={senha}
